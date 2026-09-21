@@ -1,7 +1,10 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');
 const { createApp } = require('../src/app');
-const { openDb } = require('../src/db');
+const { openDb, createOrder, getOrder } = require('../src/db');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 let server, base, db;
 const ADMIN = { 'x-admin-token': 'test-token' };
@@ -108,4 +111,18 @@ test('API quản trị: cần token, xem và đổi trạng thái đơn', async 
 test('Không đọc được file ngoài thư mục public (path traversal)', async () => {
   const res = await fetch(`${base}/..%2Fsrc%2Fdb.js`);
   assert.ok([403, 404].includes(res.status));
+});
+
+test('Dữ liệu được lưu ra file và còn nguyên sau khi mở lại', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'shop-'));
+  const file = path.join(dir, 'shop.json');
+  const db1 = openDb(file);
+  const order = createOrder(db1, { customer, items: [{ productId: 2, quantity: 3 }] });
+  db1.close();
+
+  const db2 = openDb(file);
+  assert.strictEqual(getOrder(db2, order.id).total, order.total);
+  assert.strictEqual(db2.data.products.find((p) => p.id === 2).stock, 27);
+  db2.close();
+  fs.rmSync(dir, { recursive: true, force: true });
 });

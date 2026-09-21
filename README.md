@@ -8,9 +8,9 @@ Website bán hàng trực tuyến gồm: xem/tìm kiếm/lọc sản phẩm, gi�
 |---|---|
 | Khách hàng | Xem danh sách sản phẩm, tìm kiếm, lọc theo danh mục, giỏ hàng (lưu trên trình duyệt), đặt hàng, tra cứu đơn bằng mã đơn + số điện thoại |
 | Quản trị | `/admin.html`: xem đơn, đổi trạng thái (Mới → Đã xác nhận → Đang giao → Hoàn thành / Hủy), bảo vệ bằng `ADMIN_TOKEN` |
-| Bảo đảm dữ liệu | Server tự tính tổng tiền (không tin giá từ client), kiểm tra tồn kho, đặt hàng trong 1 transaction (lỗi thì rollback), chống XSS khi hiển thị, chống path traversal |
+| Bảo đảm dữ liệu | Server tự tính tổng tiền (không tin giá từ client), kiểm tra tồn kho, đặt hàng được kiểm tra trước rồi mới ghi (lưu lỗi thì khôi phục lại như cũ), chống XSS khi hiển thị, chống path traversal |
 
-**Công nghệ:** Node.js 22 (không cần cài thư viện ngoài), SQLite (`node:sqlite` có sẵn), HTML/CSS/JS thuần, Docker, GitHub Actions.
+**Công nghệ:** Node.js 20 trở lên (không cần cài thư viện ngoài), lưu dữ liệu vào file JSON, HTML/CSS/JS thuần, Docker, GitHub Actions.
 
 ## 2. Luồng CI/CD
 
@@ -47,7 +47,7 @@ Lập trình viên ──git push──▶ GitHub ──▶ GitHub Actions
 .
 ├── src/                    # db.js (dữ liệu + nghiệp vụ), app.js (router), server.js
 ├── public/                 # index.html, admin.html, style.css, app.js (giao diện)
-├── test/app.test.js        # 10 test tự động
+├── test/app.test.js        # 11 test tự động
 ├── Dockerfile
 ├── docker-compose.yml      # web + volume lưu dữ liệu
 ├── .env.example
@@ -57,10 +57,10 @@ Lập trình viên ──git push──▶ GitHub ──▶ GitHub Actions
 
 ## 5. Chạy thử
 
-### 5.1. Bằng Node.js (cần Node >= 22.13)
+### 5.1. Bằng Node.js (cần Node >= 20)
 ```bash
 npm test
-npm start            # http://localhost:3000  (dữ liệu ở thư mục data/)
+npm start            # http://localhost:3000  (dữ liệu ở data/shop.json)
 ```
 
 ### 5.2. Bằng Docker (các lệnh trong bài giảng)
@@ -138,7 +138,7 @@ Sau khi pipeline xanh, truy cập `http://<SERVER_HOST>:8080`.
 
 ## 8. Điểm nổi bật về DevOps
 
-- Image nhẹ (`node:22-alpine`), chạy bằng user `node` (không phải root), có `HEALTHCHECK`.
+- Image nhẹ (`node:20-alpine`), chạy bằng user `node` (không phải root), có `HEALTHCHECK`.
 - Sắp xếp `COPY` để tận dụng cache layer; `.dockerignore` loại file thừa; CI dùng cache của GitHub Actions.
 - **Docker volume** `shop-data` giúp dữ liệu đơn hàng không mất khi cập nhật container.
 - CI chặn code lỗi: test hoặc smoke test thất bại thì không build/push/deploy.
@@ -150,5 +150,5 @@ Sau khi pipeline xanh, truy cập `http://<SERVER_HOST>:8080`.
 
 ## 9. Hạn chế & hướng phát triển
 
-Chưa có đăng nhập tài khoản khách, thanh toán online, upload ảnh sản phẩm; SQLite phù hợp quy mô nhỏ.
+Chưa có đăng nhập tài khoản khách, thanh toán online, upload ảnh sản phẩm; file JSON phù hợp quy mô nhỏ.
 Hướng mở rộng: chuyển sang PostgreSQL (thêm service vào Compose), thêm Nginx + HTTPS (Let's Encrypt), quét bảo mật image bằng Trivy, môi trường staging, thông báo Telegram/Slack khi deploy.

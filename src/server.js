@@ -4,7 +4,7 @@ const { createApp } = require('./app');
 const { openDb } = require('./db');
 
 const PORT = process.env.PORT || 3000;
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'shop.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'shop.json');
 
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 const db = openDb(DB_PATH);

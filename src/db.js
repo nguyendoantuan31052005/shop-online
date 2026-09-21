@@ -1,4 +1,6 @@
-const { DatabaseSync } = require('node:sqlite');
+// Lớp dữ liệu: lưu trong bộ nhớ và ghi ra 1 file JSON (không cần cài thư viện, chạy được trên Node >= 18).
+const fs = require('fs');
+const path = require('path');
 
 const SEED_PRODUCTS = [
   ['Áo thun basic trắng', 'Thời trang', 149000, 50, '👕', 'Áo thun cotton 100%, form rộng thoải mái.'],
@@ -15,50 +17,6 @@ const SEED_PRODUCTS = [
   ['Bình giữ nhiệt 500ml', 'Gia dụng', 159000, 55, '🥤', 'Inox 304 giữ nóng 12 giờ, giữ lạnh 24 giờ.'],
 ];
 
-function openDb(file = ':memory:', { seed = true } = {}) {
-  const db = new DatabaseSync(file);
-  db.exec(`
-    PRAGMA foreign_keys = ON;
-    CREATE TABLE IF NOT EXISTS products (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      category TEXT NOT NULL,
-      price INTEGER NOT NULL CHECK (price >= 0),
-      stock INTEGER NOT NULL CHECK (stock >= 0),
-      emoji TEXT NOT NULL DEFAULT '📦',
-      description TEXT NOT NULL DEFAULT ''
-    );
-    CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customer_name TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      address TEXT NOT NULL,
-      total INTEGER NOT NULL,
-      status TEXT NOT NULL DEFAULT 'new',
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS order_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL REFERENCES orders(id),
-      product_id INTEGER NOT NULL REFERENCES products(id),
-      name TEXT NOT NULL,
-      price INTEGER NOT NULL,
-      quantity INTEGER NOT NULL CHECK (quantity > 0)
-    );
-  `);
-
-  if (seed) {
-    const { n } = db.prepare('SELECT COUNT(*) AS n FROM products').get();
-    if (n === 0) {
-      const ins = db.prepare(
-        'INSERT INTO products (name, category, price, stock, emoji, description) VALUES (?,?,?,?,?,?)'
-      );
-      for (const p of SEED_PRODUCTS) ins.run(...p);
-    }
-  }
-  return db;
-}
-
 class HttpError extends Error {
   constructor(status, message) {
     super(message);
@@ -66,25 +24,64 @@ class HttpError extends Error {
   }
 }
 
+function seedData() {
+  return {
+    nextProductId: SEED_PRODUCTS.length + 1,
+    nextOrderId: 1,
+    products: SEED_PRODUCTS.map(([name, category, price, stock, emoji, description], i) => (
+      { id: i + 1, name, category, price, stock, emoji, description }
+    )),
+    orders: [],
+  };
+}
+
+/** Mở "cơ sở dữ liệu". file = ':memory:' thì chỉ giữ trong bộ nhớ (dùng cho test). */
+function openDb(file = ':memory:', { seed = true } = {}) {
+  const persistent = file !== ':memory:';
+  let data;
+  if (persistent && fs.existsSync(file)) {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } else {
+    data = seed ? seedData() : { nextProductId: 1, nextOrderId: 1, products: [], orders: [] };
+  }
+  const db = {
+    file,
+    data,
+    save() {
+      if (!persistent) return;
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      const tmp = `${file}.tmp`;
+      fs.writeFileSync(tmp, JSON.stringify(db.data));
+      fs.renameSync(tmp, file); // ghi file tạm rồi đổi tên để không bị hỏng dữ liệu giữa chừng
+    },
+    close() { db.save(); },
+  };
+  if (persistent && !fs.existsSync(file)) db.save();
+  return db;
+}
+
+const clone = (x) => structuredClone(x);
+
 function listProducts(db, { q = '', category = '' } = {}) {
-  const like = `%${q.trim()}%`;
-  return db
-    .prepare(
-      `SELECT * FROM products
-       WHERE (name LIKE ? OR description LIKE ?) AND (? = '' OR category = ?)
-       ORDER BY id`
-    )
-    .all(like, like, category, category)
-    .map((p) => ({ ...p }));
+  const kw = q.trim().toLowerCase();
+  return clone(
+    db.data.products.filter((p) =>
+      (!kw || p.name.toLowerCase().includes(kw) || p.description.toLowerCase().includes(kw)) &&
+      (!category || p.category === category))
+  );
 }
 
 function listCategories(db) {
-  return db.prepare('SELECT DISTINCT category FROM products ORDER BY category').all().map((r) => r.category);
+  return [...new Set(db.data.products.map((p) => p.category))].sort((a, b) => a.localeCompare(b, 'vi'));
 }
 
 function getProduct(db, id) {
-  const p = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
-  return p ? { ...p } : null;
+  const p = db.data.products.find((x) => x.id === id);
+  return p ? clone(p) : null;
+}
+
+function nowString() {
+  return new Date().toISOString().slice(0, 19).replace('T', ' ');
 }
 
 function createOrder(db, payload) {
@@ -100,64 +97,64 @@ function createOrder(db, payload) {
     throw new HttpError(400, 'Giỏ hàng trống');
   }
 
-  db.exec('BEGIN IMMEDIATE');
+  // Bước 1: kiểm tra toàn bộ, chưa thay đổi dữ liệu gì
+  let total = 0;
+  const lines = [];
+  const seen = new Set();
+  for (const it of items) {
+    const qty = Number(it.quantity);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 99) throw new HttpError(400, 'Số lượng không hợp lệ');
+    const pid = Number(it.productId);
+    if (seen.has(pid)) throw new HttpError(400, 'Sản phẩm bị trùng trong giỏ hàng');
+    seen.add(pid);
+    const p = db.data.products.find((x) => x.id === pid);
+    if (!p) throw new HttpError(400, `Sản phẩm #${it.productId} không tồn tại`);
+    if (p.stock < qty) throw new HttpError(409, `"${p.name}" chỉ còn ${p.stock} sản phẩm`);
+    total += p.price * qty; // giá luôn lấy từ server, không tin client
+    lines.push({ p, qty });
+  }
+
+  // Bước 2: ghi dữ liệu; nếu lưu file lỗi thì khôi phục lại như cũ
+  const backup = clone(db.data);
   try {
-    let total = 0;
-    const lines = [];
-    const seen = new Set();
-    for (const it of items) {
-      const qty = Number(it.quantity);
-      if (!Number.isInteger(qty) || qty < 1 || qty > 99) {
-        throw new HttpError(400, 'Số lượng không hợp lệ');
-      }
-      const pid = Number(it.productId);
-      if (seen.has(pid)) throw new HttpError(400, 'Sản phẩm bị trùng trong giỏ hàng');
-      seen.add(pid);
-      const p = db.prepare('SELECT * FROM products WHERE id = ?').get(pid);
-      if (!p) throw new HttpError(400, `Sản phẩm #${it.productId} không tồn tại`);
-      if (p.stock < qty) throw new HttpError(409, `"${p.name}" chỉ còn ${p.stock} sản phẩm`);
-      total += p.price * qty; // giá luôn lấy từ server, không tin client
-      lines.push({ p, qty });
-    }
-
-    const { lastInsertRowid: orderId } = db
-      .prepare('INSERT INTO orders (customer_name, phone, address, total) VALUES (?,?,?,?)')
-      .run(c.name.trim(), c.phone.trim(), c.address.trim(), total);
-
-    for (const { p, qty } of lines) {
-      db.prepare('INSERT INTO order_items (order_id, product_id, name, price, quantity) VALUES (?,?,?,?,?)')
-        .run(orderId, p.id, p.name, p.price, qty);
-      db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?').run(qty, p.id);
-    }
-    db.exec('COMMIT');
-    return getOrder(db, Number(orderId));
+    const order = {
+      id: db.data.nextOrderId++,
+      customer_name: c.name.trim(),
+      phone: c.phone.trim(),
+      address: c.address.trim(),
+      total,
+      status: 'new',
+      created_at: nowString(),
+      items: lines.map(({ p, qty }) => ({ product_id: p.id, name: p.name, price: p.price, quantity: qty })),
+    };
+    for (const { p, qty } of lines) p.stock -= qty;
+    db.data.orders.push(order);
+    db.save();
+    return clone(order);
   } catch (err) {
-    db.exec('ROLLBACK');
+    db.data = backup;
     throw err;
   }
 }
 
 function getOrder(db, id) {
-  const o = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-  if (!o) return null;
-  const items = db.prepare('SELECT product_id, name, price, quantity FROM order_items WHERE order_id = ?').all(id);
-  return { ...o, items: items.map((i) => ({ ...i })) };
+  const o = db.data.orders.find((x) => x.id === id);
+  return o ? clone(o) : null;
 }
 
 function listOrders(db) {
-  return db
-    .prepare('SELECT id FROM orders ORDER BY id DESC LIMIT 200')
-    .all()
-    .map((o) => getOrder(db, o.id));
+  return clone([...db.data.orders].sort((a, b) => b.id - a.id).slice(0, 200));
 }
 
 const STATUSES = ['new', 'confirmed', 'shipping', 'done', 'cancelled'];
 
 function updateOrderStatus(db, id, status) {
   if (!STATUSES.includes(status)) throw new HttpError(400, 'Trạng thái không hợp lệ');
-  const r = db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
-  if (r.changes === 0) throw new HttpError(404, 'Không tìm thấy đơn hàng');
-  return getOrder(db, id);
+  const o = db.data.orders.find((x) => x.id === id);
+  if (!o) throw new HttpError(404, 'Không tìm thấy đơn hàng');
+  o.status = status;
+  db.save();
+  return clone(o);
 }
 
 module.exports = {

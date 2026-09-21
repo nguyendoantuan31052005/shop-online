@@ -7,7 +7,7 @@
    - CI, Continuous Delivery/Deployment; GitHub Actions (workflow, job, step, secrets).
 3. **Phân tích & thiết kế**
    - Chức năng khách hàng / quản trị, sơ đồ use case.
-   - CSDL 3 bảng: `products`, `orders`, `order_items` (vẽ ERD).
+   - Mô hình dữ liệu: `products`, `orders` (mỗi đơn chứa danh sách `items`), lưu trong file JSON (vẽ sơ đồ quan hệ).
    - Danh sách API (README mục 3).
    - Sơ đồ luồng CI/CD (README mục 2).
 4. **Triển khai**
