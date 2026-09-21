@@ -1,0 +1,19 @@
+services:
+  web:
+    # Local: build từ Dockerfile. Deploy: đặt DOCKER_IMAGE=<user>/shop-online:latest để dùng image từ Docker Hub.
+    image: ${DOCKER_IMAGE:-shop-online:local}
+    build:
+      context: .
+      args:
+        APP_VERSION: local
+    container_name: shop-web
+    ports:
+      - "${HOST_PORT:-8080}:3000"
+    environment:
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-admin123}
+    volumes:
+      - shop-data:/data        # giữ dữ liệu đơn hàng khi container bị xóa/tạo lại
+    restart: unless-stopped
+
+volumes:
+  shop-data:

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop Online – Đồ án DevOps</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">🛍️ Shop Online</a>
+    <input id="search" type="search" placeholder="Tìm sản phẩm…" aria-label="Tìm sản phẩm">
+    <button id="cart-btn" class="btn">🛒 Giỏ hàng <span id="cart-count" class="badge">0</span></button>
+  </header>
+
+  <main>
+    <nav id="categories" class="chips" aria-label="Danh mục"></nav>
+    <section id="products" class="grid" aria-live="polite"></section>
+  </main>
+
+  <aside id="cart" class="drawer" hidden>
+    <div class="drawer-head">
+      <h2>Giỏ hàng</h2>
+      <button id="cart-close" class="btn ghost" aria-label="Đóng">✕</button>
+    </div>
+    <div id="cart-items"></div>
+    <div class="cart-total">Tổng: <strong id="cart-total">0₫</strong></div>
+
+    <form id="checkout" autocomplete="on">
+      <h3>Thông tin giao hàng</h3>
+      <input name="name" placeholder="Họ và tên" required>
+      <input name="phone" placeholder="Số điện thoại (0xxxxxxxxx)" inputmode="tel" required>
+      <textarea name="address" placeholder="Địa chỉ giao hàng" rows="2" required></textarea>
+      <p id="checkout-msg" class="msg" role="alert"></p>
+      <button class="btn primary" type="submit">Đặt hàng</button>
+    </form>
+  </aside>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <footer>
+    <span>Đồ án DevOps: Git · Docker · CI/CD</span>
+    <span id="ver"></span>
+    <a href="/admin.html">Quản trị</a>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
