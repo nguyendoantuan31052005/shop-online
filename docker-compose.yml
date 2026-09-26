@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_VERSION: local-dev
+    image: shop-online:local
+    container_name: shop-online
+    restart: unless-stopped
+    ports:
+      - "8080:3000"
+    environment:
+      PORT: 3000
+      DB_PATH: /data/shop.json
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-admin123}
+    volumes:
+      - shop-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  shop-data:

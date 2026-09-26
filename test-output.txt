@@ -1,0 +1,85 @@
+TAP version 13
+# Subtest: GET /health
+ok 1 - GET /health
+  ---
+  duration_ms: 106.2321
+  ...
+# Subtest: Đăng ký và đăng nhập thành công bằng tên đăng nhập
+ok 2 - Đăng ký và đăng nhập thành công bằng tên đăng nhập
+  ---
+  duration_ms: 109.9128
+  ...
+# Subtest: Sai mật khẩu đăng nhập bị từ chối
+ok 3 - Sai mật khẩu đăng nhập bị từ chối
+  ---
+  duration_ms: 88.3848
+  ...
+# Subtest: GET / trả về trang HTML cửa hàng
+ok 4 - GET / trả về trang HTML cửa hàng
+  ---
+  duration_ms: 12.6886
+  ...
+# Subtest: Danh sách sản phẩm, tìm kiếm và lọc danh mục
+ok 5 - Danh sách sản phẩm, tìm kiếm và lọc danh mục
+  ---
+  duration_ms: 44.7845
+  ...
+# Subtest: Dữ liệu sản phẩm luôn có hình ảnh và metadata tối thiểu
+ok 6 - Dữ liệu sản phẩm luôn có hình ảnh và metadata tối thiểu
+  ---
+  duration_ms: 16.1652
+  ...
+# Subtest: Chi tiết sản phẩm và 404
+ok 7 - Chi tiết sản phẩm và 404
+  ---
+  duration_ms: 5.5741
+  ...
+# Subtest: Đặt hàng thành công: tính tổng tiền ở server và trừ tồn kho
+ok 8 - Đặt hàng thành công: tính tổng tiền ở server và trừ tồn kho
+  ---
+  duration_ms: 9.0202
+  ...
+# Subtest: Đặt vượt tồn kho bị từ chối (409) và không trừ kho
+ok 9 - Đặt vượt tồn kho bị từ chối (409) và không trừ kho
+  ---
+  duration_ms: 5.4578
+  ...
+# Subtest: Dữ liệu đặt hàng không hợp lệ trả về 400
+ok 10 - Dữ liệu đặt hàng không hợp lệ trả về 400
+  ---
+  duration_ms: 4.2546
+  ...
+# Subtest: Tra cứu đơn cần đúng số điện thoại
+ok 11 - Tra cứu đơn cần đúng số điện thoại
+  ---
+  duration_ms: 4.0732
+  ...
+# Subtest: API quản trị: cần token, xem và đổi trạng thái đơn
+ok 12 - API quản trị: cần token, xem và đổi trạng thái đơn
+  ---
+  duration_ms: 3.8979
+  ...
+# Subtest: Bộ sưu tập nổi bật phải render dữ liệu thật từ catalog
+ok 13 - Bộ sưu tập nổi bật phải render dữ liệu thật từ catalog
+  ---
+  duration_ms: 0.9001
+  ...
+# Subtest: Không đọc được file ngoài thư mục public (path traversal)
+ok 14 - Không đọc được file ngoài thư mục public (path traversal)
+  ---
+  duration_ms: 4.4441
+  ...
+# Subtest: Dữ liệu được lưu ra file và còn nguyên sau khi mở lại
+ok 15 - Dữ liệu được lưu ra file và còn nguyên sau khi mở lại
+  ---
+  duration_ms: 6.7341
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 554.1538

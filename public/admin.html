@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản trị đơn hàng</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 24px; }
+      .container { max-width: 900px; margin: 0 auto; }
+      .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+      select, input { padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+      button { padding: 10px 14px; background: #111827; color: white; border: 0; border-radius: 8px; cursor: pointer; }
+      #status { margin-bottom: 12px; color: #0f766e; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="container panel">
+      <h1>Quản trị đơn hàng</h1>
+      <div id="status"></div>
+      <label>Token quản trị</label>
+      <input id="adminToken" type="password" placeholder="Nhập token" />
+      <button onclick="loadOrders()">Xem đơn</button>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Khách</th>
+            <th>Tổng</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="orders"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const ordersEl = document.getElementById('orders');
+
+      async function api(path, options = {}) {
+        const res = await fetch(path, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'Request failed');
+        }
+        return data;
+      }
+
+      async function loadOrders() {
+        const token = document.getElementById('adminToken').value;
+        try {
+          const orders = await api('/api/admin/orders', { headers: { 'x-admin-token': token } });
+          ordersEl.innerHTML = orders.map((order) => `
+            <tr>
+              <td>#${order.id}</td>
+              <td>${order.customer_name}</td>
+              <td>${Number(order.total).toLocaleString('vi-VN')}đ</td>
+              <td>
+                <select data-id="${order.id}">
+                  <option value="new" ${order.status === 'new' ? 'selected' : ''}>new</option>
+                  <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>confirmed</option>
+                  <option value="shipping" ${order.status === 'shipping' ? 'selected' : ''}>shipping</option>
+                  <option value="done" ${order.status === 'done' ? 'selected' : ''}>done</option>
+                  <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>cancelled</option>
+                </select>
+              </td>
+              <td>
+                <button onclick="updateStatus(${order.id})">Cập nhật</button>
+              </td>
+            </tr>
+          `).join('');
+          statusEl.textContent = 'Đã tải đơn hàng';
+        } catch (err) {
+          statusEl.textContent = err.message;
+          statusEl.style.color = '#b91c1c';
+        }
+      }
+
+      async function updateStatus(id) {
+        const token = document.getElementById('adminToken').value;
+        const select = document.querySelector(`select[data-id="${id}"]`);
+        try {
+          const data = await api(`/api/admin/orders/${id}`, {
+            method: 'PATCH',
+            headers: { 'x-admin-token': token },
+            body: JSON.stringify({ status: select.value }),
+          });
+          statusEl.textContent = `Đơn #${id} cập nhật thành ${data.status}`;
+          statusEl.style.color = '#0f766e';
+        } catch (err) {
+          statusEl.textContent = err.message;
+          statusEl.style.color = '#b91c1c';
+        }
+      }
+    </script>
+  </body>
+</html>

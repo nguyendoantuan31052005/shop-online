@@ -1,0 +1,12 @@
+{
+  "name": "shop-online",
+  "version": "1.0.0",
+  "description": "Đồ án DevOps: Web bán hàng trực tuyến với Git, Docker, CI/CD",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
