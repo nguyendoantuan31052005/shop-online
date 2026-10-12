@@ -88,57 +88,26 @@
         <div class="feature-pill"><span class="icon">♡</span> Lưu sản phẩm yêu thích</div>
       </section>
 
-      <section class="section">
-        <div class="section-head">
-          <div class="section-title">Danh mục nổi bật</div>
-        </div>
-        <div class="category-grid" id="categoryGrid"></div>
-      </section>
-
-<section class="section">
-        <div class="toolbar">
-          <div class="section-title">Khám phá sản phẩm</div>
-          <div class="flash-clock" hidden aria-hidden="true" style="display:none">
-            <span>Kết thúc trong</span>
-            <span class="clock-box" id="hours">02</span>
-            <span>:</span>
-            <span class="clock-box" id="minutes">14</span>
-            <span>:</span>
-            <span class="clock-box" id="seconds">59</span>
-          </div>
-        </div>
-
-        <div class="toolbar">
-          <div class="filter-chips" id="filterChips"></div>
-          <div class="sort-box">
-            <span style="color:var(--sub); font-weight:700;">Sắp xếp:</span>
+      <section class="section catalog-controls" id="catalogControls" aria-label="Danh mục và bộ lọc sản phẩm">
+        <div class="catalog-heading">
+          <h2 class="section-title">Khám phá sản phẩm</h2>
+          <label class="sort-box" for="sortSelect">Sắp xếp
             <select id="sortSelect">
               <option value="featured">Nổi bật</option>
               <option value="price_asc">Giá tăng dần</option>
               <option value="price_desc">Giá giảm dần</option>
               <option value="newest">Mới nhất</option>
             </select>
-          </div>
-          <div id="userBadge" style="font-weight:700; color:var(--text);"></div>
+          </label>
         </div>
-
-        <div id="flashProducts" hidden></div>
+        <div class="filter-chips" id="filterChips" role="group" aria-label="Danh mục sản phẩm"></div>
+        <details class="catalog-filters">
+          <summary>Kích cỡ & màu sắc</summary>
+          <div class="filter-row"><span class="filter-label">Kích cỡ</span><div class="size-pills" id="sizePills" role="group" aria-label="Lọc theo kích cỡ"></div></div>
+          <div class="filter-row"><span class="filter-label">Màu sắc</span><div class="color-pills" id="colorPills" role="group" aria-label="Lọc theo màu sắc"></div></div>
+        </details>
+        <div class="filter-footer"><span id="shoppingFilterStatus" role="status"></span><button type="button" class="small-btn soft" id="clearShoppingFilters" disabled>Xóa bộ lọc</button></div>
       </section>
-
-
-
-      <section class="section">
-        <div class="section-head">
-          <div class="section-title">Bộ lọc & tính năng mua sắm</div>
-        </div>
-        <p>Chọn kích cỡ và màu sắc. Bấm lại để bỏ chọn.</p>
-        <div class="size-pills" id="sizePills" role="group" aria-label="Lọc theo kích cỡ"></div>
-        <div class="color-pills" id="colorPills" role="group" aria-label="Lọc theo màu sắc" style="margin-top:12px;"></div>
-        <p id="shoppingFilterStatus" role="status"></p>
-        <button type="button" class="small-btn soft" id="clearShoppingFilters" disabled>Xóa lọc kích cỡ và màu</button>
-        <a class="small-btn" href="#recommendedProducts">Xem kết quả</a>
-      </section>
-
       <section class="section">
         <div class="section-head">
           <div class="section-title" id="searchResultTitle" aria-live="polite">Gợi ý cho bạn</div>

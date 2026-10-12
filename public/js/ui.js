@@ -55,17 +55,3 @@ function getProductImage(product, fallbackIndex = 0) {
   const imageCandidate = product?.image || matched?.[1] || fallback;
   return getImageUrl(imageCandidate);
 }
-
-
-function updateCountdown() {
-  const now = new Date();
-  const end = new Date(now);
-  end.setHours(24, 0, 0, 0);
-  const diff = Math.max(0, end - now);
-  const hours = Math.floor(diff / 3600000);
-  const minutes = Math.floor((diff % 3600000) / 60000);
-  const seconds = Math.floor((diff % 60000) / 1000);
-  document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-  document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-  document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-}

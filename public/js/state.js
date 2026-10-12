@@ -1,26 +1,5 @@
 // Storefront: state. Loaded in index.html order; shared state is in state.js.
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const categories = [
-  { name: 'Thời trang', icon: '👕' },
-  { name: 'Phụ kiện', icon: '🎒' },
-  { name: 'Điện tử', icon: '📱' },
-  { name: 'Đồ ăn uống', icon: '☕' },
-  { name: 'Gia dụng', icon: '🏠' },
-  { name: 'Mẹ & Bé', icon: '🍼' },
-  { name: 'Thể thao', icon: '🏀' },
-  { name: 'Sức khỏe', icon: '💊' },
-  { name: 'Nhà sách', icon: '📚' },
-  { name: 'Xem thêm', icon: '✨' }
-];
-
-const categoryGrid = document.getElementById('categoryGrid');
-categoryGrid.innerHTML = categories.map((cat) => `
-  <button type="button" class="category-box" data-category="${esc(cat.name)}">
-    <div class="category-icon">${cat.icon}</div>
-    <div>${esc(cat.name)}</div>
-  </button>
-`).join('');
-
 const sizePills = document.getElementById('sizePills');
 const colorPills = document.getElementById('colorPills');
 const couponGrid = document.getElementById('couponGrid');

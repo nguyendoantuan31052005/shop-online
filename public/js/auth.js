@@ -42,7 +42,6 @@ function renderUserPanel() {
   const userPanel = document.getElementById('userPanel');
   const loginBtn = document.getElementById('openLoginBtn');
   const registerBtn = document.getElementById('openRegisterBtn');
-  const badge = document.getElementById('userBadge');
 
   if (user) {
     userPanel.classList.remove('hidden');
@@ -56,12 +55,10 @@ function renderUserPanel() {
       </div>
       <button class="user-action-btn" data-logout="true">Đăng xuất</button>
     `;
-    badge.textContent = `Xin chào, ${user.name}`;
   } else {
     userPanel.classList.add('hidden');
     loginBtn.classList.remove('hidden');
     registerBtn.classList.remove('hidden');
-    badge.textContent = 'Bạn chưa đăng nhập';
     userPanel.innerHTML = '';
   }
 
@@ -77,16 +74,6 @@ function renderUserPanel() {
 }
 
 
-function updateUserBadge() {
-  const token = localStorage.getItem('shop_token');
-  const badge = document.getElementById('userBadge');
-  if (!token) {
-    badge.textContent = 'Bạn chưa đăng nhập';
-    return;
-  }
-  const user = getStoredUser();
-  badge.textContent = user ? `Xin chào, ${user.name}` : 'Tài khoản đã đăng nhập';
-}
 
 async function hydrateUserSession() {
   const token = localStorage.getItem('shop_token');

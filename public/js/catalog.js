@@ -200,7 +200,6 @@ function renderProductsPanel() {
   document.getElementById('shoppingFilterStatus').textContent = `${items.length} sản phẩm phù hợp${shoppingFilters.size ? ' · Size: ' + shoppingFilters.size : ''}${shoppingFilters.color ? ' · Màu: ' + shoppingFilters.color : ''}`;
   const query = document.querySelector('.search-wrap input').value.trim();
   document.getElementById('searchResultTitle').textContent = query ? `${items.length} kết quả cho “${query}”` : 'Gợi ý cho bạn';
-  document.getElementById('flashProducts').innerHTML = '';
   const start = (productPage - 1) * productsPerPage;
   renderProducts(items.slice(start, start + productsPerPage), 'recommendedProducts', false);
   const pagination = document.getElementById('productPagination');
@@ -301,7 +300,6 @@ async function loadProducts() {
     renderAccountSummary();
     renderOrderHistory();
     renderCart();
-    updateUserBadge();
     await loadOrderHistory();
 
     try {
@@ -324,7 +322,6 @@ async function loadProducts() {
       document.getElementById('searchSuggestions').innerHTML = '<div class="suggestion-item"><div>HEATTECH</div><div>Áo giữ ấm</div></div>';
     }
   } catch (error) {
-    document.getElementById('flashProducts').innerHTML = '<div class="empty-state"><h4>Không tải được sản phẩm</h4><div>Vui lòng kiểm tra kết nối hoặc thử lại sau.</div></div>';
-    document.getElementById('recommendedProducts').innerHTML = '';
+    document.getElementById('recommendedProducts').innerHTML = '<div class="empty-state"><h4>Không tải được sản phẩm</h4><div>Vui lòng kiểm tra kết nối hoặc thử lại sau.</div></div>';
   }
 }

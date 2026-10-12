@@ -78,14 +78,6 @@ document.querySelectorAll('.panel-link').forEach((button) => {
   });
 });
 
-document.querySelectorAll('.category-box').forEach((box) => {
-  box.addEventListener('click', () => {
-    selectedCategory = box.dataset.category || 'Tất cả';
-    selectedGender = '';
-    renderFilterChips();
-    renderProductsPanel();
-  });
-});
 
 document.getElementById('registerForm').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -104,7 +96,6 @@ document.getElementById('registerForm').addEventListener('submit', async (event)
     localStorage.setItem('shop_user', JSON.stringify(data.user));
     setStatus(`Đăng ký thành công. Xin chào ${data.user.name}!`);
     renderUserPanel();
-    updateUserBadge();
     renderAccountSummary();
     await loadOrderHistory();
     form.reset();
@@ -136,7 +127,6 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     localStorage.setItem('shop_user', JSON.stringify(data.user));
     setStatus(`Đăng nhập thành công. Xin chào ${data.user.name}!`);
     renderUserPanel();
-    updateUserBadge();
     renderAccountSummary();
     await loadOrderHistory();
     form.reset();

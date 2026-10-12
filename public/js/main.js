@@ -5,7 +5,7 @@ loadProducts();
 hydrateUserSession();
 loadOrderHistory();
 document.getElementById('heroShopBtn').onclick = scrollToProducts;
-document.getElementById('heroExploreBtn').onclick = () => document.getElementById('categoryGrid').scrollIntoView({ behavior: 'smooth' });
+document.getElementById('heroExploreBtn').onclick = () => document.getElementById('catalogControls').scrollIntoView({ behavior: 'smooth' });
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   document.querySelectorAll('.modal.show').forEach(modal => modal.classList.remove('show'));
