@@ -67,7 +67,8 @@ test('Voucher CRUD, public availability and server quote',async t=>{
   const v=await request('/api/admin/vouchers','POST',{code:'new20',type:'percent',value:20,usageLimit:1},h);assert.equal(v.status,201);assert.equal(v.body.code,'NEW20');
   assert.equal((await request('/api/admin/vouchers','POST',{code:'NEW20',type:'fixed',value:10},h)).status,409);
   const q=await request('/api/checkout/quote','POST',payload({voucherCode:'new20'}));assert.equal(q.status,200);assert.equal(q.body.discount,29800);assert.equal(q.body.total,149200);
-  const o=await request('/api/orders','POST',payload({voucherCode:'new20',total:1,shippingFee:0}));assert.equal(o.body.total,q.body.total);
+  const buyer=await request('/api/auth/register','POST',{name:'Buyer',username:'voucher-buyer',password:'password123'});
+  const o=await request('/api/orders','POST',payload({voucherCode:'new20',total:1,shippingFee:0}),{Authorization:'Bearer '+buyer.body.token});assert.equal(o.body.total,q.body.total);
   assert.equal((await request('/api/checkout/quote','POST',payload({voucherCode:'NEW20'}))).status,400);
   await request('/api/admin/orders/'+o.body.id,'PATCH',{status:'cancelled'},h);
   assert.equal((await request('/api/admin/vouchers')).status,401);
@@ -119,7 +120,7 @@ test('Changed price requires confirmation and does not debit stock',()=>{
   assert.equal(db.data.products[0].stock,50);assert.equal(db.data.orders.length,0);
 });
 test('Orders belong to authenticated user, never to an arbitrary payload user id',async t=>{
-  const {request}=await fixture(t);
+  const {request,db}=await fixture(t);
   const a=await request('/api/auth/register','POST',{name:'A',username:'userA',password:'password123'});
   const b=await request('/api/auth/register','POST',{name:'B',username:'userB',password:'password123'});
   const ah={Authorization:'Bearer '+a.body.token};const bh={Authorization:'Bearer '+b.body.token};
@@ -128,6 +129,9 @@ test('Orders belong to authenticated user, never to an arbitrary payload user id
   assert.equal((await request('/api/orders/mine','GET',undefined,bh)).body.length,0);
   assert.equal((await request('/api/orders/mine')).status,401);
   assert.equal((await request('/api/orders','POST',payload(),{Authorization:'Bearer invalid'})).status,401);
+  const before=JSON.stringify(db.data);
+  assert.equal((await request('/api/orders','POST',payload())).status,401);
+  assert.equal(JSON.stringify(db.data),before);
 });
 test('Products, vouchers and order snapshots survive restart and deletion',t=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'shop-commerce-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));

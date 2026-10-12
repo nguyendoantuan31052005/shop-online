@@ -1,5 +1,6 @@
 // Storefront: cart. Loaded in index.html order; shared state is in state.js.
 function addToCart(id, selectedVariant = {}) {
+  if (!requireShoppingLogin()) return false;
   const product = allProducts.find((item) => item.id === id);
   if (!product) return;
   if (product.stock <= 0) {
@@ -35,6 +36,7 @@ function addToCart(id, selectedVariant = {}) {
 }
 
 function updateCartQty(id, delta, size = null, color = null) {
+  if (delta > 0 && !requireShoppingLogin()) return;
   const product=allProducts.find(p=>p.id===id);
   const total=cart.filter(i=>i.id===id).reduce((n,i)=>n+i.qty,0);
   if(delta>0&&(!product||total>=product.stock)){showToast('Không đủ tồn kho.','error');return;}

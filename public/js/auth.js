@@ -1,4 +1,13 @@
 // Storefront: auth. Loaded in index.html order; shared state is in state.js.
+function requireShoppingLogin() {
+  if (localStorage.getItem('shop_token') && getStoredUser()) return true;
+  closeCart();
+  closeDetail();
+  document.getElementById('checkoutModal').classList.remove('show');
+  toggleAuth('login');
+  setStatus('Vui lòng đăng nhập để thêm vào giỏ hàng và mua sản phẩm.');
+  return false;
+}
 function setStatus(message, isError = false) {
   const node = document.getElementById('authStatus');
   if (!node) return;

@@ -6,18 +6,20 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-let server, base, db;
+let server, base, db, shoppingToken;
 const ADMIN = { 'x-admin-token': 'test-token' };
 const customer = { name: 'Nguyễn Văn A', phone: '0901234567', address: '12 Bạch Đằng, Đà Nẵng' };
 
 const post = (url, body, headers = {}) =>
-  fetch(base + url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
+  fetch(base + url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(url === '/api/orders' ? { Authorization: 'Bearer ' + shoppingToken } : {}), ...headers }, body: JSON.stringify(body) });
 
 before(async () => {
   db = openDb(':memory:');
   server = createApp({ db, adminToken: 'test-token', version: 'test' });
   await new Promise((r) => server.listen(0, r));
   base = `http://127.0.0.1:${server.address().port}`;
+  const signup = await post('/api/auth/register', { name:'Shopper', username:'shopping-test', password:'test-password' });
+  shoppingToken = (await signup.json()).token;
 });
 
 after(() => { server.close(); db.close(); });

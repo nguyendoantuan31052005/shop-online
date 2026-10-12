@@ -442,8 +442,8 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
         if (pathname === '/api/orders' && req.method === 'POST') {
           const body = await readJson(req);
           const auth = readAuthState(req, db, jwtSecret);
-          if (getTokenFromRequest(req) && !auth) throw new HttpError(401, 'Phiên đăng nhập đã hết hạn');
-          const order = createOrder(db, body || {}, auth?.user.id || null);
+          if (!auth) throw new HttpError(401, 'Vui lòng đăng nhập để đặt hàng');
+          const order = createOrder(db, body || {}, auth.user.id);
           sendJson(res, 201, order);
           return;
         }

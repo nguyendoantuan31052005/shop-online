@@ -35,6 +35,7 @@ document.getElementById('closeCheckoutBtn').addEventListener('click', () => docu
 document.getElementById('cancelCheckoutBtn').addEventListener('click', () => document.getElementById('checkoutModal').classList.remove('show'));
 
 document.getElementById('checkoutBtn').addEventListener('click', () => {
+  if (!requireShoppingLogin()) return;
   if (!cart.length) {
     showToast('Giỏ hàng của bạn đang trống.', 'error');
     return;
@@ -45,6 +46,7 @@ document.getElementById('checkoutBtn').addEventListener('click', () => {
 
 document.getElementById('checkoutForm').addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (!requireShoppingLogin()) return;
   const form = event.currentTarget;
   if(submittingOrder||!checkoutQuote)return;
   const name = form.querySelector('[name="name"]').value.trim();
