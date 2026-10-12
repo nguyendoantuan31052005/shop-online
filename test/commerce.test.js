@@ -55,6 +55,32 @@ test('Storefront admin login creates a protected session and reserves the admin 
   const customer=await request('/api/auth/login','POST',{username:'customer',password:'password123'});
   assert.equal(customer.status,200);assert.ok(customer.body.token);assert.equal(customer.cookie,null);
 });
+test('Admin manages users without exposing passwords; locking blocks existing sessions and purchases',async t=>{
+  const {request,db}=await fixture(t);
+  const a=await request('/api/auth/register','POST',{name:'Buyer',username:'managed-buyer',password:'password123'});
+  const b=await request('/api/auth/register','POST',{name:'Other',username:'other-buyer',password:'password123'});
+  const id=a.body.user.id;const h={'x-admin-token':'private-admin-password'};
+  const buyer={Authorization:'Bearer '+a.body.token};
+  assert.equal((await request('/api/admin/users')).status,401);
+  assert.equal((await request('/api/admin/users/'+id,'PATCH',{disabled:true})).status,401);
+  const listing=await request('/api/admin/users','GET',undefined,h);
+  assert.equal(listing.status,200);assert.equal(listing.body.length,2);
+  for(const user of listing.body){assert.equal(user.password,undefined);assert.equal(user.hash,undefined);assert.equal(user.salt,undefined);}
+  const order=await request('/api/orders','POST',payload(),buyer);assert.equal(order.status,201);
+  assert.equal((await request('/api/admin/users/'+id+'/orders','GET',undefined,h)).body.length,1);
+  assert.equal((await request('/api/admin/users/'+b.body.user.id+'/orders','GET',undefined,h)).body.length,0);
+  assert.equal((await request('/api/admin/users/'+id,'PATCH',{disabled:'true'},h)).status,400);
+  assert.equal((await request('/api/admin/users/999','PATCH',{disabled:true},h)).status,404);
+  const save=db.save;db.save=()=>{throw new Error('disk failure');};
+  assert.equal((await request('/api/admin/users/'+id,'PATCH',{disabled:true},h)).status,500);
+  assert.equal(db.data.users.find(u=>u.id===id).disabled,undefined);db.save=save;
+  assert.equal((await request('/api/admin/users/'+id,'PATCH',{disabled:true},h)).status,200);
+  assert.equal((await request('/api/auth/me','GET',undefined,buyer)).status,401);
+  assert.equal((await request('/api/orders','POST',payload(),buyer)).status,401);
+  assert.equal((await request('/api/auth/login','POST',{username:'managed-buyer',password:'password123'})).status,403);
+  assert.equal((await request('/api/admin/users/'+id,'PATCH',{disabled:false},h)).status,200);
+  assert.equal((await request('/api/auth/login','POST',{username:'managed-buyer',password:'password123'})).status,200);
+});
 test('Configured admin token replaces defaults',async t=>{
   const old=process.env.ADMIN_TOKEN; process.env.ADMIN_TOKEN='from-environment';
   t.after(()=>{if(old===undefined)delete process.env.ADMIN_TOKEN;else process.env.ADMIN_TOKEN=old;});

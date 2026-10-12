@@ -4,7 +4,7 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 const money = (v) => Number(v || 0).toLocaleString('vi-VN') + 'đ';
 const labels = {new:'Mới',confirmed:'Đã xác nhận',shipping:'Đang giao',done:'Hoàn thành',cancelled:'Đã hủy'};
 const transitions = {new:['confirmed','cancelled'],confirmed:['shipping','cancelled'],shipping:['done','cancelled'],done:[],cancelled:[]};
-let products = [], vouchers = [], orders = [], deleteAction = null;
+let products = [], vouchers = [], orders = [], users = [], deleteAction = null;
 function message(text, error = false) { $('#message').textContent = text; $('#message').classList.toggle('error', error); }
 function auth(show) { $('#dashboard').hidden = !show; $('#loginPanel').hidden = show; $('#logout').hidden = !show; }
 async function api(path, options = {}) {
@@ -17,13 +17,13 @@ async function api(path, options = {}) {
   return data;
 }
 async function refresh() {
-  [products, vouchers, orders] = await Promise.all(['products','vouchers','orders'].map(p => api(p)));
+  [products, vouchers, orders, users] = await Promise.all(['products','vouchers','orders','users'].map(p => api(p)));
   auth(true); render();
 }
 function render() {
   const revenue = orders.filter(o => o.status === 'done').reduce((s,o) => s + o.total, 0);
   $('#stats').innerHTML = [['Sản phẩm', products.length],['Đơn mới',orders.filter(o => o.status === 'new').length],['Voucher đang bật',vouchers.filter(v => v.active).length],['Doanh thu hoàn thành',money(revenue)]].map(([label,value]) => `<div class="stat">${esc(label)}<strong>${esc(value)}</strong></div>`).join('');
-  renderProducts(); renderVouchers(); renderOrders();
+  renderProducts(); renderVouchers(); renderOrders(); renderUsers();
 }
 function renderProducts() {
   const q = $('#productSearch').value.toLocaleLowerCase('vi');
@@ -140,3 +140,32 @@ document.addEventListener('error', e => {
   if (e.target.matches?.('.product-thumb') && !e.target.src.endsWith('/images/product-placeholder.svg')) e.target.src = '/images/product-placeholder.svg';
 }, true);
 $('#productDialog').addEventListener('cancel', e => { if (imageUploading) e.preventDefault(); });
+function renderUsers() {
+  const query = $('#userSearch').value.trim().toLocaleLowerCase('vi');
+  const items = users.filter(u => `${u.name} ${u.username} ${u.email}`.toLocaleLowerCase('vi').includes(query));
+  $('#userCount').textContent = `${users.length} tài khoản`;
+  $('#userRows').innerHTML = items.map(u => `<tr><td><strong>${esc(u.name)}</strong><div class="muted">@${esc(u.username)} · #${u.id}</div></td><td>${esc(u.email || 'Chưa cung cấp')}</td><td>${esc(new Date(u.createdAt).toLocaleDateString('vi-VN'))}</td><td>${u.orderCount}</td><td><span class="badge ${u.disabled ? 'account-locked' : ''}">${u.disabled ? 'Đã khóa' : 'Hoạt động'}</span></td><td><button data-user-orders="${u.id}">Xem đơn</button><button data-user-toggle="${u.id}" class="${u.disabled ? '' : 'danger'}">${u.disabled ? 'Mở khóa' : 'Khóa'}</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">Không tìm thấy tài khoản</td></tr>';
+}
+$('#userSearch').oninput = renderUsers;
+document.addEventListener('click', async e => {
+  const button = e.target.closest('button'); if (!button) return;
+  if (button.dataset.userToggle) {
+    const user = users.find(u => u.id === Number(button.dataset.userToggle)); if (!user) return;
+    button.disabled = true;
+    try {
+      await api('users/' + user.id, {method:'PATCH',body:JSON.stringify({disabled:!user.disabled})});
+      await refresh(); message(user.disabled ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản.');
+    } catch (error) { message(error.message,true); }
+    finally { button.disabled = false; }
+  }
+  if (button.dataset.userOrders) {
+    const user = users.find(u => u.id === Number(button.dataset.userOrders)); if (!user) return;
+    $('#userOrdersTitle').textContent = 'Đơn hàng · ' + user.name;
+    $('#userOrderRows').textContent = 'Đang tải…'; $('#userOrdersDialog').showModal();
+    try {
+      const items = await api('users/' + user.id + '/orders');
+      if (!$('#userOrdersDialog').open) return;
+      $('#userOrderRows').innerHTML = items.map(o => `<article class="order"><div class="heading"><strong>Đơn #${o.id}</strong><span class="badge">${esc(labels[o.status] || o.status)}</span></div><p>${esc(new Date(o.created_at).toLocaleString('vi-VN'))}<br>${esc(o.address)}</p><ul>${o.items.map(i => `<li>${esc(i.name)} · ${esc(i.size || '')} / ${esc(i.color || '')} × ${i.quantity}</li>`).join('')}</ul><strong>${money(o.total)}</strong></article>`).join('') || '<p class="empty">Khách hàng chưa có đơn hàng.</p>';
+    } catch (error) { $('#userOrderRows').textContent = error.message; }
+  }
+});

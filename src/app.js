@@ -147,7 +147,7 @@ function readAuthState(req, db, secret) {
   const payload = verifyToken(token, secret);
   if (!payload || !payload.sub) return null;
   const user = findUserById(db, payload.sub);
-  return user ? { token, user: { id: user.id, name: user.name, username: user.username, email: user.email, createdAt: user.created_at } } : null;
+  return user && !user.disabled ? { token, user: { id: user.id, name: user.name, username: user.username, email: user.email, createdAt: user.created_at } } : null;
 }
 
 function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH || path.join(__dirname, '..', 'data', 'shop.json')), 'uploads'), adminToken = process.env.ADMIN_TOKEN, version = process.env.APP_VERSION || 'dev', jwtSecret = process.env.JWT_SECRET || crypto.randomBytes(48).toString('hex') } = {}) {
@@ -213,6 +213,27 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
           sendJson(res, 200, { authenticated: true }); return;
         }
         if (!isAdmin(req)) throw new HttpError(401, 'Vui lòng đăng nhập quản trị');
+        const publicUser = user => ({ id:user.id, name:user.name, username:user.username, email:user.email || '', createdAt:user.created_at, disabled:!!user.disabled, orderCount:db.data.orders.filter(o => o.user_id === user.id).length });
+        if (pathname === '/api/admin/users' && req.method === 'GET') {
+          sendJson(res, 200, db.data.users.map(publicUser)); return;
+        }
+        const userMatch = pathname.match(/^\/api\/admin\/users\/(\d+)(\/orders)?$/);
+        if (userMatch) {
+          const user = db.data.users.find(u => u.id === Number(userMatch[1]));
+          if (!user) throw new HttpError(404, 'Không tìm thấy tài khoản');
+          if (userMatch[2] && req.method === 'GET') {
+            sendJson(res, 200, db.data.orders.filter(o => o.user_id === user.id).slice().reverse()); return;
+          }
+          if (!userMatch[2] && req.method === 'PATCH') {
+            const body = await readJson(req);
+            if (typeof body.disabled !== 'boolean' || Object.keys(body).some(key => key !== 'disabled')) throw new HttpError(400, 'Trạng thái tài khoản không hợp lệ');
+            const original = user.disabled;
+            user.disabled = body.disabled;
+            try { db.save(); } catch (error) { if (original === undefined) delete user.disabled; else user.disabled = original; throw error; }
+            sendJson(res, 200, publicUser(user)); return;
+          }
+          throw new HttpError(405, 'Thao tác không được hỗ trợ');
+        }
         if (pathname === '/api/admin/images' && req.method === 'POST') {
           const chunks = []; let size = 0;
           for await (const chunk of req) {
@@ -308,6 +329,7 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
             sendJson(res, 401, { error: 'Tên đăng nhập/email hoặc mật khẩu không đúng' });
             return;
           }
+          if (user.disabled) throw new HttpError(403, 'Tài khoản đã bị khóa. Vui lòng liên hệ cửa hàng.');
 
           const token = signToken({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, jwtSecret);
           sendJson(res, 200, {
