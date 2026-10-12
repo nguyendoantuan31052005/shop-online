@@ -5,7 +5,7 @@ FROM node:20-alpine
 ARG APP_VERSION=dev
 ENV APP_VERSION=$APP_VERSION \
     NODE_ENV=production \
-    PORT=8080 \
+    PORT=3000 \
     DB_PATH=/data/shop.json
 
 WORKDIR /app
@@ -20,9 +20,9 @@ RUN mkdir -p /data && chown -R node:node /data /app
 USER node
 VOLUME ["/data"]
 
-EXPOSE 8080
+EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:8080/health || exit 1
+  CMD wget -qO- http://127.0.0.1:3000/health || exit 1
 
 CMD ["node", "src/server.js"]

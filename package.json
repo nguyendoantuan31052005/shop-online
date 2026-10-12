@@ -4,9 +4,14 @@
   "description": "Đồ án DevOps: Web bán hàng trực tuyến với Git, Docker, CI/CD",
   "main": "src/server.js",
   "scripts": {
+    "setup": "node scripts/setup.js",
+    "docker:start": "node scripts/docker-start.js",
+    "test:browser": "node --experimental-websocket scripts/browser-check.js",
     "start": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test test"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20.12"
+  },
   "license": "MIT"
 }

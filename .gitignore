@@ -6,3 +6,7 @@ data/
 *.db-wal
 *.db-shm
 .DS_Store
+deploy_key
+deploy_key.pub
+*.pem
+.browser-test/

@@ -1,193 +1,131 @@
-# Đồ án DevOps: Web bán hàng trực tuyến (Git + Docker + CI/CD)
+﻿# Shop online — cửa hàng và quản trị
 
-Website bán hàng trực tuyến gồm: xem/tìm kiếm/lọc sản phẩm, giỏ hàng, đặt hàng, tra cứu đơn và trang quản trị đơn hàng. Ứng dụng được **quản lý bằng Git**, **đóng gói bằng Docker** và **tự động test – build – deploy bằng GitHub Actions**.
+Ứng dụng Node.js >= 20.12, HTML/CSS/JavaScript thuần, lưu dữ liệu JSON. Không cần cài thư viện để chạy website hoặc kiểm thử API.
 
-## 1. Chức năng
+## Chạy tại máy
 
-| Nhóm | Chức năng |
-|---|---|
-| Khách hàng | Xem danh sách sản phẩm, tìm kiếm, lọc theo danh mục, giỏ hàng (lưu trên trình duyệt), đặt hàng, tra cứu đơn bằng mã đơn + số điện thoại |
-| Quản trị | `/admin.html`: xem đơn, đổi trạng thái (Mới → Đã xác nhận → Đang giao → Hoàn thành / Hủy), bảo vệ bằng `ADMIN_TOKEN` |
-| Bảo đảm dữ liệu | Server tự tính tổng tiền (không tin giá từ client), kiểm tra tồn kho, đặt hàng được kiểm tra trước rồi mới ghi (lưu lỗi thì khôi phục lại như cũ), chống XSS khi hiển thị, chống path traversal |
-
-**Công nghệ:** Node.js 20 trở lên (không cần cài thư viện ngoài), lưu dữ liệu vào file JSON, HTML/CSS/JS thuần, Docker, GitHub Actions.
-
-## 2. Luồng CI/CD
-
-```
-Lập trình viên ──git push──▶ GitHub ──▶ GitHub Actions
-                                          │
-              ┌───────────────────────────┼────────────────────────┐
-              ▼                           ▼                        ▼
-   1. Test + Docker smoke test    2. Build & Push image      3. Deploy qua SSH
-   npm test, build thử image,     lên Docker Hub             docker compose pull/up
-   chạy container gọi /health     (latest, sha-xxx, v*)      trên server
-```
-
-- **Pull Request vào `main`:** chỉ chạy job 1.
-- **Push lên `main`:** chạy cả 3 job (job 3 bỏ qua nếu chưa cấu hình server).
-- **Push tag `v*`:** chạy job 1 và 2, image có tag theo phiên bản.
-
-## 3. API
-
-| Method | Đường dẫn | Mô tả |
-|---|---|---|
-| GET | `/api/products?q=&category=` | Danh sách sản phẩm |
-| GET | `/api/products/:id` | Chi tiết sản phẩm |
-| GET | `/api/categories` | Danh mục |
-| POST | `/api/orders` | Đặt hàng `{customer:{name,phone,address}, items:[{productId,quantity}]}` |
-| GET | `/api/orders/:id?phone=` | Tra cứu đơn |
-| GET | `/api/admin/orders` | (Admin) danh sách đơn, header `x-admin-token` |
-| PATCH | `/api/admin/orders/:id` | (Admin) đổi trạng thái `{status}` |
-| GET | `/health`, `/api/info` | Kiểm tra sống, phiên bản/container |
-
-## 4. Cấu trúc thư mục
-
-```
-.
-├── src/                    # db.js (dữ liệu + nghiệp vụ), app.js (router), server.js
-├── public/                 # index.html, admin.html, style.css, app.js (giao diện)
-├── test/app.test.js        # 11 test tự động
-├── Dockerfile
-├── docker-compose.yml      # web + volume lưu dữ liệu
-├── .env.example
-├── .github/workflows/ci-cd.yml
-└── docs/huong-dan-bao-cao.md
-```
-
-## 5. Chạy thử
-
-### 5.1. Bằng Node.js (cần Node >= 20)
-```bash
+```sh
+npm run setup
 npm test
-npm start            # http://localhost:3000  (dữ liệu ở data/shop.json)
+npm start
 ```
 
-### 5.2. Bằng Docker (các lệnh trong bài giảng)
-```bash
+- Cửa hàng: http://localhost:3000
+- Quản trị: http://localhost:3000/admin.html
+- `npm run setup` tạo `.env` hoặc bổ sung/thay secret bị thiếu, quá ngắn hay còn là mật khẩu mẫu; giữ nguyên secret hợp lệ và các cấu hình khác.
+- Mở `.env`, lấy giá trị `ADMIN_TOKEN` để đăng nhập quản trị. Không có mật khẩu mặc định công khai.
+- `ADMIN_TOKEN` tối thiểu 12 ký tự; `JWT_SECRET` tối thiểu 32 ký tự. Sau khi sửa cấu hình, khởi động lại server.
+- Dữ liệu ở `data/shop.json`. Sao lưu file này trước khi chuyển máy hoặc triển khai. Không chạy nhiều tiến trình cùng ghi một file JSON.
+- Nếu cổng bận, dừng tiến trình cũ hoặc đổi `PORT`; server báo lỗi thay vì tự đổi cổng.
+
+## Quản trị
+
+Trang `/admin.html` có phiên đăng nhập cookie HttpOnly, SameSite=Strict, hết hạn sau 8 giờ. Đăng xuất hoặc khởi động lại server sẽ thu hồi phiên.
+
+- **Sản phẩm:** thêm, sửa, xóa, tìm kiếm; quản lý tên, danh mục, mô tả, URL ảnh, giá, tồn kho, size, màu, nhóm khách hàng và nhóm bộ sưu tập. Size/màu nhập cách nhau bằng dấu phẩy. Tồn kho hiện được tính chung cho sản phẩm, chưa tách theo từng biến thể.
+- **Voucher:** thêm, sửa, xóa, bật/tắt; giảm theo phần trăm, số tiền cố định hoặc miễn phí ship. Có đơn tối thiểu, mức giảm tối đa, thời gian bắt đầu/hết hạn và giới hạn lượt dùng toàn cửa hàng. Giá trị 0 ở giới hạn lượt/mức giảm tối đa nghĩa là không giới hạn. Mỗi đơn áp dụng một voucher. Hủy đơn hoàn lại lượt dùng.
+- **Đơn hàng:** xem khách hàng, địa chỉ, sản phẩm, size/màu, tổng tiền và voucher; lọc và đổi trạng thái. Luồng: Mới → Đã xác nhận → Đang giao → Hoàn thành. Có thể hủy trước khi hoàn thành; hủy hoàn tồn kho đúng một lần. Đơn đã hoàn thành hoặc đã hủy không mở lại.
+- **Thống kê:** số sản phẩm, đơn mới, voucher đang bật và doanh thu của đơn hoàn thành.
+
+Xóa sản phẩm/voucher không xóa thông tin đã chụp lại trong lịch sử đơn. Sản phẩm đã xóa không được tự tạo lại khi hủy đơn cũ.
+
+## Khách hàng và thanh toán
+
+- Đăng ký, đăng nhập; mật khẩu khách hàng được băm bằng scrypt.
+- Xem, tìm kiếm, lọc, sắp xếp sản phẩm; chọn size/màu; giỏ hàng và yêu thích lưu trên trình duyệt.
+- Khi thanh toán, server tính lại giá, tồn kho, giảm giá và phí ship; giao diện sử dụng báo giá từ server. Phí ship cơ bản 30.000đ/đơn.
+- Hiện chỉ hỗ trợ **COD**. VietQR, MoMo, VNPay chưa tích hợp, không hiển thị như phương thức có thể thanh toán.
+- Địa chỉ nhập trực tiếp tỉnh/thành, phường/xã, địa chỉ chi tiết; quận/huyện tùy chọn.
+- Đơn đặt khi đăng nhập gắn với tài khoản và hiển thị lịch sử từ server. Đơn khách vãng lai tra bằng mã đơn + số điện thoại. Các đơn cũ không có tài khoản vẫn tra cứu theo cách này.
+- Nội dung động được escape trước khi hiển thị HTML để ngăn tên khách/sản phẩm chèn mã vào giao diện.
+
+## API chính
+
+| API | Chức năng |
+|---|---|
+| `GET /api/products`, `/api/products/:id`, `/api/categories` | Catalog |
+| `POST /api/auth/register`, `/api/auth/login`; `GET /api/auth/me` | Tài khoản khách |
+| `GET /api/vouchers` | Voucher còn hiệu lực |
+| `POST /api/checkout/quote` | Báo giá `{items, voucherCode}` |
+| `POST /api/orders` | Đặt hàng `{customer, items, voucherCode, paymentMethod:"cod"}` |
+| `GET /api/orders/mine` | Đơn của tài khoản theo Bearer token |
+| `GET /api/orders/:id?phone=...` | Tra cứu đơn |
+| `POST /api/admin/login`, `/api/admin/logout` | Phiên quản trị |
+| `GET /api/admin/session` | Kiểm tra phiên |
+| `GET/POST /api/admin/products`, `PATCH/DELETE /api/admin/products/:id` | Quản lý sản phẩm |
+| `GET/POST /api/admin/vouchers`, `PATCH/DELETE /api/admin/vouchers/:id` | Quản lý voucher |
+| `GET /api/admin/orders`, `PATCH /api/admin/orders/:id` | Quản lý đơn |
+| `GET /health`, `/api/info` | Health/version |
+
+Item đặt hàng: `{productId, quantity, size, color}`. Server cộng tồn kho của tất cả size/màu cùng sản phẩm để tránh bán vượt kho. API admin nhận cookie phiên; lệnh ghi từ giao diện gửi `X-Requested-With: shop-admin`. Header `x-admin-token` vẫn được hỗ trợ cho tác vụ quản trị từ server, không nhúng giá trị vào frontend.
+
+## Docker
+
+### Docker Desktop trên Windows
+
+Mở Docker Desktop, chờ Engine sẵn sàng, rồi nhấp đúp **`start-shop.cmd`** trong thư mục dự án. Có thể chạy `node scripts/docker-start.js` hoặc `npm run docker:start` trong terminal.
+
+Script tạo/sửa khóa thiếu trong `.env`, build mã nguồn hiện tại và chờ service khỏe. Trong Docker Desktop chọn **Containers → shop-online**, mở cổng **8080:3000**. Truy cập http://localhost:8080 và http://localhost:8080/admin.html; mật khẩu quản trị là `ADMIN_TOKEN` trong `.env`.
+
+Không bấm **Images → Run** với cấu hình trống: container đó không có khóa đăng nhập hay cổng host. Nếu chủ động chạy image riêng, phải truyền `--env-file`, `-p` và volume như lệnh bên dưới. Cổng 3000 trong log là cổng bên trong container; địa chỉ trên máy là cổng host 8080.
+
+Để dừng: `docker compose stop`. Để chạy lại và cập nhật: nhấp đúp `start-shop.cmd`. Không xóa volume nếu muốn giữ sản phẩm, người dùng và đơn hàng. Các container khác như `strange_shtern` có volume riêng; dữ liệu của chúng không tự đồng bộ với `shop-online`.
+
+```sh
+npm run setup
+docker compose up -d --build
+# http://localhost:8080
+# http://localhost:8080/admin.html
+docker compose ps
+docker compose logs web
+docker compose down
+```
+
+Cổng trong container và healthcheck đều là 3000. `HOST_PORT` mặc định 8080. Volume `shop-data` giữ dữ liệu khi thay container; không dùng `down -v` nếu muốn giữ dữ liệu.
+
+Build/chạy riêng:
+
+```sh
 docker build -t shop-online:local .
-docker run -d --name shop -p 8080:3000 -v shop-data:/data shop-online:local
-
-curl http://localhost:8080/health
-docker ps -a                  # liệt kê container
-docker logs shop              # xem log
-docker stop shop              # dừng
-docker rm shop                # xóa container (dữ liệu vẫn còn trong volume shop-data)
-docker rmi shop-online:local  # xóa image
+docker run -d --name shop -p 8080:3000 --env-file .env -v shop-data:/data shop-online:local
 ```
 
-### 5.3. Bằng Docker Compose
-```bash
-cp .env.example .env          # rồi sửa ADMIN_TOKEN
-docker compose up -d --build  # http://localhost:8080
-docker compose down           # dừng (thêm -v nếu muốn xóa cả dữ liệu)
-```
-Trang quản trị: http://localhost:8080/admin.html (nhập `ADMIN_TOKEN`; mặc định khi không đặt là `admin123` — **phải đổi khi triển khai thật**).
+Để dùng image đã push, đặt `DOCKER_IMAGE=<user>/shop-online:<tag>` và chạy `docker compose pull`, `docker compose up -d --no-build --wait`.
 
-### 5.4. Đẩy image lên Docker Hub thủ công
-```bash
-docker login
-docker tag shop-online:local <dockerhub-user>/shop-online:latest
-docker push <dockerhub-user>/shop-online:latest
-```
+## CI/CD
 
-## 6. Quy trình Git
+GitHub Actions chạy test, Docker smoke test, Trivy và build/push image. Deploy qua SSH khi đã cấu hình server. Image được gắn SHA đầy đủ; triển khai dùng đúng SHA đó. Secrets cần cấu hình:
 
-```bash
-git init
-git add .
-git commit -m "feat: khởi tạo web bán hàng"
-git branch -M main
-git remote add origin https://github.com/<user>/shop-online.git
-git push -u origin main
+- `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
+- `SERVER_HOST`, `SERVER_USER`, `SERVER_SSH_KEY` để deploy
+- `ADMIN_TOKEN` và `JWT_SECRET` cho server (dùng chuỗi ngẫu nhiên hex/base64url)
+
+Deploy lưu cấu hình vào `.env` trên server với quyền hạn chế, pull image rồi chờ container healthy. Service Compose là `web`. Khi đưa lên HTTPS, cấu hình `COOKIE_SECURE=true` cho cookie quản trị.
+
+Không commit `.env`, khóa SSH hoặc file dữ liệu. `deploy_key*` và secrets được loại khỏi Docker build context. Nếu khóa từng bị công khai, cần thay khóa trên máy chủ/GitHub.
+
+## Kiểm thử
+
+```sh
+npm test
+# Kiểm tra UI trên Chrome/Edge cài sẵn (Windows):
+node --experimental-websocket scripts/browser-check.js
 ```
 
-Làm việc theo nhánh:
-```bash
-git checkout -b feature/tim-kiem
-# ... sửa code ...
-git add . && git commit -m "feat: cải thiện tìm kiếm"
-git push -u origin feature/tim-kiem
-# Mở Pull Request -> CI chạy -> merge vào main -> tự build & deploy
-```
+Kiểm thử browser dùng database trong bộ nhớ và profile riêng tại `.browser-test`, không ghi vào dữ liệu cửa hàng. Có kiểm tra đăng nhập admin, CRUD, chọn hai biến thể, voucher, checkout, lịch sử tài khoản, hủy đơn và escape HTML. Ảnh chụp mobile lưu tại `.browser-test`.
 
-Quy ước commit: `feat:` tính năng · `fix:` sửa lỗi · `docs:` tài liệu · `ci:` pipeline · `test:` kiểm thử.
-Gắn phiên bản: `git tag v1.0.0 && git push origin v1.0.0`.
+## Phạm vi còn lại
 
-## 7. Cấu hình GitHub Actions
+Chưa có thanh toán online, gửi email, tồn kho từng biến thể, phân vai nhiều quản trị viên, tích hợp hãng vận chuyển hoặc cơ sở dữ liệu cho nhiều instance. Các endpoint gợi ý size/catalog mở rộng vẫn phục vụ demo. Không coi kiểm thử local là xác nhận pipeline đã deploy thành công lên server thật.
 
-Vào **Settings → Secrets and variables → Actions → New repository secret**:
+## Ảnh sản phẩm và đăng nhập quản trị
 
-| Secret | Bắt buộc | Ý nghĩa |
-|---|---|---|
-| `DOCKERHUB_USERNAME` | Có | Tên tài khoản Docker Hub |
-| `DOCKERHUB_TOKEN` | Có | Access Token tạo tại Docker Hub → Account settings → Security |
-| `SERVER_HOST` | Không | IP/domain VPS. Bỏ trống thì bỏ qua bước deploy |
-| `SERVER_USER` | Không | User SSH |
-| `SERVER_SSH_KEY` | Không | Nội dung private key SSH |
-| `ADMIN_TOKEN` | Nên có | Mật khẩu trang quản trị trên server (không đặt sẽ dùng mặc định `admin123`) |
+Tại trang chủ, bấm Đăng nhập, dùng tên tài khoản `admin` và mật khẩu từ biến môi trường `ADMIN_TOKEN`. Đăng nhập thành công sẽ mở phần quản trị bằng cookie HttpOnly.
 
-### Chuẩn bị server (nếu deploy)
-```bash
-curl -fsSL https://get.docker.com | sh      # cài Docker trên Ubuntu
-sudo usermod -aG docker $USER               # đăng nhập lại sau lệnh này
-# Thêm public key tương ứng SERVER_SSH_KEY vào ~/.ssh/authorized_keys
-# Mở port 8080 trên firewall
-```
-Sau khi pipeline xanh, truy cập `http://<SERVER_HOST>:8080`.
+Bảng quản trị hiển thị ảnh nhỏ. Form Thêm/Sửa sản phẩm hỗ trợ URL ảnh hoặc tải JPG, PNG, WebP từ máy tính, tối đa 5 MB, có xem trước và bỏ ảnh. Sau khi chọn ảnh, bấm Lưu sản phẩm để áp dụng. Ảnh tải lên lưu trong thư mục `uploads` cạnh file `DB_PATH`, được giữ trong volume `/data` khi chạy Docker.
 
-## 8. Điểm nổi bật về DevOps
+## Triển khai trên Render
 
-- Image nhẹ (`node:20-alpine`), chạy bằng user `node` (không phải root), có `HEALTHCHECK`.
-- Sắp xếp `COPY` để tận dụng cache layer; `.dockerignore` loại file thừa; CI dùng cache của GitHub Actions.
-- **Docker volume** `shop-data` giúp dữ liệu đơn hàng không mất khi cập nhật container.
-- CI chặn code lỗi: test hoặc smoke test thất bại thì không build/push/deploy.
-- Tag image theo git SHA giúp truy vết và rollback:
-  ```bash
-  DOCKER_IMAGE=<user>/shop-online:sha-abc1234 docker compose up -d
-  ```
-- Chân trang web hiển thị phiên bản (commit SHA) và tên container, dễ chứng minh đã deploy bản mới.
+Service Docker cần biến `ADMIN_TOKEN` (ít nhất 8 ký tự), `JWT_SECRET` (ít nhất 32 ký tự), `COOKIE_SECURE=true` và `DB_PATH` trỏ đến file trên persistent disk của service, ví dụ `/data/shop.json` nếu disk được mount tại `/data`. Không commit `.env` hoặc dữ liệu khách hàng. Service không có persistent disk sẽ mất dữ liệu và ảnh tải lên khi deploy lại.
 
-## 9. Hạn chế & hướng phát triển
-
-Hiện tại ứng dụng đang đáp ứng tốt mục tiêu DevOps và demo bán hàng nhanh, nhưng vẫn còn nhiều thiếu sót nếu muốn nâng lên mức sản phẩm thực tế. Một số điểm cần cải thiện gồm:
-
-### 9.1. Data & Content
-- Dữ liệu mẫu hiện chưa được thay thế hoàn toàn bằng thông tin sản phẩm thật, có thể còn các đoạn văn bản giả lập như "Lorem Ipsum" và hình ảnh lỗi nếu thiếu media local.
-- Chưa có đủ các trang thông tin bắt buộc như Chính sách đổi trả/bảo hành, Chính sách bảo mật, Điều khoản dịch vụ, Trang liên hệ và Giới thiệu công ty.
-- Hiển thị giá chưa được chuẩn hóa theo định dạng tiền tệ Việt Nam, ví dụ vẫn dùng `150000` thay vì `150.000 VNĐ`.
-- Chưa có logic và giao diện rõ ràng khi sản phẩm hoặc biến thể (size, màu) đã hết hàng, dẫn đến tình trạng khách hàng không biết trạng thái tồn kho.
-
-### 9.2. UX/UI
-- Thiết kế chưa tối ưu trên màn hình mobile: có thể bị tràn layout, chữ đè, menu khó bấm hoặc table không co giãn đúng trên điện thoại.
-- Chưa có trạng thái phản hồi rõ ràng khi chờ dữ liệu (loading spinner/skeleton) và empty state cho các trường hợp như giỏ hàng trống hoặc không tìm thấy sản phẩm theo bộ lọc.
-- Sau khi nhấn thêm vào giỏ hoặc mua ngay, chưa có toast/ popup xác nhận nên người dùng dễ bấm lặp lại nhiều lần.
-- Tìm kiếm và lọc còn cơ bản, chưa có gợi ý từ khóa (autocomplete) hoặc bộ lọc nâng cao theo khoảng giá, size và màu.
-
-### 9.3. Checkout Flow
-- Chưa có xác thực dữ liệu đầu vào đầy đủ: email sai định dạng, số điện thoại trống hoặc địa chỉ không hợp lệ chưa được cảnh báo rõ ràng.
-- Luồng nhập địa chỉ chưa theo phân cấp hành chính, chưa có chọn Tỉnh/Thành phố → Quận/Huyện → Phường/Xã theo dạng danh sách chuẩn.
-- Chưa tích hợp cổng thanh toán thực tế như VietQR, MoMo, VNPay hoặc thẻ quốc tế; hiện chỉ có lựa chọn COD giả lập.
-- Chưa có tính phí vận chuyển tự động dựa trên địa điểm nhận hàng, thiếu API hoặc công thức tính ship theo khu vực.
-
-### 9.4. Technical & Performance
-- Mật khẩu và thông tin nhạy cảm chưa được mã hóa (nên dùng bcrypt/argon2), đồng thời chưa có biện pháp bảo vệ cơ bản chống SQL Injection, XSS và dữ liệu thô trong database.
-- Chưa có route guard để ngăn khách chưa đăng nhập truy cập trực tiếp vào trang admin hoặc lịch sử đơn hàng.
-- Thiếu metadata SEO cơ bản như `<title>`, `<meta name="description">`, Open Graph ở từng trang sản phẩm chi tiết.
-- Hình ảnh chưa được tối ưu hóa: có thể dùng kích thước lớn, chưa nén hoặc chuyển sang định dạng WebP, gây chậm tải trang.
-- Cấu hình môi trường vẫn chưa tuân thủ chuẩn: khó tránh việc hardcode Database URL, API key và secret key trực tiếp trong mã nguồn; nên chuyển sang `.env` và quản lý secrets riêng.
-
-### 9.5. Bảng đối chiếu: website cần có vs điểm dự án đang thiếu
-
-| Hạng mục | Một website hoàn chỉnh bắt buộc phải có | Điểm dự án hiện đang thiếu / cần khắc phục |
-|---|---|---|
-| Trải nghiệm Sản phẩm | Lựa chọn biến thể (Size, Màu sắc) rõ ràng; bắt buộc chọn biến thể trước khi mua; tồn kho và giá thay đổi theo biến thể; đánh giá & bình luận từ khách hàng. | Chưa ràng buộc bắt buộc chọn Size/Màu trước khi bấm "Thêm vào giỏ"; thiếu các thông số đánh giá thực tế từ người dùng. |
-| Giỏ hàng & Luồng Mua hàng | Thông báo Toast/Popup phản hồi khi thêm giỏ; màn hình "Giỏ hàng trống" kèm nút mua sắm; chặn số lượng âm/chữ/quá lớn; auto-save giỏ hàng khi reload F5. | Chưa có thông báo phản hồi khi thêm vào giỏ; khi giỏ hàng trống giao diện bị trống/đứt bố cục; chưa validate chặn các giá trị số lượng bất hợp lý. |
-| Thanh toán & Vận chuyển | Validation form chặt chẽ; chọn địa chỉ cấp Tỉnh/Thành → Quận/Huyện → Phường/Xã; tính phí ship tự động; tích hợp cổng thanh toán thực tế. | Form thanh toán chưa chặn tốt định dạng SĐT/Email; ô nhập địa chỉ còn thô, chưa dùng API địa giới hành chính; phí ship đang cố định hoặc thiếu logic. |
-| Tìm kiếm & Trạng thái Hệ thống | Thanh tìm kiếm gợi ý từ khóa; sắp xếp (giá tăng/giảm, mới nhất, bán chạy); thông báo "Không tìm thấy kết quả"; loading skeleton/spinner. | Bộ lọc và sắp xếp chưa mượt; khi từ khóa sai thường bị trang trắng; thiếu trạng thái loading khi gọi API. |
-| Giao diện Mobile & Trang Pháp lý | Responsive 100% trên điện thoại; menu hamburger; footer đầy đủ các trang chính sách. | Giao diện mobile còn vỡ khung ở một số vị trí; menu header chưa tối ưu; thiếu các trang chính sách bắt buộc ở footer. |
-| Hệ thống Quản trị & Bảo mật | Trang Admin quản lý đơn hàng, kho, sản phẩm; phân quyền Route; mã hóa mật khẩu và lưu secret trong .env; gửi email xác nhận đơn hàng. | Chưa tối ưu phân quyền giữa User/Admin; console vẫn có cảnh báo lỗi JS; chưa có email xác nhận đơn hàng tự động. |
-
-### 9.6. Hướng phát triển
-Chưa có đăng nhập tài khoản khách, thanh toán online, upload ảnh sản phẩm; file JSON phù hợp quy mô nhỏ.
-Hướng mở rộng: chuyển sang PostgreSQL (thêm service vào Compose), thêm Nginx + HTTPS (Let's Encrypt), quét bảo mật image bằng Trivy, môi trường staging, thông báo Telegram/Slack khi deploy.
+Nếu service đã kết nối repository này và bật Auto Deploy cho nhánh `main`, push mới sẽ kích hoạt triển khai. Nếu tắt Auto Deploy, chọn Manual Deploy → Deploy latest commit trong Render.

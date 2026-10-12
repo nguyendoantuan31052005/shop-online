@@ -160,12 +160,16 @@ function openDb(file = ':memory:', { seed = true } = {}) {
     data = seed ? seedData() : { nextProductId: 1, nextOrderId: 1, nextUserId: 1, products: [], orders: [], users: [] };
   }
 
-  if (!data.nextUserId) data.nextUserId = 1;
-  if (!Array.isArray(data.users)) data.users = [];
   if (!Array.isArray(data.products)) data.products = [];
+  if (!Array.isArray(data.vouchers)) data.vouchers = [];
+  if (!Array.isArray(data.users)) data.users = [];
+  if (!Array.isArray(data.orders)) data.orders = [];
   data.products = data.products.map((product, index) => normalizeProduct(product, index));
-  if (!data.nextProductId || Number(data.nextProductId) <= data.products.length) {
-    data.nextProductId = data.products.length + 1;
+  for (const [collection, counter] of [['products', 'nextProductId'], ['vouchers', 'nextVoucherId'], ['users', 'nextUserId'], ['orders', 'nextOrderId']]) {
+    data[counter] = data[collection].reduce((next, item) => {
+      const id = Number(item.id);
+      return Number.isSafeInteger(id) && id > 0 ? Math.max(next, id + 1) : next;
+    }, Number.isSafeInteger(data[counter]) && data[counter] > 0 ? data[counter] : 1);
   }
 
   const db = {
@@ -187,10 +191,10 @@ function openDb(file = ':memory:', { seed = true } = {}) {
 const clone = (x) => structuredClone(x);
 
 function listProducts(db, { q = '', category = '', gender = '' } = {}) {
-  const kw = q.trim().toLowerCase();
+  const search = require('../public/search');
   return clone(
     db.data.products.filter((p) => {
-      const matchesText = !kw || p.name.toLowerCase().includes(kw) || p.description.toLowerCase().includes(kw);
+      const matchesText = search.matches(p, q);
       const matchesCategory = !category || p.category === category || p.subCategory === category;
       const matchesGender = !gender || p.gender === gender;
       return matchesText && matchesCategory && matchesGender;
@@ -211,57 +215,8 @@ function nowString() {
   return new Date().toISOString().slice(0, 19).replace('T', ' ');
 }
 
-function createOrder(db, payload) {
-  const c = payload && payload.customer;
-  const items = payload && payload.items;
-  if (!c || !String(c.name || '').trim() || !String(c.address || '').trim()) {
-    throw new HttpError(400, 'Vui lòng nhập họ tên và địa chỉ giao hàng');
-  }
-  if (!/^0\d{9,10}$/.test(String(c.phone || '').trim())) {
-    throw new HttpError(400, 'Số điện thoại không hợp lệ');
-  }
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new HttpError(400, 'Giỏ hàng trống');
-  }
-
-  // Bước 1: kiểm tra toàn bộ, chưa thay đổi dữ liệu gì
-  let total = 0;
-  const lines = [];
-  const seen = new Set();
-  for (const it of items) {
-    const qty = Number(it.quantity);
-    if (!Number.isInteger(qty) || qty < 1 || qty > 99) throw new HttpError(400, 'Số lượng không hợp lệ');
-    const pid = Number(it.productId);
-    if (seen.has(pid)) throw new HttpError(400, 'Sản phẩm bị trùng trong giỏ hàng');
-    seen.add(pid);
-    const p = db.data.products.find((x) => x.id === pid);
-    if (!p) throw new HttpError(400, `Sản phẩm #${it.productId} không tồn tại`);
-    if (p.stock < qty) throw new HttpError(409, `"${p.name}" chỉ còn ${p.stock} sản phẩm`);
-    total += p.price * qty; // giá luôn lấy từ server, không tin client
-    lines.push({ p, qty });
-  }
-
-  // Bước 2: ghi dữ liệu; nếu lưu file lỗi thì khôi phục lại như cũ
-  const backup = clone(db.data);
-  try {
-    const order = {
-      id: db.data.nextOrderId++,
-      customer_name: c.name.trim(),
-      phone: c.phone.trim(),
-      address: c.address.trim(),
-      total,
-      status: 'new',
-      created_at: nowString(),
-      items: lines.map(({ p, qty }) => ({ product_id: p.id, name: p.name, price: p.price, quantity: qty })),
-    };
-    for (const { p, qty } of lines) p.stock -= qty;
-    db.data.orders.push(order);
-    db.save();
-    return clone(order);
-  } catch (err) {
-    db.data = backup;
-    throw err;
-  }
+function createOrder(db, payload, userId = null) {
+  return require('./commerce').createOrder(db, payload, userId);
 }
 
 function getOrder(db, id) {
@@ -285,9 +240,16 @@ function verifyPassword(password, stored) {
 }
 
 function createUser(db, { name, username, email, password }) {
+  if (typeof name !== 'string' || typeof username !== 'string' || typeof password !== 'string' || (email !== undefined && typeof email !== 'string')) {
+    throw new HttpError(400, 'Thông tin tài khoản không hợp lệ');
+  }
   const cleanName = String(name || '').trim();
   const cleanUsername = String(username || '').trim();
   const cleanEmail = String(email || '').trim().toLowerCase();
+
+  if (cleanName.length > 200 || cleanUsername.length > 80 || cleanEmail.length > 254 || password.length > 256) {
+    throw new HttpError(400, 'Thông tin tài khoản quá dài');
+  }
 
   if (!cleanName || !cleanUsername || !String(password || '').trim()) {
     throw new HttpError(400, 'Vui lòng nhập đầy đủ tên, tên đăng nhập và mật khẩu');
@@ -301,11 +263,14 @@ function createUser(db, { name, username, email, password }) {
     throw new HttpError(400, 'Mật khẩu phải có ít nhất 6 ký tự');
   }
 
-  if (db.data.users.some((u) => u.username === cleanUsername || (cleanEmail && u.email === cleanEmail))) {
+  if (db.data.users.some((u) => u.username.toLowerCase() === cleanUsername.toLowerCase() ||
+    (u.email && u.email.toLowerCase() === cleanUsername.toLowerCase()) ||
+    (cleanEmail && (u.email === cleanEmail || u.username.toLowerCase() === cleanEmail)))) {
     throw new HttpError(409, 'Tên đăng nhập hoặc email đã tồn tại');
   }
 
   const { salt, hash } = hashPassword(String(password));
+  const backup = clone(db.data);
   const user = {
     id: db.data.nextUserId++,
     name: cleanName,
@@ -315,14 +280,15 @@ function createUser(db, { name, username, email, password }) {
     created_at: nowString(),
   };
   db.data.users.push(user);
-  db.save();
+  try { db.save(); }
+  catch (error) { db.data = backup; throw error; }
   return clone({ ...user, password: undefined });
 }
 
 function findUserByUsername(db, username) {
   const cleanUsername = String(username || '').trim();
   if (!cleanUsername) return null;
-  const user = db.data.users.find((u) => u.username === cleanUsername);
+  const user = db.data.users.find((u) => u.username.toLowerCase() === cleanUsername.toLowerCase());
   return user ? clone(user) : null;
 }
 
@@ -341,12 +307,7 @@ function findUserById(db, id) {
 const STATUSES = ['new', 'confirmed', 'shipping', 'done', 'cancelled'];
 
 function updateOrderStatus(db, id, status) {
-  if (!STATUSES.includes(status)) throw new HttpError(400, 'Trạng thái không hợp lệ');
-  const o = db.data.orders.find((x) => x.id === id);
-  if (!o) throw new HttpError(404, 'Không tìm thấy đơn hàng');
-  o.status = status;
-  db.save();
-  return clone(o);
+  return require('./commerce').updateOrderStatus(db, id, status);
 }
 
 function getMenCatalog() {

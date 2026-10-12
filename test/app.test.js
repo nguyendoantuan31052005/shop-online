@@ -128,7 +128,9 @@ test('Đặt hàng thành công: tính tổng tiền ở server và trừ tồn 
   assert.strictEqual(order.status, 'new');
   assert.strictEqual(order.items.length, 2);
   const p5 = await (await fetch(`${base}/api/products/5`)).json();
-  assert.strictEqual(order.total, before.price * 2 + p5.price);
+  assert.strictEqual(order.subtotal, before.price * 2 + p5.price);
+  assert.strictEqual(order.shippingFee, 30000);
+  assert.strictEqual(order.total, order.subtotal + 30000);
 
   const after = await (await fetch(`${base}/api/products/1`)).json();
   assert.strictEqual(after.stock, before.stock - 2);
@@ -164,10 +166,10 @@ test('API quản trị: cần token, xem và đổi trạng thái đơn', async 
   assert.ok(orders.length >= 1);
 
   const patch = await fetch(`${base}/api/admin/orders/${orders[0].id}`, {
-    method: 'PATCH', headers: { 'Content-Type': 'application/json', ...ADMIN }, body: JSON.stringify({ status: 'shipping' }),
+    method: 'PATCH', headers: { 'Content-Type': 'application/json', ...ADMIN }, body: JSON.stringify({ status: 'confirmed' }),
   });
   assert.strictEqual(patch.status, 200);
-  assert.strictEqual((await patch.json()).status, 'shipping');
+  assert.strictEqual((await patch.json()).status, 'confirmed');
 
   const bad = await fetch(`${base}/api/admin/orders/${orders[0].id}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json', ...ADMIN }, body: JSON.stringify({ status: 'xyz' }),
@@ -175,9 +177,13 @@ test('API quản trị: cần token, xem và đổi trạng thái đơn', async 
   assert.strictEqual(bad.status, 400);
 });
 
-test('Bộ sưu tập nổi bật phải render dữ liệu thật từ catalog', () => {
+test('Trang cửa hàng tải catalog từ API và render danh sách sản phẩm', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-  assert.match(html, /renderFeaturedCollections|featuredCollections/);
+  const catalog = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'catalog.js'), 'utf8');
+  assert.match(html, /src="\/js\/catalog\.js"/);
+  assert.match(catalog, /await api\('\/api\/products'\)/);
+  assert.match(catalog, /allProducts\.push\(\.\.\.items\)/);
+  assert.match(catalog, /renderProductsPanel\(\)/);
 });
 
 test('Không đọc được file ngoài thư mục public (path traversal)', async () => {

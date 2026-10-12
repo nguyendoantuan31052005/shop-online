@@ -5,19 +5,22 @@ services:
       dockerfile: Dockerfile
       args:
         APP_VERSION: local-dev
-    image: shop-online:local
+    image: ${DOCKER_IMAGE:-shop-online:local}
     container_name: shop-online
     restart: unless-stopped
     ports:
-      - "8080:3000"
+      - "${HOST_PORT:-8080}:3000"
     environment:
       PORT: 3000
+      HOST_PORT: ${HOST_PORT:-8080}
       DB_PATH: /data/shop.json
-      ADMIN_TOKEN: ${ADMIN_TOKEN:-admin123}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?Chay npm run setup de tao ADMIN_TOKEN}
+      JWT_SECRET: ${JWT_SECRET:?Chay npm run setup de tao JWT_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     volumes:
       - shop-data:/data
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
       interval: 30s
       timeout: 3s
       retries: 3

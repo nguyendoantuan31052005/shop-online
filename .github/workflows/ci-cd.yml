@@ -10,6 +10,10 @@ on:
 env:
   IMAGE_NAME: shop-online
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   # ---------- CI: test + kiểm tra image chạy được ----------
   test:
@@ -18,6 +22,7 @@ jobs:
     steps:
       - name: Checkout mã nguồn
         uses: actions/checkout@v4
+
 
       - name: Cài Node.js
         uses: actions/setup-node@v4
@@ -32,13 +37,14 @@ jobs:
 
       - name: Chạy container và kiểm tra /health
         run: |
-          docker run -d --name shop -p 8080:3000 ${{ env.IMAGE_NAME }}:ci
+          set -eu
+          trap 'docker logs shop; docker rm -f shop' EXIT
+          docker run -d --name shop -p 8080:3000 -e ADMIN_TOKEN="$(openssl rand -hex 24)" -e JWT_SECRET="$(openssl rand -hex 48)" ${{ env.IMAGE_NAME }}:ci
           for i in $(seq 1 15); do
             curl -fsS http://localhost:8080/health && break || sleep 2
           done
-          curl -fsS http://localhost:8080/api/products | head -c 200
-          docker logs shop
-          docker rm -f shop
+          curl -fsS http://localhost:8080/health
+          curl -fsS http://localhost:8080/api/products -o /tmp/shop-products.json
 
       - name: Quét image tìm lỗ hổng bảo mật
         uses: aquasecurity/trivy-action@master
@@ -49,6 +55,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload báo cáo Trivy
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
@@ -76,7 +83,7 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=short
+            type=sha,format=long
             type=ref,event=tag
 
       - name: Thiết lập Docker Buildx
@@ -129,16 +136,22 @@ jobs:
       - name: Pull image mới và khởi động lại container
         if: steps.check.outputs.enabled == 'true'
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         with:
+          envs: DOCKER_IMAGE,ADMIN_TOKEN,JWT_SECRET
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -eu
             cd ~/shop-online
-            export DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            export ADMIN_TOKEN='${{ secrets.ADMIN_TOKEN }}'
+            test -n "$ADMIN_TOKEN"
+            test -n "$JWT_SECRET"
+            umask 077
+            printf 'DOCKER_IMAGE=%s\nADMIN_TOKEN=%s\nJWT_SECRET=%s\n' "$DOCKER_IMAGE" "$ADMIN_TOKEN" "$JWT_SECRET" > .env
             docker compose pull --quiet
-            docker compose up -d --remove-orphans
-            sleep 3
-            docker compose exec -T shop wget -qO- http://localhost:3000/health || echo "Cảnh báo: healthcheck thất bại"
-            docker image prune -f
+            docker compose up -d --no-build --remove-orphans --wait --wait-timeout 90
+            docker compose exec -T web wget -qO- http://127.0.0.1:3000/health
