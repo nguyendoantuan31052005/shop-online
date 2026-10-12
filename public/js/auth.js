@@ -13,6 +13,8 @@ function setStatus(message, isError = false) {
   if (!node) return;
   node.textContent = message;
   node.style.color = isError ? '#d93025' : '#2f7d4b';
+  node.classList.toggle('auth-error', isError);
+  node.setAttribute('role', isError ? 'alert' : 'status');
 }
 
 function toggleAuth(mode) {

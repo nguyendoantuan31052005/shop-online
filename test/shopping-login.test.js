@@ -6,7 +6,7 @@ const vm=require('node:vm');
 test('Guest add-to-cart opens login without changing cart; signed-in customer can add',()=>{
  const saved=new Map();const actions=[];
  const nodes=new Map();
- function node(id){if(!nodes.has(id))nodes.set(id,{classList:{remove(){},add(){},toggle(){}},style:{},textContent:''});return nodes.get(id);}
+ function node(id){if(!nodes.has(id))nodes.set(id,{classList:{remove(){},add(){},toggle(){}},setAttribute(){},style:{},textContent:''});return nodes.get(id);}
  const context=vm.createContext({localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},document:{getElementById:node,querySelector:()=>node('badge')},closeDetail:()=>actions.push('close-detail'),allProducts:[{id:1,name:'Product',stock:5}],cart:[],showToast:()=>{}});
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/js/auth.js'),'utf8'),context);
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/js/cart.js'),'utf8'),context);

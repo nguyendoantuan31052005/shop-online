@@ -182,7 +182,7 @@
           <button class="close-btn" id="closeModalBtn" aria-label="Đóng">×</button>
         </div>
 
-        <div id="authStatus" class="status-box"></div>
+        <div id="authStatus" class="status-box" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <form id="registerForm" class="auth-form hidden">
           <label>Họ tên</label>
@@ -201,7 +201,7 @@
           <label>Tên đăng nhập</label>
           <input name="username" placeholder="username123" required />
           <label>Mật khẩu</label>
-          <input name="password" type="password" placeholder="Mật khẩu" required />
+          <input name="password" type="password" placeholder="Mật khẩu" autocomplete="current-password" aria-describedby="authStatus" required />
           <button type="submit">Đăng nhập</button>
           <div class="switch-link">Chưa có tài khoản? <button type="button" data-switch="register">Đăng ký</button></div>
         </form>

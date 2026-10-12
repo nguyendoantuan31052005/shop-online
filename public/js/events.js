@@ -108,6 +108,12 @@ document.getElementById('registerForm').addEventListener('submit', async (event)
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
+  if (button.disabled) return;
+  button.disabled = true;
+  button.textContent = 'Đang đăng nhập…';
+  setStatus('');
+  form.elements.password.removeAttribute('aria-invalid');
   try {
     const data = await api('/api/auth/login', {
       method: 'POST',
@@ -132,7 +138,15 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     form.reset();
     setTimeout(() => document.getElementById('authModal').classList.remove('show'), 700);
   } catch (error) {
-    setStatus(error.message, true);
+    setStatus(error.status === 401 ? 'Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng kiểm tra và thử lại.' : error.message, true);
+    if (error.status === 401) {
+      form.elements.password.setAttribute('aria-invalid', 'true');
+      form.elements.password.value = '';
+      form.elements.password.focus();
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Đăng nhập';
   }
 });
 
