@@ -64,7 +64,10 @@ function renderUserPanel() {
     userPanel.innerHTML = '';
   }
 
-  document.querySelector('[data-logout]')?.addEventListener('click', () => {
+  document.querySelector('[data-logout]')?.addEventListener('click', async () => {
+    try { await api('/api/auth/logout', {method:'POST'}); } catch (error) { if(error.status !== 401) { showToast(error.message,'error'); return; } }
+    cart = []; localStorage.removeItem('shop_cart'); renderCart();
+    wishlist = []; localStorage.removeItem('shop_wishlist'); renderWishlist(); renderProductsPanel();
     localStorage.removeItem('shop_token');
     localStorage.removeItem('shop_user');
     localStorage.removeItem('shop_admin_token');
@@ -98,6 +101,8 @@ async function hydrateUserSession() {
     localStorage.removeItem('shop_token');
     localStorage.removeItem('shop_user');
   }
+  if (localStorage.getItem('shop_token')) await loadCustomerShopping();
+  else { cart = []; localStorage.removeItem('shop_cart'); renderCart(); }
   renderUserPanel();
   await loadOrderHistory();
 }

@@ -4,6 +4,8 @@ function toggleWishlist(id, btn = null) {
   if (exists) wishlist = wishlist.filter((item) => item !== id);
   else wishlist.push(id);
   localStorage.setItem('shop_wishlist', JSON.stringify(wishlist));
+  const token = localStorage.getItem('shop_token');
+  if (token) api('/api/wishlist', {method:'PUT',headers:{Authorization:'Bearer '+token},body:JSON.stringify({productIds:wishlist})}).catch(error=>showToast(error.message,'error'));
 
   if (btn) {
     btn.textContent = exists ? '♡' : '♥';

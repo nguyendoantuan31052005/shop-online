@@ -94,6 +94,7 @@ document.getElementById('registerForm').addEventListener('submit', async (event)
     });
     localStorage.setItem('shop_token', data.token);
     localStorage.setItem('shop_user', JSON.stringify(data.user));
+    await loadCustomerShopping();
     setStatus(`Đăng ký thành công. Xin chào ${data.user.name}!`);
     renderUserPanel();
     renderAccountSummary();
@@ -131,6 +132,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     }
     localStorage.setItem('shop_token', data.token);
     localStorage.setItem('shop_user', JSON.stringify(data.user));
+    await loadCustomerShopping();
     setStatus(`Đăng nhập thành công. Xin chào ${data.user.name}!`);
     renderUserPanel();
     renderAccountSummary();

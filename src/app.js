@@ -20,6 +20,7 @@ const {
 } = require('./db');
 
 const commerce = require('./commerce');
+const customerBackend = require('./customer');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -147,7 +148,7 @@ function readAuthState(req, db, secret) {
   const payload = verifyToken(token, secret);
   if (!payload || !payload.sub) return null;
   const user = findUserById(db, payload.sub);
-  return user && !user.disabled ? { token, user: { id: user.id, name: user.name, username: user.username, email: user.email, createdAt: user.created_at } } : null;
+  return user && !user.disabled && (payload.version || 0) === (user.tokenVersion || 0) ? { token, user: { id: user.id, name: user.name, username: user.username, email: user.email, phone:user.phone || '', address:user.address || '', createdAt: user.created_at } } : null;
 }
 
 function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH || path.join(__dirname, '..', 'data', 'shop.json')), 'uploads'), adminToken = process.env.ADMIN_TOKEN, version = process.env.APP_VERSION || 'dev', jwtSecret = process.env.JWT_SECRET || crypto.randomBytes(48).toString('hex') } = {}) {
@@ -213,6 +214,9 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
           sendJson(res, 200, { authenticated: true }); return;
         }
         if (!isAdmin(req)) throw new HttpError(401, 'Vui lòng đăng nhập quản trị');
+        if (pathname === '/api/admin/stats' && req.method === 'GET') {
+          sendJson(res, 200, customerBackend.stats(db)); return;
+        }
         const publicUser = user => ({ id:user.id, name:user.name, username:user.username, email:user.email || '', createdAt:user.created_at, disabled:!!user.disabled, orderCount:db.data.orders.filter(o => o.user_id === user.id).length });
         if (pathname === '/api/admin/users' && req.method === 'GET') {
           sendJson(res, 200, db.data.users.map(publicUser)); return;
@@ -308,7 +312,7 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
             throw new HttpError(409, 'Tên đăng nhập admin dành riêng cho quản trị viên');
           }
           const user = createUser(db, body || {});
-          const token = signToken({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, jwtSecret);
+          const token = signToken({ sub: user.id, version:user.tokenVersion || 0, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, jwtSecret);
           sendJson(res, 201, {
             token,
             user: { id: user.id, name: user.name, username: user.username, email: user.email || '', createdAt: user.created_at },
@@ -331,7 +335,7 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
           }
           if (user.disabled) throw new HttpError(403, 'Tài khoản đã bị khóa. Vui lòng liên hệ cửa hàng.');
 
-          const token = signToken({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, jwtSecret);
+          const token = signToken({ sub: user.id, version:user.tokenVersion || 0, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, jwtSecret);
           sendJson(res, 200, {
             token,
             user: { id: user.id, name: user.name, username: user.username, email: user.email || '', createdAt: user.created_at },
@@ -349,11 +353,23 @@ function createApp({ db, uploadDir = path.join(path.dirname(process.env.DB_PATH 
           return;
         }
 
+        if ((pathname === '/api/auth/me' && req.method === 'PATCH') || (pathname === '/api/auth/password' && req.method === 'POST') || (pathname === '/api/auth/logout' && req.method === 'POST')) {
+          const auth = readAuthState(req, db, jwtSecret);
+          if (!auth) throw new HttpError(401, 'Vui lòng đăng nhập');
+          const result = customerBackend.account(db, auth.user.id, pathname, body);
+          sendJson(res, 200, result); return;
+        }
         sendJson(res, 404, { error: 'Không tìm thấy endpoint auth' });
         return;
       }
 
       if (pathname.startsWith('/api/')) {
+        if (pathname === '/api/cart' || pathname === '/api/wishlist' || /^\/api\/orders\/\d+(\/cancel)?$/.test(pathname) && req.method !== 'GET') {
+          const auth = readAuthState(req, db, jwtSecret);
+          if (!auth) throw new HttpError(401, 'Vui lòng đăng nhập');
+          const result = customerBackend.handle(db, auth.user.id, pathname, req.method, await readJson(req));
+          sendJson(res, 200, result); return;
+        }
         if (pathname === '/api/vouchers' && req.method === 'GET') {
           sendJson(res, 200, db.data.vouchers.filter(v => commerce.available(v)).map(({ code, type, value, minOrder, maxDiscount, expiresAt, description }) => ({ code, type, value, minOrder, maxDiscount, expiresAt, description }))); return;
         }

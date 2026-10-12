@@ -129,6 +129,8 @@ function createOrder(db, payload, userId = null) {
     for (const line of quote.items) db.data.products.find(p => p.id === line.product_id).stock -= line.quantity;
     if (quote.voucherId) db.data.vouchers.find(v => v.id === quote.voucherId).used++;
     db.data.orders.push(order);
+    const buyer = db.data.users.find(u => u.id === userId);
+    if (buyer) buyer.cart = [];
     return order;
   });
 }

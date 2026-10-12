@@ -25,7 +25,7 @@ function addToCart(id, selectedVariant = {}) {
     cart.push({ ...product, qty: 1, size, color });
   }
 
-  localStorage.setItem('shop_cart', JSON.stringify(cart));
+  persistCustomerCart();
   renderCart();
   showToast(`${product.name} đã được thêm vào giỏ hàng.`);
   const cartBadge = document.querySelector('.cart-pill');
@@ -49,7 +49,7 @@ function updateCartQty(id, delta, size = null, color = null) {
     })
     .filter(Boolean);
 
-  localStorage.setItem('shop_cart', JSON.stringify(cart));
+  persistCustomerCart();
   renderCart();
 }
 
@@ -124,3 +124,22 @@ function closeCart() {
 
 document.querySelector('.cart-pill').addEventListener('click', openCart);
 document.getElementById('closeCartBtn').addEventListener('click', closeCart);
+let cartSaveQueue = Promise.resolve();
+function persistCustomerCart() {
+  localStorage.setItem('shop_cart', JSON.stringify(cart));
+  const token = localStorage.getItem('shop_token');
+  const items = cart.map(i=>({productId:i.id,quantity:i.qty,size:i.size,color:i.color}));
+  if (!token) return;
+  cartSaveQueue = cartSaveQueue.catch(()=>{}).then(()=>api('/api/cart',{method:'PUT',headers:{Authorization:'Bearer '+token},body:JSON.stringify({items})})).catch(error=>showToast('Không lưu được giỏ hàng: '+error.message,'error'));
+}
+async function loadCustomerShopping() {
+  try {
+    await cartSaveQueue;
+    const result = await api('/api/cart');
+    cart = result.items.filter(i=>i.product).map(i=>({...i.product,qty:i.quantity,size:i.size,color:i.color}));
+    localStorage.setItem('shop_cart',JSON.stringify(cart));renderCart();
+    const favorites = await api('/api/wishlist');
+    wishlist = favorites.products.map(p=>p.id);
+    localStorage.setItem('shop_wishlist',JSON.stringify(wishlist));renderWishlist();renderProductsPanel();
+  } catch(error) { showToast(error.message,'error'); }
+}

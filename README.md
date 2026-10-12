@@ -14,7 +14,7 @@ npm start
 - Quản trị: http://localhost:3000/admin.html
 - `npm run setup` tạo `.env` hoặc bổ sung/thay secret bị thiếu, quá ngắn hay còn là mật khẩu mẫu; giữ nguyên secret hợp lệ và các cấu hình khác.
 - Mở `.env`, lấy giá trị `ADMIN_TOKEN` để đăng nhập quản trị. Không có mật khẩu mặc định công khai.
-- `ADMIN_TOKEN` tối thiểu 12 ký tự; `JWT_SECRET` tối thiểu 32 ký tự. Sau khi sửa cấu hình, khởi động lại server.
+- `ADMIN_TOKEN` tối thiểu 8 ký tự; `JWT_SECRET` tối thiểu 32 ký tự. Sau khi sửa cấu hình, khởi động lại server.
 - Dữ liệu ở `data/shop.json`. Sao lưu file này trước khi chuyển máy hoặc triển khai. Không chạy nhiều tiến trình cùng ghi một file JSON.
 - Nếu cổng bận, dừng tiến trình cũ hoặc đổi `PORT`; server báo lỗi thay vì tự đổi cổng.
 
@@ -129,3 +129,23 @@ Bảng quản trị hiển thị ảnh nhỏ. Form Thêm/Sửa sản phẩm hỗ
 Service Docker cần biến `ADMIN_TOKEN` (ít nhất 8 ký tự), `JWT_SECRET` (ít nhất 32 ký tự), `COOKIE_SECURE=true` và `DB_PATH` trỏ đến file trên persistent disk của service, ví dụ `/data/shop.json` nếu disk được mount tại `/data`. Không commit `.env` hoặc dữ liệu khách hàng. Service không có persistent disk sẽ mất dữ liệu và ảnh tải lên khi deploy lại.
 
 Nếu service đã kết nối repository này và bật Auto Deploy cho nhánh `main`, push mới sẽ kích hoạt triển khai. Nếu tắt Auto Deploy, chọn Manual Deploy → Deploy latest commit trong Render.
+
+## Backend khách hàng
+
+Backend chạy Node.js, phục vụ giao diện và API cùng origin. Các endpoint khách hàng dùng `Authorization: Bearer <token>`; token hết hạn sau 24 giờ. Đổi mật khẩu hoặc đăng xuất thu hồi mọi phiên của tài khoản. Tài khoản bị khóa không thể dùng API mua hàng.
+
+| Endpoint | Chức năng |
+| --- | --- |
+| `PATCH /api/auth/me` | Sửa `name`, `email`, `phone`, `address`; kiểm tra trùng email |
+| `POST /api/auth/password` | Nhận `currentPassword`, `newPassword`; yêu cầu đăng nhập lại |
+| `POST /api/auth/logout` | Thu hồi các token đang tồn tại |
+| `GET /api/cart` | Giỏ riêng của khách, giá hiện tại và trạng thái còn hàng |
+| `PUT /api/cart` | Lưu `{items:[{productId,quantity,size,color}]}`; kiểm tra biến thể và tồn kho |
+| `DELETE /api/cart` | Xóa giỏ |
+| `GET /api/wishlist`, `PUT /api/wishlist` | Đọc/lưu danh sách yêu thích; PUT nhận `{productIds:[1,2]}` |
+| `POST /api/orders/:id/cancel` | Khách hủy đơn mới của chính mình, hoàn kho và voucher một lần |
+| `GET /api/admin/stats` | Thống kê người dùng, tài khoản khóa, tồn kho thấp, trạng thái đơn và doanh thu |
+
+Giỏ và danh sách yêu thích được tải theo tài khoản khi đăng nhập; giỏ được xóa trên server sau khi đặt hàng thành công. API hồ sơ và đổi mật khẩu đã sẵn sàng, chưa có form tương ứng trên giao diện. Ghi dữ liệu lỗi sẽ hoàn tác thay đổi trong bộ nhớ.
+
+Hệ thống hiện hỗ trợ thanh toán COD. Thanh toán online và khôi phục mật khẩu qua email cần kết nối nhà cung cấp riêng. Cơ sở dữ liệu vẫn là JSON cho một instance; trên Render phải cấu hình persistent disk để giữ dữ liệu và ảnh sau deploy, hoặc chuyển sang PostgreSQL trước khi chạy nhiều instance.

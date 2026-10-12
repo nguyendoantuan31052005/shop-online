@@ -333,6 +333,7 @@ function getMenCatalog() {
 }
 
 module.exports = {
+  hashPassword,
   openDb, HttpError, listProducts, listCategories, getProduct,
   createOrder, getOrder, listOrders, updateOrderStatus, STATUSES,
   createUser, findUserByUsername, findUserByEmail, findUserById, verifyPassword,

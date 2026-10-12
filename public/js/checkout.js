@@ -72,6 +72,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (event)
 
   submittingOrder=true; form.querySelector('button[type="submit"]').disabled=true;
   try {
+    await cartSaveQueue;
     const order = await api('/api/orders', {
       method: 'POST',
       body: JSON.stringify({
