@@ -112,9 +112,15 @@ function renderCart() {
 }
 
 function openCart() {
+  renderCart();
   document.getElementById('cartDrawer').classList.add('open');
+  document.querySelector('.cart-pill').setAttribute('aria-expanded', 'true');
 }
 
 function closeCart() {
   document.getElementById('cartDrawer').classList.remove('open');
+  document.querySelector('.cart-pill').setAttribute('aria-expanded', 'false');
 }
+
+document.querySelector('.cart-pill').addEventListener('click', openCart);
+document.getElementById('closeCartBtn').addEventListener('click', closeCart);

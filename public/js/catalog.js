@@ -246,10 +246,10 @@ function renderProducts(items, nodeId, showSale = false) {
 
     return `
       <article class="product-card">
-        <div class="thumb">
+        <button type="button" class="thumb product-image-button" data-detail="${p.id}" aria-label="Xem chi tiết ${esc(p.name)}">
           <span class="thumb-badge">${p.stock > 0 ? esc(p.category) : 'Hết hàng'}</span>
           ${imageHtml}
-        </div>
+        </button>
         <div class="product-info">
           <div class="product-name">${esc(p.name)}</div>
           <p class="product-description">${esc(p.description || 'Xem chi tiết để chọn màu và kích cỡ phù hợp.')}</p>

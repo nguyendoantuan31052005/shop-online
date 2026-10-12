@@ -6,7 +6,7 @@ const vm=require('node:vm');
 test('Guest add-to-cart opens login without changing cart; signed-in customer can add',()=>{
  const saved=new Map();const actions=[];
  const nodes=new Map();
- function node(id){if(!nodes.has(id))nodes.set(id,{classList:{remove(){},add(){},toggle(){}},setAttribute(){},style:{},textContent:''});return nodes.get(id);}
+ function node(id){if(!nodes.has(id))nodes.set(id,{listeners:{},classes:new Set(),attributes:{},classList:{remove(name){node(id).classes.delete(name);},add(name){node(id).classes.add(name);},toggle(){}},addEventListener(name,fn){this.listeners[name]=fn;},setAttribute(name,value){this.attributes[name]=value;},style:{},textContent:''});return nodes.get(id);}
  const context=vm.createContext({localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},document:{getElementById:node,querySelector:()=>node('badge')},closeDetail:()=>actions.push('close-detail'),allProducts:[{id:1,name:'Product',stock:5}],cart:[],showToast:()=>{}});
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/js/auth.js'),'utf8'),context);
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/js/cart.js'),'utf8'),context);
@@ -17,4 +17,12 @@ test('Guest add-to-cart opens login without changing cart; signed-in customer ca
  saved.set('shop_token','customer-token');saved.set('shop_user',JSON.stringify({id:1,name:'Buyer'}));
  assert.equal(context.addToCart(1,{size:'M',color:'Black'}),true);
  assert.equal(context.cart.length,1);assert.equal(context.cart[0].qty,1);
+ node('badge').listeners.click();
+ assert.ok(node('cartDrawer').classes.has('open'));
+ assert.equal(node('badge').attributes['aria-expanded'],'true');
+ node('closeCartBtn').listeners.click();
+ assert.equal(node('cartDrawer').classes.has('open'),false);
+ context.updateCartQty(1,1,'M','Black');assert.equal(context.cart[0].qty,2);
+ context.updateCartQty(1,-1,'M','Black');assert.equal(context.cart[0].qty,1);
+ context.updateCartQty(1,-99,'M','Black');assert.equal(context.cart.length,0);
 });
