@@ -19,9 +19,9 @@ Nguồn đối chiếu chính thức:
 | Hậu mãi | Bổ sung phiếu hỗ trợ/đổi trả và phản hồi từ quản trị, cách ly theo chủ đơn |
 | Trả hàng/hoàn tiền tự động | Chưa có. Phiếu hỗ trợ không tự chuyển tiền, tạo vận đơn hay hoàn kho |
 | Thanh toán | COD; chưa tích hợp nhà cung cấp thanh toán online |
-| Vận chuyển | Đã có adapter GHN để tự gửi đơn sau checkout, tạo lại từ admin và nhận webhook trạng thái; tài khoản GHN production chưa cấu hình nên hiện chưa hoạt động. Phí checkout vẫn là mức cơ bản, chưa hỏi phí GHN theo tuyến |
-| Khôi phục mật khẩu | Email qua Resend khi được cấu hình hoặc mã TOTP offline từ ứng dụng Authenticator; không gửi SMS. Người dùng cần bật Authenticator trước khi mất quyền truy cập. |
-| Nội dung sản phẩm | Có catalog mẫu/ảnh minh họa; cần shop nhập ảnh, mô tả và tồn kho hàng thật |
+| Vận chuyển | GHN production token/Shop ID đã cấu hình và tự tạo vận đơn COD đang bật. Chưa xác minh một vận đơn thật sau bản triển khai mới nhất; webhook cần đăng ký trong cổng GHN. Checkout hiện dùng phí cơ bản, chưa gọi GHN báo phí theo tuyến |
+| Khôi phục mật khẩu | Authenticator TOTP hoạt động miễn phí; email Resend chưa cấu hình. Người dùng cần bật Authenticator trước khi mất quyền truy cập. |
+| Nội dung sản phẩm | Có 1.121 sản phẩm mẫu. Ảnh chụp tham khảo được dùng chung theo nhóm; shop cần xác minh giá/tồn kho và thay bằng ảnh, mô tả đúng hàng thực trước khi mở bán chính thức |
 | Vận hành nhiều instance | Chưa có; hiện JSON cho một tiến trình, cần database và lưu trữ ảnh dùng chung khi mở rộng |
 | Chính sách giao nhận, bảo hành, đổi trả | Cần chủ shop cung cấp điều khoản áp dụng thực tế; không sao chép cam kết Shopee |
 
@@ -39,11 +39,11 @@ Quản trị có thể đánh dấu đã thu COD và ghi thông tin hãng vận 
 
 ## Trạng thái triển khai AWS
 
-Ứng dụng đang chạy trên một EC2 instance; dữ liệu JSON và ảnh tải lên nằm trên EBS mã hóa. CloudFormation tạo bucket S3 riêng tư, chặn truy cập công khai, mã hóa AES256 và xóa bản sao sau 30 ngày. Systems Manager chạy backup thư mục `/opt/shop/data` mỗi ngày lúc 02:15 UTC; bản backup đầu tiên đã được tạo. Đây là backup phục hồi sự cố, không biến JSON thành cơ sở dữ liệu hỗ trợ nhiều instance.
+Ứng dụng đang chạy trên một EC2 instance; dữ liệu JSON và ảnh tải lên nằm trên EBS mã hóa. CloudFormation tạo bucket S3 riêng tư, chặn truy cập công khai, mã hóa AES256 và xóa bản sao sau 30 ngày. Systems Manager chạy backup thư mục `/opt/shop/data` mỗi ngày lúc 02:15 UTC. Đây là backup phục hồi sự cố, không biến JSON thành cơ sở dữ liệu hỗ trợ nhiều instance.
 
 Để khôi phục: dừng container `shop-online`, tải một file `daily/shop-*.tar.gz` từ bucket backup qua AWS Console, giải nén vào `/opt/shop`, đặt lại quyền thư mục data cho UID 1000 rồi khởi động container. Không giải nén khi ứng dụng đang ghi dữ liệu.
 
-Thanh toán online chưa được tích hợp; hiện chỉ có COD. Adapter GHN đã có trong ứng dụng: khi bật cấu hình, đơn COD được gửi GHN ngay sau checkout; admin có thể thử lại nếu gửi lỗi và nhận trạng thái qua webhook. Tuy nhiên AWS Secrets Manager production hiện chưa có thông tin GHN, vì vậy vận chuyển tự động chưa thể chạy. Email nhận đơn/trạng thái và khôi phục mật khẩu đã có trong ứng dụng nhưng cần cấu hình Resend và địa chỉ gửi đã xác minh. Không thay các dịch vụ này bằng phản hồi thanh toán/vận chuyển giả.
+Thanh toán online chưa được tích hợp; hiện chỉ có COD. GHN_TOKEN, GHN_SHOP_ID, GHN_AUTO_CREATE_ORDERS và GHN_WEBHOOK_SECRET hiện có trong AWS Secrets Manager; cờ tự tạo vận đơn đang bật. Việc có khóa không đảm bảo GHN sẽ nhận mọi địa chỉ hoặc số điện thoại, vì vậy cần xác nhận trên một đơn thật trước khi dựa vào luồng tự động. Đăng ký webhook trong cổng GHN là thao tác thủ công. Email nhận đơn/trạng thái và khôi phục qua email chưa hoạt động vì chưa cấu hình Resend; Authenticator TOTP không cần dịch vụ trả phí. Không thay các dịch vụ này bằng phản hồi thanh toán/vận chuyển giả.
 
 Script triển khai EC2 đọc các khóa tùy chọn từ secret JSON trong AWS Secrets Manager và truyền chúng vào container. Để bật email cần `PUBLIC_URL`, `RESEND_API_KEY` và `MAIL_FROM` đã xác minh. GHN dùng token và Shop ID; người gửi mặc định lấy từ hồ sơ Shop ID. Khối lượng/kích thước được ước tính theo các dòng hàng trong mỗi đơn và có thể khai báo chính xác theo từng sản phẩm trong admin. Đặt `GHN_AUTO_CREATE_ORDERS` thành `true` để gửi đơn COD mới tự động; `GHN_WEBHOOK_SECRET` bật callback trạng thái vận đơn. Cập nhật secret không đổi tiến trình đang chạy cho đến lần deploy tiếp theo. Hiện trạng dịch vụ được hiển thị trong trang admin sau khi đăng nhập; chỉ báo cấu hình không thay cho giao dịch thử trực tiếp với nhà cung cấp.
 
@@ -71,6 +71,14 @@ Bản `release-20261108-182303` thêm chuyển sáng/tối cho tài liệu `/api
 
 ## Trạng thái production ngày 12/11/2026
 
-Phiên bản `growth-20261112-1` đang chạy khỏe qua CloudFront. Tích hợp GHN đã xác thực được thông tin cửa hàng; tự tạo vận đơn cho đơn COD mới và webhook secret đều đã bật trong runtime. Chủ shop cần đăng ký URL `https://dd7z91m61r0gy.cloudfront.net/api/webhooks/ghn` trong cổng GHN, dùng header `X-GHN-Webhook-Token` với giá trị `GHN_WEBHOOK_SECRET` trong Secrets Manager để nhận cập nhật hành trình.
+Phiên bản `real-photos-20261120-2` đang trả health `ok` qua CloudFront. Tự tạo vận đơn COD GHN đã bật trong cấu hình. Chủ shop cần đăng ký URL `https://dd7z91m61r0gy.cloudfront.net/api/webhooks/ghn` trong cổng GHN, dùng header `X-GHN-Webhook-Token` với giá trị `GHN_WEBHOOK_SECRET` trong Secrets Manager để nhận cập nhật hành trình.
 
 Không tạo thêm dịch vụ AWS tính phí theo yêu cầu giữ chi phí. Production vẫn là một EC2, dữ liệu JSON trên volume và ảnh tải lên ở volume đó; backup định kỳ lên S3 vẫn hoạt động. Chưa bật thanh toán online vì cần tài khoản merchant và khóa ký từ nhà cung cấp. Không gửi khóa merchant hoặc dữ liệu ngân hàng trong chat; thêm chúng qua Secrets Manager khi sẵn sàng.
+
+## Mở bán trong giới hạn hiện tại
+
+- Không tạo thêm dịch vụ AWS hoặc tích hợp thanh toán có phí định kỳ. Website chỉ nhận COD; phí GHN của từng kiện hàng vẫn áp dụng theo hợp đồng/tuyến và không thể cam kết miễn phí.
+- Trước khi quảng bá hàng hóa thật, shop phải thay catalog mẫu bằng giá, tồn kho, mô tả và ảnh đúng sản phẩm. Ảnh stock hiện tại chỉ dùng tham khảo, không chứng minh đó là chính xác mặt hàng giao cho khách.
+- Đăng ký webhook GHN nêu trên và xác minh một đơn thật từ cổng quản trị. Thao tác gửi đơn có thể phát sinh cước vận chuyển; không dùng đơn mô phỏng để kết luận GHN đã nhận đơn thật.
+- Email thông báo và khôi phục qua email vẫn tắt đến khi có khóa dịch vụ gửi thư; luồng Authenticator miễn phí vẫn dùng được.
+- Phù hợp chạy thử hoặc cửa hàng nhỏ trên một EC2. Trước khi tăng lưu lượng cần database/ảnh dùng chung và kiểm tra chính sách backup, phục hồi.
