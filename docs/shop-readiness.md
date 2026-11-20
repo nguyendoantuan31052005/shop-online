@@ -71,7 +71,7 @@ Bản `release-20261108-182303` thêm chuyển sáng/tối cho tài liệu `/api
 
 ## Trạng thái production ngày 12/11/2026
 
-Phiên bản `real-photos-20261120-2` đang trả health `ok` qua CloudFront. Tự tạo vận đơn COD GHN đã bật trong cấu hình. Chủ shop cần đăng ký URL `https://dd7z91m61r0gy.cloudfront.net/api/webhooks/ghn` trong cổng GHN, dùng header `X-GHN-Webhook-Token` với giá trị `GHN_WEBHOOK_SECRET` trong Secrets Manager để nhận cập nhật hành trình.
+Phiên bản `real-photos-20261120-2` đang trả health `ok` qua CloudFront. GHN API trả mã thành công cho yêu cầu GET kiểm tra shop; Shop ID cấu hình khớp shop đang hoạt động. Tự tạo vận đơn COD GHN đã bật. Chủ shop vẫn cần tự đăng ký callback trong [GHN Developer Portal](https://developer.ghn.vn/en/docs/webhook/callback-order-status): account menu → Webhook configuration → Order → endpoint `https://dd7z91m61r0gy.cloudfront.net/api/webhooks/ghn` → custom header `X-GHN-Webhook-Token` với giá trị `GHN_WEBHOOK_SECRET` trong Secrets Manager → Create webhook. GHN có thể mất khoảng 15 phút để áp dụng thay đổi.
 
 Không tạo thêm dịch vụ AWS tính phí theo yêu cầu giữ chi phí. Production vẫn là một EC2, dữ liệu JSON trên volume và ảnh tải lên ở volume đó; backup định kỳ lên S3 vẫn hoạt động. Chưa bật thanh toán online vì cần tài khoản merchant và khóa ký từ nhà cung cấp. Không gửi khóa merchant hoặc dữ liệu ngân hàng trong chat; thêm chúng qua Secrets Manager khi sẵn sàng.
 
