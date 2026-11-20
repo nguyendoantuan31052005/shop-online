@@ -4,6 +4,7 @@
   "description": "Đồ án DevOps: Web bán hàng trực tuyến với Git, Docker, CI/CD",
   "main": "src/server.js",
   "scripts": {
+    "docs:api": "node scripts/export-api.js",
     "setup": "node scripts/setup.js",
     "docker:start": "node scripts/docker-start.js",
     "test:browser": "node --experimental-websocket scripts/browser-check.js",

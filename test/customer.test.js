@@ -13,7 +13,7 @@ test('Customer backend isolates carts, validates variants, rolls back failed sav
 });
 const {createApp}=require('../src/app');
 test('HTTP account changes revoke tokens; customer cancellation enforces ownership',async t=>{
- const db=openDb(':memory:');const server=createApp({db,jwtSecret:'x'.repeat(48),adminToken:'private-admin'});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));});
+ const db=openDb(':memory:');const server=createApp({db,jwtSecret:'x'.repeat(48),adminToken:'private-admin'});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{const closed=new Promise(r=>server.close(r));server.closeAllConnections();server.closeIdleConnections();await closed;});
  const base='http://127.0.0.1:'+server.address().port;
  async function req(route,method='GET',body,token){const res=await fetch(base+route,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,body:await res.json()};}
  const a=await req('/api/auth/register','POST',{name:'A',username:'alpha',password:'password123'});const b=await req('/api/auth/register','POST',{name:'B',username:'beta',password:'password123'});

@@ -1,0 +1,274 @@
+/* Admin color modes. Keep this stylesheet after the shared workspace styles. */
+html[data-admin-theme="dark"] {
+  color-scheme: dark;
+  --ink: #b7d7c4;
+  --gold: #d9bd84;
+  --line: #3a423c;
+  --muted: #aab4ac;
+  --workspace-bg: #111312;
+}
+
+html[data-admin-theme="dark"] body.admin-page {
+  background: #111312;
+  color: #e8ece8;
+}
+
+html[data-admin-theme="dark"] .admin-page > header {
+  background: #181b19;
+  color: #f2f4f2;
+  border-color: #75613d;
+}
+
+html[data-admin-theme="dark"] .admin-page header h1,
+html[data-admin-theme="dark"] .admin-page .overview h2,
+html[data-admin-theme="dark"] .admin-page .card h2,
+html[data-admin-theme="dark"] .admin-page .stat strong,
+html[data-admin-theme="dark"] .admin-page td strong,
+html[data-admin-theme="dark"] .admin-page .heading h2 {
+  color: #e7eee9;
+}
+
+html[data-admin-theme="dark"] .admin-page header small,
+html[data-admin-theme="dark"] .admin-page .overview small {
+  color: #d9bd84;
+}
+
+html[data-admin-theme="dark"] .admin-page .overview {
+  background: linear-gradient(120deg, #202823, #24211a);
+  border-color: #41483e;
+}
+
+html[data-admin-theme="dark"] .admin-page .overview p,
+html[data-admin-theme="dark"] .admin-page p,
+html[data-admin-theme="dark"] .admin-page .muted,
+html[data-admin-theme="dark"] .admin-page .admin-context,
+html[data-admin-theme="dark"] .admin-page .admin-pagination,
+html[data-admin-theme="dark"] .admin-page .table-toolbar > span {
+  color: #aeb8b0;
+}
+
+html[data-admin-theme="dark"] .admin-page .workspace-label,
+html[data-admin-theme="dark"] .admin-page .card,
+html[data-admin-theme="dark"] .admin-page .stat,
+html[data-admin-theme="dark"] .admin-page .insights,
+html[data-admin-theme="dark"] .admin-page dialog {
+  background: #1b1e1c;
+  color: #e5eae6;
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page .stat:last-child {
+  background: #28362e;
+  color: #d4e2d8;
+  border-color: #45564a;
+}
+
+html[data-admin-theme="dark"] .admin-page .stat:last-child strong {
+  color: #f0f5f1;
+}
+
+html[data-admin-theme="dark"] .admin-page #dashboard > nav {
+  background: #1b1e1c;
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page #dashboard > nav button,
+html[data-admin-theme="dark"] .admin-page #refresh,
+html[data-admin-theme="dark"] .admin-page header a,
+html[data-admin-theme="dark"] .admin-page header button {
+  background: #242825;
+  color: #d4ddd6;
+  border-color: #414a43;
+}
+
+html[data-admin-theme="dark"] .admin-page #dashboard > nav button:hover,
+html[data-admin-theme="dark"] .admin-page #refresh:hover,
+html[data-admin-theme="dark"] .admin-page header a:hover,
+html[data-admin-theme="dark"] .admin-page header button:hover {
+  background: #303832;
+  color: #ffffff;
+}
+
+html[data-admin-theme="dark"] .admin-page #dashboard > nav button.active,
+html[data-admin-theme="dark"] .admin-page .primary {
+  background: #315b46;
+  color: #ffffff;
+  border-color: #48775e;
+}
+
+html[data-admin-theme="dark"] .admin-page #dashboard > nav button.active:hover,
+html[data-admin-theme="dark"] .admin-page .primary:hover {
+  background: #3b6a52;
+}
+
+html[data-admin-theme="dark"] .admin-page button.danger {
+  background: #3a2523;
+  color: #ffc2b8;
+  border-color: #68413c;
+}
+
+html[data-admin-theme="dark"] .admin-page button.danger:hover {
+  background: #4b2d29;
+}
+
+html[data-admin-theme="dark"] .admin-page label,
+html[data-admin-theme="dark"] .admin-page .admin-quick-actions h3,
+html[data-admin-theme="dark"] .admin-page .insights h3 {
+  color: #c4d1c8;
+}
+
+html[data-admin-theme="dark"] .admin-page input,
+html[data-admin-theme="dark"] .admin-page select,
+html[data-admin-theme="dark"] .admin-page textarea,
+html[data-admin-theme="dark"] .admin-page .panel > label input,
+html[data-admin-theme="dark"] .admin-page .image-editor,
+html[data-admin-theme="dark"] .admin-page .image-preview {
+  background: #141715;
+  color: #edf1ee;
+  border-color: #414a43;
+}
+
+html[data-admin-theme="dark"] .admin-page input::placeholder,
+html[data-admin-theme="dark"] .admin-page textarea::placeholder {
+  color: #8f9a92;
+}
+
+html[data-admin-theme="dark"] .admin-page input:focus,
+html[data-admin-theme="dark"] .admin-page select:focus,
+html[data-admin-theme="dark"] .admin-page textarea:focus {
+  border-color: #8aa994;
+  box-shadow: 0 0 0 3px #8aa9942b;
+}
+
+html[data-admin-theme="dark"] .admin-page .table-wrap {
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page th {
+  background: #242825;
+  color: #c1ccc4;
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page td {
+  color: #dce3de;
+  border-color: #343b36;
+}
+
+html[data-admin-theme="dark"] .admin-page tbody tr:hover {
+  background: #252a26;
+}
+
+html[data-admin-theme="dark"] .admin-page .badge {
+  background: #28372e;
+  color: #c1e1cc;
+  border-color: #415846;
+}
+
+html[data-admin-theme="dark"] .admin-page .badge.account-locked {
+  background: #3b2825;
+  color: #ffc3b8;
+  border-color: #68423c;
+}
+
+html[data-admin-theme="dark"] .admin-page .order,
+html[data-admin-theme="dark"] .admin-page .admin-quick-actions {
+  background: #202522;
+  color: #e3e9e4;
+  border-color: #3d4840;
+}
+
+html[data-admin-theme="dark"] .admin-page .admin-quick-actions button,
+html[data-admin-theme="dark"] .admin-page .admin-pagination button,
+html[data-admin-theme="dark"] .admin-page .category-row button,
+html[data-admin-theme="dark"] .admin-page td button,
+html[data-admin-theme="dark"] .admin-page dialog button {
+  background: #282d29;
+  color: #e1e8e2;
+  border-color: #454d47;
+}
+
+html[data-admin-theme="dark"] .admin-page .admin-quick-actions button:hover,
+html[data-admin-theme="dark"] .admin-page .admin-pagination button:hover,
+html[data-admin-theme="dark"] .admin-page .category-row button:hover,
+html[data-admin-theme="dark"] .admin-page td button:hover,
+html[data-admin-theme="dark"] .admin-page dialog button:hover {
+  background: #343b35;
+}
+
+html[data-admin-theme="dark"] .admin-page .trend-track {
+  background: #303732;
+}
+
+html[data-admin-theme="dark"] .admin-page .insight-row,
+html[data-admin-theme="dark"] .admin-page .admin-context,
+html[data-admin-theme="dark"] .admin-page .admin-quick-actions {
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page .empty,
+html[data-admin-theme="dark"] .admin-page #message {
+  color: #b5c6b9;
+}
+
+html[data-admin-theme="dark"] .admin-page .form-error,
+html[data-admin-theme="dark"] .admin-page #message.error {
+  color: #ffaaa0;
+}
+
+html[data-admin-theme="dark"] .admin-page dialog::backdrop {
+  background: #000000b8;
+}
+
+.admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.admin-theme-toggle > span:first-child {
+  font-size: 17px;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .admin-theme-toggle { padding: 8px 10px; }
+  .admin-theme-toggle > span:last-child { display: none; }
+}
+
+html[data-admin-theme="dark"] .admin-page .integration-status,
+html[data-admin-theme="dark"] .admin-page .integration-item {
+  background: #1b1e1c;
+  border-color: #3b423d;
+}
+
+html[data-admin-theme="dark"] .admin-page .parcel-estimate {
+  background: #242825;
+  color: #d5e7d8;
+}
+
+html[data-admin-theme="dark"] .admin-page .integration-item strong,
+html[data-admin-theme="dark"] .admin-page .integration-heading h2 {
+  color: #e7eee9;
+}
+
+html[data-admin-theme="dark"] .admin-page .integration-heading p,
+html[data-admin-theme="dark"] .admin-page .integration-note,
+html[data-admin-theme="dark"] .admin-page .integration-item p {
+  color: #aeb8b0;
+}
+
+html[data-admin-theme="dark"] .admin-page .integration-pill.ready {
+  color: #b4dfbf;
+  background: #20372a;
+  border-color: #3b6247;
+}
+
+html[data-admin-theme="dark"] .admin-page .integration-pill.missing {
+  color: #ead09f;
+  background: #382f20;
+  border-color: #625234;
+}

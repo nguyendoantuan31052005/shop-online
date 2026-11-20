@@ -1,11 +1,36 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TLuxyry | Shop thời trang</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Khám phá đồ dùng nhà bếp, phòng khách, trang trí và lưu trữ. Chọn sản phẩm, áp dụng ưu đãi, đặt hàng COD và theo dõi đơn tại Home Shopping." />
+    <meta name="theme-color" content="#f6f3ed" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Home Shopping" />
+    <meta property="og:title" content="Home Shopping | Đồ dùng đẹp cho tổ ấm" />
+    <meta property="og:description" content="Khám phá đồ dùng nhà bếp, phòng khách, trang trí và lưu trữ. Đặt hàng COD và theo dõi đơn trực tuyến." />
+    <meta property="og:url" content="https://dd7z91m61r0gy.cloudfront.net/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://dd7z91m61r0gy.cloudfront.net/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Home Shopping | Đồ dùng đẹp cho tổ ấm</title>
     <link rel="stylesheet" href="/css/storefront-base.css">
-    <link rel="stylesheet" href="/storefront.css">
+    <link rel="stylesheet" href="/storefront.css?v=totp-free-20261120-1">
+    <link rel="stylesheet" href="/experience.css"><link rel="stylesheet" href="/home-shopping.css"><link rel="stylesheet" href="/home-balance.css?v=2"><link rel="stylesheet" href="/shopper.css?v=address-book-20261112-2"><link rel="stylesheet" href="/effects.css"><link rel="stylesheet" href="/logo-3d.css"><link rel="stylesheet" href="/support-compact.css"><link rel="stylesheet" href="/luxury.css?v=1"><link rel="stylesheet" href="/catalog-compact.css?v=1"><link rel="stylesheet" href="/atelier.css?v=1">
+    <link rel="stylesheet" href="/marketplace.css?v=1">
+    <link rel="stylesheet" href="/finish.css?v=1">
+    <link rel="stylesheet" href="/form-layering.css?v=1">
+    <link rel="stylesheet" href="/vietnamese-type.css?v=1">
+    <link rel="stylesheet" href="/storefront-polish.css">
+    <link rel="stylesheet" href="/mobile-storefront.css?v=mobile-20261108-1">
+    <script src="/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/mobile-balance.css?v=detail-balanced-20261112-1">
+    <link id="darkThemeStylesheet" rel="stylesheet" href="/dark-theme.css?v=totp-free-20261120-1" disabled>
+    <link rel="stylesheet" href="/cart-refinement.css?v=cart-images-mobile-20261112-1">
+    <link rel="stylesheet" href="/seasonal-experience.css?v=original-palette-20261112-1">
+    <link rel="stylesheet" href="/global-luxe.css?v=all-store-headings-20261112-1">
+    <link rel="stylesheet" href="/site-balance.css?v=whole-workspace-20261112-1">
   </head>
   <body>
     <div class="announcement-bar">Thanh toán khi nhận hàng · Phí giao hàng 30.000đ · Áp dụng voucher tại thanh toán</div>
@@ -13,15 +38,13 @@
     <header class="header-main">
       <div class="container header-inner">
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Mở menu">☰</button>
-        <div class="logo" aria-label="TLuxyry">
-          <span class="brand-main">T</span>
-          <span class="brand-sub">luxyry</span>
-        </div>
+        <div class="logo" aria-label="Home Shopping">
+          <span class="home-mark" aria-hidden="true"><span class="shop-emblem"><span class="emblem-face emblem-front"><svg viewBox="0 0 40 40" fill="none"><path d="m7 18 13-11 13 11v14H7z"/><path d="M15 32V22h10v10M15 17h10"/></svg></span><span class="emblem-face emblem-back"><svg viewBox="0 0 40 40" fill="none"><path d="m7 18 13-11 13 11v14H7z"/><path d="M15 32V22h10v10M15 17h10"/></svg></span><span class="emblem-face emblem-right"></span><span class="emblem-face emblem-left"></span><span class="emblem-face emblem-top"></span><span class="emblem-face emblem-bottom"></span></span></span><span class="home-brand">Home Shopping<small>EVERYTHING FOR YOUR HOME</small></span></div>
         <nav class="nav" aria-label="Danh mục chính">
-          <button type="button" class="nav-item active" data-nav="Nam">Nam</button>
-          <button type="button" class="nav-item" data-nav="Nữ">Nữ</button>
-          <button type="button" class="nav-item" data-nav="Trẻ em">Trẻ em</button>
-          <button type="button" class="nav-item" data-nav="Thời trang mới">Thời trang mới</button>
+          <button type="button" class="nav-item active" data-nav="Trang chủ">Trang chủ</button>
+          <button type="button" class="nav-item" data-nav="Nhà bếp">Nhà bếp</button>
+          <button type="button" class="nav-item" data-nav="Phòng khách">Phòng khách</button>
+          <button type="button" class="nav-item" data-nav="Trang trí">Trang trí</button>
           <button type="button" class="nav-item" data-nav="Khuyến mãi">Khuyến mãi</button>
         </nav>
         <div class="search-wrap">
@@ -32,6 +55,7 @@
           <div id="userPanel" class="user-panel hidden"></div>
           <button class="auth-button" id="openLoginBtn">Đăng nhập</button>
           <button class="auth-button" id="openRegisterBtn">Đăng ký</button>
+          <button class="theme-toggle-button" id="themeToggleBtn" type="button" aria-label="Bật giao diện tối" aria-pressed="false" title="Bật giao diện tối"><span aria-hidden="true">☾</span></button>
           <button type="button" class="cart-pill" aria-label="Giỏ hàng" aria-controls="cartDrawer" aria-expanded="false">🛒 <span>0</span></button>
         </div>
       </div>
@@ -43,10 +67,10 @@
         <button class="close-btn" id="closeMobileMenuBtn" aria-label="Đóng menu">×</button>
       </div>
       <nav aria-label="Menu di động">
-        <button type="button" class="panel-link active" data-nav="Nam">Nam</button>
-        <button type="button" class="panel-link" data-nav="Nữ">Nữ</button>
-        <button type="button" class="panel-link" data-nav="Trẻ em">Trẻ em</button>
-        <button type="button" class="panel-link" data-nav="Thời trang mới">Thời trang mới</button>
+        <button type="button" class="panel-link active" data-nav="Trang chủ">Trang chủ</button>
+        <button type="button" class="panel-link" data-nav="Nhà bếp">Nhà bếp</button>
+        <button type="button" class="panel-link" data-nav="Phòng khách">Phòng khách</button>
+        <button type="button" class="panel-link" data-nav="Trang trí">Trang trí</button>
         <button type="button" class="panel-link" data-nav="Khuyến mãi">Khuyến mãi</button>
       </nav>
     </aside>
@@ -54,33 +78,42 @@
     <main class="main-shell">
       <section class="hero">
         <div class="hero-main">
+          <img class="hero-editorial-image" src="/images/products/lamp.jpg" alt="Gợi ý không gian sống với đèn bàn và bình hoa" fetchpriority="high" width="1000" height="667">
           <div class="hero-copy">
-            <div class="mini-label">Collection 2026</div>
-            <h1>Everyday basics, refined.</h1>
-            <p>Trang phục tối giản, chất liệu tốt và phong cách sống hiện đại cho mọi ngày.</p>
+            <div class="mini-label">KHÔNG GIAN SỐNG · HOME SHOPPING</div>
+            <h1>Nhà là nơi<br><em>bạn muốn về.</em></h1>
+            <p>Từ căn bếp nhỏ đến góc phòng yêu thích. Tìm những món đồ giúp cuộc sống mỗi ngày tiện nghi và dễ chịu hơn.</p>
             <div class="cta-row">
               <button class="primary-btn" id="heroShopBtn">Mua ngay</button>
               <button class="secondary-btn" id="heroExploreBtn">Khám phá</button>
             </div>
           </div>
+          <div class="hero-slider-controls" aria-label="Chọn banner"><button type="button" id="heroPrevious" aria-label="Banner trước">‹</button><div id="heroDots"></div><button type="button" id="heroNext" aria-label="Banner tiếp theo">›</button></div><span class="hero-caption" id="heroCaption">Cảm hứng cho tổ ấm · Ảnh minh họa</span>
         </div>
 
         <div class="hero-stack">
           <div class="small-banner">
             <div class="small-banner-content">
-              <h3>Autumn Edit</h3>
-              <span>Áo khoác và đồ mặc ngoài</span>
+              <span class="collection-index">01 / CĂN BẾP</span>
+              <h3>Gọn bếp, vui nhà</h3>
+              <span>Đồ dùng nhà bếp & lưu trữ</span>
+              <span class="collection-link">Khám phá không gian ↗</span>
             </div>
           </div>
           <div class="small-banner">
             <div class="small-banner-content">
-              <h3>Essential Layer</h3>
-              <span>Trang phục cơ bản cho mọi ngày</span>
+              <span class="collection-index">02 / GÓC SỐNG</span>
+              <h3>Góc nhỏ, niềm vui lớn</h3>
+              <span>Trang trí & đồ dùng phòng khách</span>
+              <span class="collection-link">Khám phá không gian ↗</span>
             </div>
           </div>
         </div>
       </section>
 
+      <section class="home-category-section" aria-labelledby="homeCategoryTitle"><div class="section-head"><div><span class="service-eyebrow">MUA SẮM THEO KHÔNG GIAN</span><h2 id="homeCategoryTitle">Ngôi nhà của bạn, lựa chọn của bạn</h2></div></div><div id="homeCategories" class="home-categories"></div></section>
+      <section class="section home-merch-section"><div class="section-head"><div><span class="service-eyebrow">ĐỒ DÙNG ĐƯỢC CHỌN LỌC</span><h2 class="section-title">Sản phẩm cho tổ ấm</h2></div></div><div id="bestSellerProducts" class="product-grid"></div></section>
+      <section class="section home-merch-section"><div class="section-head"><div><span class="service-eyebrow">VỪA LÊN KỆ</span><h2 class="section-title">Sản phẩm mới</h2></div></div><div id="newProducts" class="product-grid"></div></section>
       <section class="feature-strip">
         <div class="feature-pill"><span class="icon">🚚</span> Phí giao hàng 30.000đ</div>
         <div class="feature-pill"><span class="icon">📦</span> Tra cứu đơn trực tuyến</div>
@@ -88,9 +121,10 @@
         <div class="feature-pill"><span class="icon">♡</span> Lưu sản phẩm yêu thích</div>
       </section>
 
+      <div class="catalog-layout">
       <section class="section catalog-controls" id="catalogControls" aria-label="Danh mục và bộ lọc sản phẩm">
         <div class="catalog-heading">
-          <h2 class="section-title">Khám phá sản phẩm</h2>
+          <h2 class="section-title">Chọn theo ý bạn</h2>
           <label class="sort-box" for="sortSelect">Sắp xếp
             <select id="sortSelect">
               <option value="featured">Nổi bật</option>
@@ -106,16 +140,26 @@
           <div class="filter-row"><span class="filter-label">Kích cỡ</span><div class="size-pills" id="sizePills" role="group" aria-label="Lọc theo kích cỡ"></div></div>
           <div class="filter-row"><span class="filter-label">Màu sắc</span><div class="color-pills" id="colorPills" role="group" aria-label="Lọc theo màu sắc"></div></div>
         </details>
-        <div class="filter-footer"><span id="shoppingFilterStatus" role="status"></span><button type="button" class="small-btn soft" id="clearShoppingFilters" disabled>Xóa bộ lọc</button></div>
+        <label class="brand-filter" for="brandFilter">Thương hiệu<select id="brandFilter"><option value="">Tất cả thương hiệu</option></select></label>
+        <div class="home-price-filters"><label>Giá từ (nghìn đ)<input id="minPrice" type="number" min="0" step="1" placeholder="0" title="Nhập 100 để lọc từ 100.000đ"></label><label>Đến (nghìn đ)<input id="maxPrice" type="number" min="0" step="1" placeholder="Không giới hạn" title="Nhập 200 để lọc đến 200.000đ"></label><label class="stock-only"><input id="inStockOnly" type="checkbox"> Chỉ còn hàng</label></div><div class="filter-footer"><span id="shoppingFilterStatus" role="status"></span><button type="button" class="small-btn soft" id="clearShoppingFilters" disabled>Xóa bộ lọc</button></div>
       </section>
-      <section class="section">
+      <section class="section" id="recentSection" hidden>
+        <div class="section-head"><div><span class="service-eyebrow">TIẾP TỤC KHÁM PHÁ</span><h2 class="section-title">Bạn vừa xem</h2></div><button type="button" class="small-btn" id="clearRecent">Xóa lịch sử xem</button></div>
+        <div id="recentProducts" class="recent-grid"></div>
+      </section>
+      <section class="section catalog-results">
         <div class="section-head">
-          <div class="section-title" id="searchResultTitle" aria-live="polite">Gợi ý cho bạn</div>
+          <div><span class="service-eyebrow">NHỮNG LỰA CHỌN CHO MỖI NGÀY</span><h2 class="section-title" id="searchResultTitle" aria-live="polite">Gợi ý cho bạn</h2></div>
+        </div>
+        <div class="market-toolbar" aria-label="Chọn nhanh sản phẩm">
+          <div class="market-sort" role="group" aria-label="Sắp xếp nhanh"><span>Sắp xếp theo</span><button type="button" data-market-sort="featured" aria-pressed="true">Nổi bật</button><button type="button" data-market-sort="newest" aria-pressed="false">Mới nhất</button><button type="button" data-market-sort="price_asc" aria-pressed="false">Giá tăng ↑</button><button type="button" data-market-sort="price_desc" aria-pressed="false">Giá giảm ↓</button></div>
+          <div class="market-budget" role="group" aria-label="Khoảng giá nhanh"><span>Ngân sách</span><button type="button" data-budget="0:100000" aria-pressed="false">Đến 100.000đ</button><button type="button" data-budget="100000:300000" aria-pressed="false">100.000–300.000đ</button><button type="button" data-budget="300000:" aria-pressed="false">Từ 300.000đ</button></div>
         </div>
         <div id="searchSuggestions" hidden></div>
         <div class="product-grid" id="recommendedProducts" style="margin-top:18px;"></div>
         <nav id="productPagination" class="product-pagination" aria-label="Phân trang sản phẩm"></nav>
       </section>
+      </div>
 
 
 
@@ -128,15 +172,15 @@
 
       <section class="section">
         <div class="section-head">
-          <div class="section-title">Tài khoản & đơn hàng</div>
+          <div><span class="service-eyebrow">DÀNH RIÊNG CHO BẠN</span><h2 class="section-title">Tài khoản & đơn hàng</h2><p class="service-description">Quản lý thông tin, đơn mua và những món đồ bạn yêu thích.</p></div>
         </div>
         <div class="account-grid">
           <div class="account-card">
-            <h4>Hồ sơ khách hàng</h4>
+            <h4><span class="service-icon" aria-hidden="true">◎</span> Hồ sơ khách hàng</h4>
             <div id="accountSummary" class="mini-list"></div>
           </div>
           <div class="account-card">
-            <h4>Wishlist</h4>
+            <h4><span class="service-icon" aria-hidden="true">♡</span> Sản phẩm yêu thích</h4>
             <div id="wishlistList" class="mini-list"></div>
           </div>
         </div>
@@ -144,36 +188,33 @@
 
       <section class="section">
         <div class="section-head">
-          <div class="section-title">Lịch sử đơn hàng</div>
+          <div><span class="service-eyebrow">THEO DÕI ĐƠN MUA</span><h2 class="section-title">Lịch sử đơn hàng</h2><p class="service-description">Tra cứu đơn hàng bằng mã đơn và số điện thoại đã đặt.</p></div>
         </div>
-        <form id="lookupForm" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px"><input name="orderId" type="number" min="1" required placeholder="Mã đơn hàng" aria-label="Mã đơn hàng"><input name="phone" required placeholder="Số điện thoại đặt hàng" aria-label="Số điện thoại"><button type="submit">Tra cứu đơn</button></form><div id="lookupResult" role="status"></div><div id="orderHistoryList" class="mini-list"></div>
+        <form id="lookupForm" class="order-lookup"><label>Mã đơn hàng<input name="orderId" type="number" min="1" required placeholder="Ví dụ: 1024"></label><label>Số điện thoại<input name="phone" type="tel" autocomplete="tel" required placeholder="Số điện thoại đặt hàng"></label><button type="submit">Tra cứu đơn <span aria-hidden="true">→</span></button></form><div id="lookupResult" role="status" aria-live="polite"></div><div id="orderHistoryList" class="mini-list"></div>
       </section>
 
-      <section class="section">
-        <div class="section-head">
-          <div class="section-title">Hỗ trợ khách hàng</div>
-        </div>
-        <div class="account-grid">
-          <div class="account-card">
-            <h4>Liên hệ nhanh</h4>
-            <div class="mini-list">
-              <div class="mini-item"><span>Đơn hàng của bạn</span><a href="#lookupForm">Tra cứu bằng mã đơn và số điện thoại</a></div>
-              <div class="mini-item"><span>Tài khoản khách</span><button type="button" class="small-btn" onclick="toggleAuth('login')">Đăng nhập xem lịch sử</button></div>
-              <div class="mini-item"><span>Dành cho chủ cửa hàng</span><a href="/admin">Đăng nhập quản trị</a></div>
-            </div>
-          </div>
-          <div class="account-card">
-            <h4>Câu hỏi thường gặp</h4>
-            <div class="mini-list">
-              <div class="mini-item"><span>Thanh toán</span><strong>Tiền mặt khi nhận hàng (COD)</strong></div>
-              <div class="mini-item"><span>Voucher</span><strong>Nhập mã tại bước thanh toán</strong></div>
-              <div class="mini-item"><span>Vận chuyển</span><strong>30.000đ/đơn trước ưu đãi</strong></div>
-            </div>
-          </div>
-        </div>
+      <section class="section support-compact" aria-labelledby="supportHeading">
+        <div class="support-heading"><div><span class="service-eyebrow">AN TÂM MUA SẮM</span><h2 id="supportHeading" class="section-title">Cần hỗ trợ? Có chúng mình.</h2></div><nav class="support-shortcuts" aria-label="Hỗ trợ nhanh"><a href="#lookupForm">Tra cứu đơn ↗</a><a href="#accountSummary">Tài khoản của tôi ↗</a><a href="/admin">Quản trị ↗</a></nav></div>
+        <div id="shopContact" class="shop-contact" aria-live="polite"></div>
+        <div class="support-faq" aria-label="Câu hỏi thường gặp"><details><summary>Thanh toán COD <span aria-hidden="true">＋</span></summary><p>Thanh toán tiền mặt khi nhận hàng. Hiện shop hỗ trợ phương thức COD.</p></details><details><summary>Dùng voucher thế nào? <span aria-hidden="true">＋</span></summary><p>Nhập mã tại bước thanh toán, chọn Áp dụng để xem mức giảm và tổng tiền trước khi đặt hàng.</p></details><details><summary>Phí vận chuyển <span aria-hidden="true">＋</span></summary><p>Phí cơ bản 30.000đ/đơn trước ưu đãi. Phí thực tế sau voucher được hiển thị trong tổng thanh toán.</p></details></div>
       </section>
 
-    </main>
+    </main><nav class="home-bottom-nav" aria-label="Điều hướng mua sắm"><button type="button" data-home-action="home"><span aria-hidden="true">⌂</span>Trang chủ</button><button type="button" data-home-action="catalog"><span aria-hidden="true">▦</span>Danh mục</button><button type="button" data-home-action="deals"><span aria-hidden="true">◇</span>Ưu đãi</button><button type="button" data-home-action="cart"><span aria-hidden="true">▱</span>Giỏ hàng</button><button type="button" data-home-action="account"><span aria-hidden="true">◎</span>Tài khoản</button></nav>
+    <footer class="store-footer">
+      <div><span class="footer-brand">Home Shopping.</span><p>Mọi điều bạn cần cho một ngôi nhà đáng sống.</p><span class="footer-caption">HOME IS WHERE LIFE HAPPENS</span></div>
+      <div><h3>Khám phá</h3><a href="#catalogControls">Bộ sưu tập</a><a href="#wishlistList">Sản phẩm yêu thích</a><a href="#recentSection">Sản phẩm vừa xem</a></div>
+      <div><h3>Đồng hành cùng bạn</h3><a href="#accountSummary">Tài khoản của tôi</a><a href="#lookupForm">Tra cứu đơn hàng</a><span>Thanh toán khi nhận hàng · COD</span><span>Giao hàng 30.000đ/đơn trước ưu đãi</span></div>
+      <div class="footer-bottom">Home Shopping · Chọn điều phù hợp với bạn.</div>
+    </footer>
+    <dialog id="accountDialog" class="experience-dialog" aria-labelledby="accountDialogTitle">
+      <div class="experience-heading"><div><span class="service-eyebrow">TÀI KHOẢN CỦA BẠN</span><h2 id="accountDialogTitle">Thông tin cá nhân</h2></div><button type="button" data-close-experience aria-label="Đóng hồ sơ">×</button></div>
+      <form id="profileForm" class="experience-form"><label>Họ tên<input name="name" required maxlength="200" autocomplete="name"></label><label>Email<input name="email" type="email" maxlength="254" autocomplete="email"></label><label>Số điện thoại<input name="phone" type="tel" pattern="0[0-9]{9,10}" autocomplete="tel"></label><label>Địa chỉ giao hàng<input name="address" maxlength="1000" autocomplete="street-address"></label><button type="submit">Lưu thông tin</button></form>
+      <details class="password-settings"><summary>Đổi mật khẩu</summary><p>Bạn sẽ cần đăng nhập lại sau khi đổi mật khẩu.</p><form id="passwordForm" class="experience-form"><label>Mật khẩu hiện tại<input name="currentPassword" type="password" required autocomplete="current-password"></label><label>Mật khẩu mới<input name="newPassword" type="password" required minlength="8" maxlength="256" autocomplete="new-password"></label><label>Nhập lại mật khẩu mới<input name="confirmPassword" type="password" required minlength="8" maxlength="256" autocomplete="new-password"></label><button type="submit">Cập nhật mật khẩu</button></form></details>
+      <section id="totpSettings" class="totp-settings"><div><h3>Khôi phục miễn phí bằng Authenticator</h3><p>Dùng mã offline trên Google Authenticator, Microsoft Authenticator hoặc ứng dụng TOTP tương thích. Không gửi SMS.</p></div><p id="totpStatus" role="status" aria-live="polite">Đang tải trạng thái…</p><button id="totpSetupButton" type="button">Thiết lập Authenticator</button><div id="totpEnrollment" hidden><p>Trong ứng dụng Authenticator, chọn thêm tài khoản bằng khóa thiết lập và nhập khóa sau:</p><code id="totpSecret"></code><button id="copyTotpSecret" type="button">Sao chép khóa</button><p>Nhập mã 6 số đang hiện trong ứng dụng để xác nhận bật:</p><form id="totpEnableForm" class="experience-form"><label>Mã Authenticator<input name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label><button type="submit">Xác nhận bật</button></form></div><form id="totpDisableForm" class="experience-form" hidden><label>Mã Authenticator để tắt<input name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label><button type="submit">Tắt Authenticator</button></form></section>
+      <p id="accountFeedback" role="status" aria-live="polite"></p>
+    </dialog>
+    <dialog id="compareDialog" class="experience-dialog compare-dialog" aria-labelledby="compareTitle"><div class="experience-heading"><div><span class="service-eyebrow">CHỌN ĐIỀU PHÙ HỢP</span><h2 id="compareTitle">So sánh sản phẩm</h2></div><button type="button" data-close-experience aria-label="Đóng so sánh">×</button></div><div id="compareContent"></div></dialog>
+    <div id="compareBar" class="compare-bar" hidden><span id="compareCount" aria-live="polite"></span><button type="button" id="openCompare">Xem so sánh</button><button type="button" id="clearCompare">Xóa chọn</button></div>
 
     <div class="modal" id="authModal">
       <div class="modal-box">
@@ -185,25 +226,52 @@
         <div id="authStatus" class="status-box" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <form id="registerForm" class="auth-form hidden">
-          <label>Họ tên</label>
-          <input name="name" placeholder="Nguyễn Văn A" required />
-          <label>Tên đăng nhập</label>
-          <input name="username" placeholder="username123" required />
-          <label>Email</label>
-          <input name="email" type="email" placeholder="abc@gmail.com" />
-          <label>Mật khẩu</label>
-          <input name="password" type="password" placeholder="Ít nhất 6 ký tự" required />
+          <label for="registerName">Họ tên</label>
+          <input id="registerName" name="name" type="text" autocomplete="name" maxlength="200" placeholder="Nguyễn Văn A" required />
+          <label for="registerUsername">Tên đăng nhập</label>
+          <input id="registerUsername" name="username" type="text" autocomplete="username" maxlength="80" placeholder="username123" required />
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" name="email" type="email" autocomplete="email" maxlength="254" placeholder="abc@gmail.com" />
+          <label for="registerPhone">Số điện thoại nhận OTP khôi phục</label>
+          <input id="registerPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" pattern="(?:0[35789][0-9]{8}|\+84[35789][0-9]{8})" maxlength="13" placeholder="0901234567" required />
+          <label for="registerPassword">Mật khẩu</label>
+          <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" maxlength="256" placeholder="Ít nhất 6 ký tự" required />
           <button type="submit">Đăng ký</button>
           <div class="switch-link">Đã có tài khoản? <button type="button" data-switch="login">Đăng nhập</button></div>
         </form>
 
         <form id="loginForm" class="auth-form">
-          <label>Tên đăng nhập</label>
-          <input name="username" placeholder="username123" required />
-          <label>Mật khẩu</label>
-          <input name="password" type="password" placeholder="Mật khẩu" autocomplete="current-password" aria-describedby="authStatus" required />
+          <label for="loginUsername">Tên đăng nhập</label>
+          <input id="loginUsername" name="username" type="text" autocomplete="username" maxlength="254" placeholder="username123 hoặc email" required />
+          <label for="loginPassword">Mật khẩu</label>
+          <input id="loginPassword" name="password" type="password" maxlength="256" placeholder="Mật khẩu" autocomplete="current-password" aria-describedby="authStatus" required />
           <button type="submit">Đăng nhập</button>
+          <div class="switch-link"><button type="button" data-switch="forgot">Quên mật khẩu?</button></div>
           <div class="switch-link">Chưa có tài khoản? <button type="button" data-switch="register">Đăng ký</button></div>
+        </form>
+        <div id="recoveryMethods" class="recovery-methods" hidden><button type="button" id="recoveryEmailTab" aria-pressed="true">Email</button><button type="button" id="recoveryTotpTab" aria-pressed="false">Authenticator</button></div>
+        <p id="recoveryUnavailable" class="recovery-help hidden">Khôi phục email chưa được cấu hình. Hãy dùng Authenticator nếu bạn đã bật trong hồ sơ.</p>
+        <form id="forgotPasswordForm" class="auth-form hidden">
+          <p id="recoveryMethodHelp">Nhập email đã lưu trong hồ sơ. Liên kết đặt lại mật khẩu có hiệu lực 15 phút.</p>
+          <label for="recoveryEmail">Email tài khoản</label><input id="recoveryEmail" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="ban@example.com">
+          <button type="submit">Gửi liên kết khôi phục</button>
+          <div class="switch-link"><button type="button" data-switch="login">← Quay lại đăng nhập</button></div>
+        </form>
+        <form id="forgotAuthenticatorForm" class="auth-form hidden">
+          <p>Mở ứng dụng Authenticator trên điện thoại. Mã thay đổi sau mỗi 30 giây; tài khoản phải bật tính năng này từ trước.</p>
+          <label for="recoveryTotpPhone">Số điện thoại tài khoản</label><input id="recoveryTotpPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" pattern="(?:0[35789][0-9]{8}|\+84[35789][0-9]{8})" maxlength="13" required placeholder="0901234567">
+          <label for="recoveryTotpCode">Mã Authenticator 6 số</label><input id="recoveryTotpCode" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="123456">
+          <label for="recoveryTotpPassword">Mật khẩu mới</label><input id="recoveryTotpPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" required>
+          <label for="recoveryTotpConfirm">Nhập lại mật khẩu</label><input id="recoveryTotpConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" required>
+          <button type="submit">Đổi mật khẩu</button>
+          <div class="switch-link"><button type="button" data-switch="login">← Quay lại đăng nhập</button></div>
+        </form>
+        <form id="resetPasswordForm" class="auth-form hidden">
+          <p>Đặt mật khẩu mới. Các phiên đăng nhập cũ sẽ được đăng xuất.</p>
+          <label for="recoveryPassword">Mật khẩu mới</label><input id="recoveryPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" required>
+          <label for="recoveryConfirm">Nhập lại mật khẩu</label><input id="recoveryConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" required>
+          <button type="submit">Lưu mật khẩu mới</button>
+          <div class="switch-link"><button type="button" data-switch="forgot">Yêu cầu liên kết mới</button></div>
         </form>
       </div>
     </div>
@@ -223,7 +291,7 @@
     <div class="modal checkout-modal" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
       <div class="modal-box checkout-box">
         <div class="modal-head">
-          <div><span class="checkout-eyebrow">TLUXYRY · ĐẶT HÀNG</span><h2 id="checkoutTitle">Hoàn tất đơn hàng</h2></div>
+          <div><span class="checkout-eyebrow">Home Shopping · ĐẶT HÀNG</span><h2 id="checkoutTitle">Hoàn tất đơn hàng</h2></div>
           <button class="close-btn" id="closeCheckoutBtn" aria-label="Đóng thanh toán">×</button>
         </div>
         <form id="checkoutForm">
@@ -238,7 +306,7 @@
             </div>
             <div class="field">
               <label for="checkoutPhone">Số điện thoại</label>
-              <input id="checkoutPhone" name="phone" type="tel" autocomplete="tel" placeholder="0901234567" required />
+              <input id="checkoutPhone" name="phone" type="tel" autocomplete="tel" placeholder="0901234567 hoặc +84 901 234 567" required />
             </div>
             <div class="field">
               <label for="checkoutEmail">Email (không bắt buộc)</label>
@@ -256,7 +324,7 @@
             </div>
             <div class="field">
               <label for="checkoutCity">Tỉnh/Thành phố</label>
-              <input name="city" id="checkoutCity" autocomplete="address-level1" required placeholder="Tỉnh / thành phố" />
+              <div class="address-inline-search"><input name="city" id="checkoutCity" autocomplete="off" aria-autocomplete="list" aria-controls="checkoutCityResults" required placeholder="Tỉnh / thành phố" /><small id="checkoutCityStatus" role="status"></small><div id="checkoutCityResults" class="address-search-results" hidden></div></div>
             </div>
             <div class="field">
               <label for="checkoutDistrict">Quận/Huyện (nếu có)</label>
@@ -264,7 +332,7 @@
             </div>
             <div class="field full">
               <label for="checkoutWard">Phường/Xã</label>
-              <input name="ward" id="checkoutWard" autocomplete="address-level2" required placeholder="Phường / xã" />
+              <div class="address-inline-search"><input name="ward" id="checkoutWard" autocomplete="off" aria-autocomplete="list" aria-controls="checkoutWardResults" required placeholder="Phường / xã" /><small id="checkoutWardStatus" role="status"></small><div id="checkoutWardResults" class="address-search-results" hidden></div></div>
             </div>
             <div class="field full">
               <label for="checkoutAddress">Số nhà, tên đường</label>
@@ -294,28 +362,52 @@
     </div>
 
     <div class="modal" id="productDetailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
-      <div class="modal-box" style="width:min(860px,100%);">
+      <div class="modal-box product-detail-box">
         <div class="modal-head">
           <h2 id="detailTitle">Chi tiết sản phẩm</h2>
           <button type="button" class="close-btn" id="closeDetailModalBtn" aria-label="Đóng chi tiết sản phẩm">×</button>
         </div>
         <div id="productDetailContent" class="detail-layout"></div>
+        <div id="productDetailStickyActions" class="detail-sticky-actions"></div>
       </div>
     </div>
 
-    <script src="/search.js"></script>
-    <script src="/js/state.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/api.js"></script>
-    <script src="/js/auth.js"></script>
-    <script src="/js/catalog.js"></script>
-    <script src="/js/wishlist.js"></script>
-    <script src="/js/orders.js"></script>
-    <script src="/js/product-detail.js"></script>
-    <script src="/js/cart.js"></script>
-    <script src="/js/address-search.js"></script>
-    <script src="/js/checkout.js"></script>
-    <script src="/js/events.js"></script>
-    <script src="/js/main.js"></script>
-  </body>
+    <script defer src="/search.js"></script>
+    <script defer src="/js/state.js"></script>
+    <script defer src="/js/ui.js"></script>
+    <script defer src="/js/api.js"></script>
+    <script defer src="/js/auth.js"></script>
+    <script defer src="/js/catalog.js?v=mobile-search-scroll-20261112-1"></script>
+    <script defer src="/js/wishlist.js"></script>
+    <script defer src="/js/orders.js"></script>
+    <script defer src="/js/product-detail.js?v=detail-sticky-20261112-3"></script>
+    <script defer src="/js/cart.js?v=quality-audit-20261112-1"></script>
+    <script defer src="/js/address-search.js?v=address-book-20261112-2"></script>
+    <script defer src="/js/checkout.js?v=phone-validation-1"></script>
+    <script defer src="/js/events.js"></script>
+    <script defer src="/js/experience.js"></script>
+    <script defer src="/js/totp.js?v=totp-free-20261120-1"></script>
+    <script defer src="/js/contact.js"></script>
+    <script defer src="/js/home-shopping.js"></script><script defer src="/js/shopper.js?v=address-book-20261112-3"></script><script defer src="/js/profile.js"></script><script defer src="/js/account-hub.js"></script><script defer src="/js/main.js"></script>
+    <script defer src="/js/password-reset.js?v=totp-free-20261120-1"></script>
+    <script defer src="/js/marketplace.js"></script>
+    <script defer src="/js/effects.js"></script>
+    <script defer src="/js/seasonal-experience.js?v=original-palette-20261112-1"></script>
+    <script defer src="/js/contact-float-ux.js"></script>
+    <script defer src="/js/theme-toggle.js"></script>
+</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+\n

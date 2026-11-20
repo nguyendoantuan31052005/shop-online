@@ -22,7 +22,7 @@ before(async () => {
   shoppingToken = (await signup.json()).token;
 });
 
-after(() => { server.close(); db.close(); });
+after(async () => { const closed = new Promise(resolve => server.close(resolve)); server.closeAllConnections(); server.closeIdleConnections(); await closed; db.close(); });
 
 test('GET /health', async () => {
   const res = await fetch(`${base}/health`);
@@ -160,6 +160,10 @@ test('Tra cứu đơn cần đúng số điện thoại', async () => {
 });
 
 test('API quản trị: cần token, xem và đổi trạng thái đơn', async () => {
+  if (db.data.orders.length === 0) {
+    const created = await post('/api/orders', { customer, items: [{ productId: 1, quantity: 1 }] });
+      assert.strictEqual(created.status, 201);
+  }
   assert.strictEqual((await fetch(`${base}/api/admin/orders`)).status, 401);
 
   const list = await fetch(`${base}/api/admin/orders`, { headers: ADMIN });
@@ -182,7 +186,7 @@ test('API quản trị: cần token, xem và đổi trạng thái đơn', async 
 test('Trang cửa hàng tải catalog từ API và render danh sách sản phẩm', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
   const catalog = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'catalog.js'), 'utf8');
-  assert.match(html, /src="\/js\/catalog\.js"/);
+  assert.match(html, /src="\/js\/catalog\.js(?:\?[^\"]*)?"/);
   assert.match(catalog, /await api\('\/api\/products'\)/);
   assert.match(catalog, /allProducts\.push\(\.\.\.items\)/);
   assert.match(catalog, /renderProductsPanel\(\)/);

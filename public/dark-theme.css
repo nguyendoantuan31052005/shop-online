@@ -1,0 +1,996 @@
+/* Default dark appearance for the whole customer storefront. Product photos
+   remain in their original colors so shoppers can judge the actual item. */
+:root {
+  color-scheme: dark;
+  --bg: #101010;
+  --panel: #181818;
+  --soft: #222222;
+  --text: #f4f4f4;
+  --sub: #b2b2b2;
+  --line: #383838;
+  --green: #f4f4f4;
+  --brass: #c8c8c8;
+}
+
+html,
+body {
+  background: #101010;
+  color: #f4f4f4;
+}
+
+body {
+  color-scheme: dark;
+}
+
+.announcement-bar,
+.store-footer {
+  background: #080808;
+  color: #eeeeee;
+}
+
+.header-main,
+.header-main.is-scrolled,
+.mobile-panel {
+  background: #141414;
+  color: #f4f4f4;
+  border-color: #383838;
+  box-shadow: 0 8px 28px #00000055;
+}
+
+.logo .home-brand,
+.logo .home-brand small,
+.nav button,
+.nav-item,
+.nav-item.active,
+.mobile-menu-btn,
+.mobile-panel .panel-link {
+  color: #f4f4f4;
+}
+
+.home-mark,
+.home-mark::after {
+  background: #f2f2f2;
+  color: #111111;
+}
+
+.nav button.active::after {
+  background: #ffffff;
+}
+
+.nav button,
+.nav-item,
+.nav-item.active {
+  color: #ededed;
+}
+
+.header-inner .nav-item.active {
+  color: #f4f4f4;
+}
+
+.search-wrap,
+.user-panel,
+.catalog-controls,
+.catalog-layout > .catalog-controls,
+.market-toolbar,
+.checkout-summary,
+.account-hub-footer,
+.checkout-address-book,
+.coupon-copy,
+.section:has(>#couponGrid),
+.feature-pill,
+.feature-strip {
+  background: #1c1c1c;
+  color: #eeeeee;
+  border-color: #383838;
+}
+
+.search-wrap input,
+input,
+select,
+textarea,
+.auth-form input,
+.experience-form input,
+.experience-form select,
+.experience-form textarea,
+.checkout-modal input,
+.checkout-modal select,
+.checkout-modal textarea,
+.order-lookup input {
+  background-color: #202020;
+  color: #f4f4f4;
+  border-color: #494949;
+}
+
+input::placeholder,
+textarea::placeholder,
+.search-wrap input::placeholder {
+  color: #a3a3a3;
+  opacity: 1;
+}
+
+.search-btn,
+.hero-copy .primary-btn,
+.product-actions .primary,
+.checkout-btn,
+.checkout-actions .primary,
+.auth-form button[type="submit"],
+.checkout-voucher button,
+.order-lookup button,
+.customer-cancel {
+  background: #f4f4f4;
+  border-color: #f4f4f4;
+  color: #111111;
+}
+
+.search-btn:hover,
+.hero-copy .primary-btn:hover,
+.product-actions .primary:hover,
+.checkout-btn:hover,
+.checkout-actions .primary:hover,
+.auth-form button[type="submit"]:hover,
+.checkout-voucher button:hover,
+.order-lookup button:hover,
+.customer-cancel:hover {
+  background: #d8d8d8;
+  border-color: #d8d8d8;
+  color: #111111;
+}
+
+.hero-main {
+  background-color: #202020;
+  border-color: #3d3d3d;
+}
+
+.hero-main::before {
+  background: linear-gradient(90deg, #111111f5 0%, #111111d9 36%, #11111138 100%);
+}
+
+.hero-editorial-image {
+  filter: saturate(88%) brightness(.78);
+}
+
+.hero-copy,
+.hero-copy h1,
+.hero-copy p,
+.hero-copy .mini-label,
+.hero-copy h1 em {
+  color: #f6f6f6;
+}
+
+.hero-copy .mini-label,
+.service-eyebrow,
+.small-banner .collection-index {
+  color: #c8c8c8;
+}
+
+.hero-copy .secondary-btn {
+  color: #f4f4f4;
+  border-color: #aaaaaa;
+  background: #202020;
+}
+
+.small-banner {
+  background-color: #202020;
+  border-color: #3b3b3b;
+  filter: none;
+  color: #f4f4f4;
+}
+
+.small-banner::before {
+  background: linear-gradient(90deg, #171717ee 0%, #171717ba 58%, #1717173b 100%);
+}
+
+.small-banner-content,
+.small-banner h3,
+.small-banner-content > span {
+  color: #f4f4f4;
+}
+
+.main-shell > .section,
+.main-shell .section,
+.home-category-section,
+.catalog-layout > .catalog-controls,
+.catalog-layout > .catalog-results,
+.catalog-results .product-card,
+.account-card,
+.coupon-card {
+  background-color: #181818;
+  color: #eeeeee;
+  border-color: #383838;
+}
+
+.section-title,
+.main-shell .section-title,
+.home-category-section h2,
+.product-card .product-name,
+.account-card h4,
+.coupon-benefit > strong {
+  color: #f4f4f4;
+}
+
+.home-categories button,
+.catalog-controls .chip,
+.market-toolbar button,
+.auth-button,
+.theme-toggle-button,
+.small-btn,
+.mobile-panel .panel-link,
+.home-bottom-nav {
+  background: #202020;
+  border-color: #414141;
+  color: #f2f2f2;
+}
+
+.home-categories button:hover,
+.catalog-controls .chip:hover,
+.market-toolbar button:hover,
+.small-btn:hover,
+.mobile-panel .panel-link:hover {
+  background: #2c2c2c;
+  border-color: #777777;
+}
+
+.home-categories button > span,
+.contact-icon,
+.service-icon,
+.product-card .thumb {
+  background: #292929;
+  color: #f2f2f2;
+  border-color: #414141;
+}
+
+.catalog-controls .chip.active,
+.market-toolbar button[aria-pressed="true"],
+.home-bottom-nav button.active,
+.chip.active,
+.mobile-panel .panel-link.active {
+  background: #f1f1f1;
+  border-color: #f1f1f1;
+  color: #111111;
+}
+
+.product-card,
+.catalog-results .product-card,
+.account-card,
+.coupon-card,
+.coupon-copy,
+.order-lookup,
+.checkout-summary,
+.checkout-address-book,
+.product-specs {
+  background: #1b1b1b;
+  border-color: #3d3d3d;
+  color: #eeeeee;
+}
+
+.product-card .thumb-image {
+  background: #252525;
+}
+
+.product-card .product-actions .small-btn.soft,
+.product-card .product-actions .small-btn.detail-btn {
+  background: #292929;
+  border: 1px solid #454545;
+  color: #f3f3f3;
+}
+
+.product-card .product-actions .small-btn.soft:hover,
+.product-card .product-actions .small-btn.detail-btn:hover {
+  background: #383838;
+  border-color: #777777;
+  color: #ffffff;
+}
+
+.product-card .product-actions .small-btn.primary {
+  background: #dedede;
+  border: 1px solid #dedede;
+  color: #111111;
+}
+
+.product-card .product-actions [data-wishlist] {
+  background: #292929 !important;
+  border: 1px solid #454545 !important;
+  color: #f3f3f3 !important;
+}
+
+.product-card .product-actions [data-wishlist][aria-pressed="true"] {
+  color: #ff9caa !important;
+}
+
+.product-card .product-actions [data-add] {
+  background: #dedede !important;
+  border-color: #dedede !important;
+  color: #111111 !important;
+}
+
+.product-card .photo-reference-tag {
+  background: #242424;
+  color: #ededed;
+  border: 1px solid #454545;
+}
+
+.product-card .price,
+.product-card:hover .price {
+  color: #ffffff;
+}
+
+.product-card .stock-label,
+.product-card .product-options,
+.product-card .product-description,
+.service-description,
+.coupon-copy,
+.catalog-controls label,
+.filter-label,
+.product-specs dt {
+  color: #b4b4b4;
+}
+
+.regular-price {
+  color: #a5a5a5;
+}
+
+.sale-badge {
+  background: #f0f0f0;
+  color: #111111;
+}
+
+.thumb-badge {
+  background: #303030;
+  border: 1px solid #505050;
+  color: #f1f1f1;
+}
+
+/* Keep later editorial and mobile styles from reintroducing pale chips and
+   controls when the user switches the storefront to dark mode. */
+.product-card .thumb-badge,
+.product-card .photo-reference-tag {
+  background: #292929 !important;
+  border: 1px solid #4a4a4a !important;
+  color: #ededed !important;
+}
+
+.product-card .product-actions .small-btn:not([data-add]),
+.product-card .compare-toggle,
+.catalog-controls button,
+.catalog-controls select,
+.catalog-controls input,
+.product-pagination button {
+  background-color: #242424;
+  border-color: #484848;
+  color: #ededed;
+}
+
+.product-card .product-actions [data-add],
+.product-card .product-actions [data-add]:hover {
+  background: #e7e7e7 !important;
+  border-color: #e7e7e7 !important;
+  color: #111111 !important;
+}
+
+.product-card img[src*="product-placeholder.svg"] {
+  filter: invert(.86) hue-rotate(180deg) saturate(.45);
+}
+
+.cart-pill,
+.header-actions .cart-pill {
+  background: #202020;
+  border-color: #494949;
+  color: #ffffff;
+}
+
+.cart-pill span {
+  background: #f1f1f1;
+  color: #111111;
+}
+
+.feature-pill .icon {
+  background: #2a2a2a;
+  color: #eeeeee;
+}
+
+.feature-strip .feature-pill {
+  background: transparent;
+  color: #e4e4e4;
+}
+
+.main-shell > .section:has(>#couponGrid) {
+  background: #181818;
+  border-color: #3a3a3a;
+}
+
+#couponGrid .coupon-card {
+  background: #202020;
+  border-color: #414141;
+  color: #eeeeee;
+  box-shadow: none;
+}
+
+#couponGrid .coupon-card h4,
+#couponGrid .coupon-card .coupon-benefit > strong {
+  color: #f0f0f0;
+}
+
+#couponGrid .coupon-card p,
+#couponGrid .coupon-card small,
+#couponGrid .coupon-stub > span {
+  color: #b8b8b8;
+}
+
+#couponGrid .coupon-stub {
+  border-right-color: #555555;
+}
+
+#couponGrid .coupon-copy {
+  background: #303030;
+  border-color: #555555;
+  color: #f0f0f0;
+}
+
+#couponGrid .coupon-copy:hover {
+  background: #424242;
+  border-color: #777777;
+}
+
+#lookupResult:not(:empty),
+.empty-state,
+.toast {
+  background: #202020;
+  color: #eeeeee;
+  border-color: #494949;
+}
+
+.contact-float summary,
+.contact-float summary:hover {
+  background: #f2f2f2;
+  color: #111111;
+}
+
+.contact-float > div,
+.cart-drawer,
+.modal-box,
+.experience-dialog,
+.account-hub,
+.checkout-modal,
+.mobile-menu-btn {
+  background: #181818;
+  color: #f4f4f4;
+  border-color: #414141;
+}
+
+.theme-toggle-button:hover {
+  background: #303030;
+}
+
+/* Keep secondary storefront controls readable in dark mode too. */
+.user-panel .user-action-btn,
+.product-pagination button,
+.filter-row .size-pill,
+.filter-row .color-pill,
+.variant-option,
+.detail-actions .soft {
+  background: #252525;
+  border-color: #494949;
+  color: #eeeeee;
+}
+
+.product-pagination span {
+  color: #b7b7b7;
+}
+
+.product-pagination button:hover:not(:disabled),
+.filter-row .size-pill:hover,
+.filter-row .color-pill:hover,
+.variant-option:hover:not(:disabled),
+.user-panel .user-action-btn:hover {
+  background: #343434;
+  border-color: #777777;
+  color: #ffffff;
+}
+
+.filter-row .size-pill.active,
+.filter-row .color-pill.active,
+.variant-option.active {
+  background: #eeeeee;
+  border-color: #eeeeee;
+  color: #111111;
+}
+
+.product-pagination button:disabled,
+.filter-row .size-pill:disabled,
+.filter-row .color-pill:disabled,
+.variant-option:disabled {
+  background: #202020;
+  border-color: #383838;
+  color: #858585;
+}
+
+.modal-head {
+  background: #181818;
+}
+
+.modal-head .close-btn,
+.effects-controls button {
+  background: #242424;
+  color: #f4f4f4;
+  border-color: #494949;
+}
+
+.account-hub .account-hub-heading {
+  background: #202020;
+  border-color: #414141;
+}
+
+.account-hub .account-hub-heading h2,
+.account-hub .account-card h4,
+.account-hub .section-title,
+.experience-heading h2,
+.modal-head h2 {
+  color: #f4f4f4;
+}
+
+.account-hub .account-hub-heading p,
+.account-hub .account-hub-footer,
+.account-hub .service-description {
+  color: #b4b4b4;
+}
+
+.account-hub .account-hub-tabs,
+.account-hub .account-hub-body,
+.account-hub .account-hub-footer,
+.account-hub .account-card,
+.account-hub .order-lookup,
+.account-hub .account-hub-tabs button {
+  background: #181818;
+  color: #eeeeee;
+  border-color: #3c3c3c;
+}
+
+.account-hub .account-hub-tabs button.active {
+  background: #eeeeee;
+  color: #111111;
+}
+
+.account-hub .account-hub-footer button,
+.account-hub .account-hub-heading > button {
+  background: #252525;
+  color: #eeeeee;
+  border-color: #4a4a4a;
+}
+
+.profile-metrics > div,
+.profile-data > div,
+.mini-item,
+.contact-channel,
+.support-faq details,
+.order-empty,
+.order-lookup,
+.product-specs > div + div {
+  border-color: #393939;
+  color: #eeeeee;
+}
+
+.support-compact .contact-channel,
+.profile-edit-grid input,
+.profile-edit-grid select,
+.profile-edit-grid textarea,
+.mini-list .empty-note {
+  background: #202020;
+  color: #eeeeee;
+  border-color: #414141;
+}
+
+.support-shortcuts a,
+.support-faq summary,
+.support-faq p,
+.contact-note,
+.account-chevron,
+.profile-data span,
+.profile-intro p {
+  color: #b6b6b6;
+}
+
+.effects-controls button {
+  background: #1e1e1eed;
+  color: #ededed;
+  border-color: #454545;
+}
+
+.header-main.is-scrolled {
+  background: #141414f2;
+}
+
+/* The support block has a light background marked !important in the editorial
+   layer, so explicitly replace its full surface and text colors in dark mode. */
+.main-shell > .support-compact {
+  background: #181818 !important;
+  border: 1px solid #3d3d3d !important;
+  color: #eeeeee;
+}
+
+.main-shell .support-heading {
+  border-color: #3c3c3c;
+}
+
+.main-shell .support-heading .section-title,
+.main-shell .support-heading h2 {
+  color: #f4f4f4;
+}
+
+.support-compact .service-eyebrow,
+.support-shortcuts a,
+.support-compact .contact-note,
+.support-faq summary,
+.support-faq p,
+.support-compact .contact-meta,
+.support-compact .contact-meta span {
+  color: #b7b7b7;
+}
+
+.support-shortcuts a:hover {
+  color: #ffffff;
+}
+
+.support-compact .contact-channel {
+  background: #202020 !important;
+  border-color: #414141;
+  color: #eeeeee;
+}
+
+.support-compact .contact-channel strong,
+.support-compact .contact-channel > span:last-child {
+  color: #eeeeee;
+}
+
+.support-compact .contact-channel small {
+  color: #b3b3b3;
+}
+
+.support-compact .contact-icon {
+  background: #303030;
+  color: #f1f1f1;
+}
+
+.support-compact .support-faq,
+.support-compact .support-faq details + details {
+  border-color: #3b3b3b;
+}
+
+.support-compact .support-faq summary > span {
+  color: #d0d0d0;
+}
+
+.store-footer,
+.store-footer .footer-brand,
+.store-footer h3,
+.store-footer .footer-caption,
+.store-footer a {
+  color: #eeeeee;
+}
+
+.service-empty .empty-symbol,
+.empty-note,
+.suggestion-item,
+#searchSuggestions,
+.filter-row,
+.catalog-filters {
+  background: #222222;
+  color: #eeeeee;
+  border-color: #414141;
+}
+
+.filter-row,
+.catalog-filters summary,
+.catalog-heading h2,
+.order-lookup label {
+  color: #eeeeee;
+}
+
+.home-bottom-nav {
+  background: #151515ed;
+  border-top-color: #3b3b3b;
+  box-shadow: 0 -6px 22px #00000055;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+textarea:focus-visible {
+  outline-color: #ffffff;
+}
+
+@media (max-width: 760px) {
+  .home-bottom-nav {
+    background: #151515ed;
+    border-top-color: #3b3b3b;
+  }
+}
+
+/* Customer flows: keep the surfaces declared by the light editorial layers
+   consistent when these dialogs and account panels are opened in dark mode. */
+.checkout-modal .checkout-box {
+  background: #181818;
+  color: #eeeeee;
+}
+
+.checkout-modal .checkout-summary,
+.checkout-modal .checkout-address-book,
+.account-hub .account-card,
+.main-shell .section:has(.service-eyebrow) .account-card {
+  background: #202020;
+  border-color: #414141;
+  color: #eeeeee;
+}
+
+.checkout-modal .checkout-payment {
+  background: #202a22;
+  border-color: #405844;
+  color: #d5e6d5;
+}
+
+.checkout-modal .checkout-muted,
+.checkout-modal .checkout-eyebrow,
+.checkout-modal .checkout-item small,
+.checkout-modal #addressSearchStatus,
+.checkout-modal #checkoutCityStatus,
+.checkout-modal #checkoutWardStatus,
+.experience-dialog .password-settings p,
+.experience-dialog #accountFeedback,
+.account-hub .account-hub-heading p,
+.account-hub .profile-data dt,
+.account-hub .profile-metrics span,
+.account-hub .profile-intro span:not(.profile-avatar),
+.account-hub .profile-intro small,
+.main-shell .section:has(.service-eyebrow) .service-empty p,
+.main-shell .section:has(.service-eyebrow) .mini-item > span,
+.main-shell .section:has(.service-eyebrow) .mini-item a {
+  color: #b5b5b5;
+}
+
+.checkout-modal .field input,
+.checkout-modal .field select,
+.checkout-modal .field textarea,
+.experience-form input,
+.experience-form select,
+.experience-form textarea,
+.shopper-order-filters input,
+.shopper-order-filters select,
+.checkout-address-book select,
+.checkout-address-book-row button {
+  background: #202020;
+  border-color: #494949;
+  color: #f0f0f0;
+}
+
+#sortSelect,
+#brandFilter,
+.home-price-filters input[type="number"] {
+  background-color: #202020 !important;
+  border-color: #494949;
+  color: #f0f0f0;
+  color-scheme: dark;
+}
+
+#sortSelect option,
+#brandFilter option {
+  background: #202020;
+  color: #f0f0f0;
+}
+
+#sizePills .size-pill,
+#colorPills .color-pill {
+  background: #252525;
+  border-color: #494949;
+  color: #eeeeee;
+}
+
+#sizePills .size-pill:hover:not(.active),
+#colorPills .color-pill:hover:not(.active) {
+  background: #343434;
+  border-color: #777777;
+  color: #ffffff;
+}
+
+#sizePills .size-pill.active,
+#colorPills .color-pill.active {
+  background: #eeeeee;
+  border-color: #eeeeee;
+  color: #111111;
+}
+
+#sizePills .size-pill:disabled,
+#colorPills .color-pill:disabled {
+  background: #202020;
+  border-color: #383838;
+  color: #858585;
+}
+
+.address-search-results {
+  background: #202020;
+  border-color: #494949;
+}
+
+.address-search-results button {
+  background: #202020;
+  border-color: #3d3d3d;
+  color: #eeeeee;
+}
+
+.address-search-results button:hover,
+.address-search-results button:focus-visible {
+  background: #303030;
+}
+
+.address-search-results span,
+.address-book-autocomplete small,
+.shopper-order-filters label {
+  color: #b5b5b5;
+}
+
+.checkout-address-book-row button:hover { background: #303030; }
+
+.checkout-item,
+.experience-dialog .password-settings,
+.experience-dialog .profile-intro,
+.experience-dialog .product-reviews,
+.shopper-order-actions,
+.shopper-order-filters,
+.comparison-scroll th,
+.comparison-scroll td {
+  border-color: #3b3b3b;
+}
+
+.auth-form > p,
+.auth-form .recovery-help,
+#quoteMessage[role="alert"] {
+  color: #ffb7ac;
+}
+
+#authStatus:not(:empty) {
+  background: #202820;
+  border: 1px solid #3b503e;
+  color: #d5e6d5;
+}
+
+#authStatus.auth-error {
+  background: #321f1e;
+  border-color: #70413c;
+  color: #ffb7ac !important;
+}
+
+.selection-hint,
+.profile-identity {
+  background: #202a22;
+  border-color: #405844;
+  color: #cfe2ce;
+}
+
+.shopper-note,
+.profile-metrics > div,
+.profile-shipping,
+.recent-product,
+.compare-bar {
+  background: #202020;
+  border-color: #414141;
+  color: #eeeeee;
+}
+
+.shopper-note small,
+.profile-shipping small,
+.profile-bio,
+.recent-product small,
+.comparison-scroll caption {
+  color: #b4b4b4;
+}
+
+.shopper-order-filters button,
+.shopper-order-actions button,
+.shopper-review-actions button,
+.shopper-note button,
+.experience-heading > button,
+.compare-bar button:last-child,
+.comparison-scroll th button,
+.cart-item .qty button {
+  background: #292929;
+  border-color: #494949;
+  color: #eeeeee;
+}
+
+.shopper-order-filters button:hover,
+.shopper-order-actions button:hover,
+.shopper-review-actions button:hover,
+.shopper-note button:hover,
+.experience-heading > button:hover,
+.compare-bar button:last-child:hover,
+.comparison-scroll th button:hover,
+.cart-item .qty button:hover {
+  background: #383838;
+  border-color: #707070;
+  color: #ffffff;
+}
+
+.compare-bar button:first-of-type,
+.account-hub .account-hub-tabs button.active {
+  background: #eeeeee;
+  border-color: #eeeeee;
+  color: #111111;
+}
+
+.detail-gallery-thumb {
+  background: #242424;
+  border-color: #454545;
+}
+
+.detail-gallery-thumb.active {
+  border-color: #eeeeee;
+}
+
+.cart-item .mini-emoji,
+.wishlist-pill {
+  background: #292929;
+  color: #f0c3c8;
+}
+
+.variant-tag {
+  background: #292929;
+  border-color: #494949;
+  color: #eeeeee;
+}
+
+::selection {
+  background: #43534a;
+  color: #ffffff;
+}
+
+.order-cancelled {
+  background: #30231f;
+  color: #e6b5a3;
+}
+
+.customer-cancel {
+  background: #33221f;
+  border-color: #60403a;
+  color: #f0b7a9;
+}
+
+#addressesDialog {
+  border-color: #6f6042;
+  color: #ede9df;
+  background: radial-gradient(ellipse at 90% 0%, #2d2a22 0, transparent 38%), linear-gradient(145deg, #1d1d1b, #171817);
+  box-shadow: 0 28px 90px #00000099, 0 0 0 1px #ffffff08 inset;
+}
+#addressesDialog .address-dialog-heading { border-color: #39372f; }
+#addressesDialog .address-dialog-heading h2 { color: #f2ede1; }
+#addressesDialog .address-dialog-heading p,
+#addressesDialog .address-dialog-eyebrow { color: #bca576; }
+#addressesDialog .address-dialog-heading > button { border-color: #4a4538; background: #292720; color: #e7dfce; }
+#addressesDialog .address-dialog-heading > button:hover { background: #373124; }
+#addressBook > .service-description { border-color: #454033; border-left-color: #b59a64; background: #24231f; color: #c0baad; }
+#addressBook .shopper-note { border-color: #3d3b34; background: #222220; box-shadow: 0 5px 18px #00000024; }
+#addressBook .shopper-note strong { color: #eee9df; }
+#addressBook .shopper-note p,
+#addressBookForm > label { color: #c4c0b5; }
+#addressBook .shopper-note .variant-tag { background: #373124; color: #d4bd88; }
+#addressBook .shopper-note button { border-color: #49463b; background: #2c2b27; color: #ddd6c7; }
+#addressBook .shopper-note button:hover { border-color: #8e7951; background: #373329; }
+#addressBookForm input:not([type=checkbox]) { border-color: #49463d; background: #222220; color: #f0ede5; }
+#addressBookForm input::placeholder { color: #8f8b80; }
+#addressBookForm input:focus { border-color: #b59a64; background: #25241f; box-shadow: 0 0 0 3px #b59a6426; }
+#addressBookForm .address-inline-search small { color: #a9a599; }
+#addressBookForm .address-inline-search .address-search-results { border-color: #514936; background: #222220; }
+#addressBookForm .address-default-check { border-color: #403d34; background: #24231f; color: #c4c0b5; }
+#addressBookForm .address-form-actions button { border-color: #b69b64; background: #b69b64; color: #171815; }
+#addressBookForm .address-form-actions button:hover { background: #c5ad7a; }
+#addressBookForm .address-form-actions button[type=reset] { border-color: #514d42; background: transparent; color: #d0cabc; }
+#addressBookForm .address-form-actions button[type=reset]:hover { background: #2a2924; }
+#addressBookFeedback { color: #b9d2b5; }
+.recovery-methods { border-color: #49463d; background: #222220; }
+.recovery-methods button { color: #ccc6b8; }
+.recovery-methods button[aria-pressed="true"] { background: #b59a64; color: #171815; }
+.recovery-methods button:disabled { color: #888478; }
+.totp-settings { border-color: #49463d; background: #222220; color: #ede9df; }
+.totp-settings h3 { color: #f2ede1; }
+.totp-settings p { color: #c4c0b5; }
+.totp-settings code { border-color: #746344; background: #171817; color: #e9dfcc; }
+.totp-settings > button, .totp-settings form button, .totp-settings #copyTotpSecret { border-color: #b59a64; background: #b59a64; color: #171815; }

@@ -1,0 +1,7 @@
+.admin-login-page { min-height:100vh; }
+.admin-page .login { margin:clamp(40px,10vh,100px) auto; }
+#adminLoginForm { display:grid; gap:18px; }
+#adminLoginForm .primary { width:100%; min-height:46px; margin-top:0; }
+#adminLoginError:empty { display:none; }
+.admin-page #adminLoginError { margin:0; color:#a04b47; }
+html[data-admin-theme="dark"] .admin-page #adminLoginError { color:#ffaaa0; }

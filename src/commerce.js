@@ -1,5 +1,6 @@
 // All writes are synchronous transactions: memory and disk change together.
 const { HttpError } = require('./db');
+const { normalizeVietnamPhone, isVietnamMobilePhone } = require('./phone');
 const clone = (value) => structuredClone(value);
 function transaction(db, work) {
   const backup = clone(db.data);
@@ -20,16 +21,35 @@ function options(value, label) {
   if (!Array.isArray(value) || !value.length || value.length > 30) throw new HttpError(400, `${label} không hợp lệ`);
   return [...new Set(value.map(v => text(v, label, 50)))];
 }
+function optionalMeasure(value, label, max) {
+  if (value == null || value === '') return null;
+  const measure = integer(value, label, 1, max);
+  return measure;
+}
 function saveProduct(db, id, input) {
   const existing = id == null ? null : db.data.products.find(p => p.id === id);
   if (id != null && !existing) throw new HttpError(404, 'Không tìm thấy sản phẩm');
   const p = { ...existing, ...input };
   const image = text(p.image || '', 'URL ảnh', 2000, false);
   if (image && !/^https?:\/\//i.test(image) && !/^\/(?!\/)/.test(image)) throw new HttpError(400, 'Ảnh phải là URL http/https hoặc đường dẫn /');
+  const brand = text(p.brand || '', 'Thương hiệu', 100, false);
+  const salePrice = p.salePrice === '' || p.salePrice == null ? null : integer(p.salePrice, 'Giá khuyến mãi', 1, 1000000000);
+  if (salePrice !== null && salePrice >= p.price) throw new HttpError(400, 'Giá khuyến mãi phải thấp hơn giá gốc');
+  const images = p.images == null ? (existing?.images || []) : p.images;
+  if (!Array.isArray(images) || images.length > 8) throw new HttpError(400, 'Tối đa 8 ảnh chi tiết');
+  const cleanImages = images.map(value => {
+    const url = text(value, 'URL ảnh chi tiết', 2000);
+    if (!/^https?:\/\//i.test(url) && !/^\/(?!\/)/.test(url)) throw new HttpError(400, 'Ảnh chi tiết phải là URL http/https hoặc đường dẫn /');
+    return url;
+  });
   const product = {
     name: text(p.name, 'Tên sản phẩm'), category: text(p.category, 'Danh mục', 80),
-    description: text(p.description || '', 'Mô tả', 5000, false), image,
+    description: text(p.description || '', 'Mô tả', 5000, false), image, images: cleanImages, brand, salePrice,
     price: integer(p.price, 'Giá'), stock: integer(p.stock, 'Tồn kho', 0, 1000000),
+    shippingWeightG: optionalMeasure(p.shippingWeightG, 'Khối lượng đóng gói (g)', 500000),
+    shippingLengthCm: optionalMeasure(p.shippingLengthCm, 'Chiều dài kiện hàng (cm)', 200),
+    shippingWidthCm: optionalMeasure(p.shippingWidthCm, 'Chiều rộng kiện hàng (cm)', 200),
+    shippingHeightCm: optionalMeasure(p.shippingHeightCm, 'Chiều cao kiện hàng (cm)', 200),
     sizes: options(p.sizes || ['One Size'], 'Kích cỡ'), colors: options(p.colors || ['Mặc định'], 'Màu'),
     gender: text(p.gender || 'all', 'Nhóm', 20), subCategory: text(p.subCategory || 'phu-kien', 'Nhóm danh mục', 80),
     emoji: text(p.emoji || '🛍️', 'Biểu tượng', 20),
@@ -74,6 +94,26 @@ function deleteVoucher(db, id) {
   if (!db.data.vouchers.some(v => v.id === id)) throw new HttpError(404, 'Không tìm thấy voucher');
   return transaction(db, () => { db.data.vouchers = db.data.vouchers.filter(v => v.id !== id); return { deleted: true }; });
 }
+function saveCategory(db, currentName, input) {
+  const name = text(input?.name, 'Tên danh mục', 80);
+  const categories = require('./db').listCategories(db);
+  if (currentName && !categories.includes(currentName)) throw new HttpError(404, 'Không tìm thấy danh mục');
+  if (categories.some(value => value.toLocaleLowerCase('vi') === name.toLocaleLowerCase('vi') && value !== currentName)) throw new HttpError(409, 'Danh mục đã tồn tại');
+  return transaction(db, () => {
+    db.data.categories ||= [];
+    if (currentName) {
+      db.data.categories = db.data.categories.filter(value => value !== currentName);
+      db.data.products.forEach(product => { if (product.category === currentName) product.category = name; });
+    }
+    if (!db.data.categories.includes(name)) db.data.categories.push(name);
+    return { name };
+  });
+}
+function deleteCategory(db, name) {
+  if (!require('./db').listCategories(db).includes(name)) throw new HttpError(404, 'Không tìm thấy danh mục');
+  if (db.data.products.some(product => product.category === name)) throw new HttpError(409, 'Hãy chuyển hoặc xóa sản phẩm trong danh mục trước');
+  return transaction(db, () => { db.data.categories = (db.data.categories || []).filter(value => value !== name); return { deleted: true }; });
+}
 function available(v, now = new Date().toISOString()) {
   return v.active && (!v.startsAt || now >= v.startsAt) && (!v.expiresAt || now < v.expiresAt) && (!v.usageLimit || v.used < v.usageLimit);
 }
@@ -91,7 +131,12 @@ function quoteOrder(db, payload) {
     if (totalQty > p.stock) throw new HttpError(409, `${p.name} chỉ còn ${p.stock} sản phẩm`);
     totals.set(p.id, totalQty);
     const key = JSON.stringify([p.id, size, color]);
-    const line = lines.get(key) || { product_id: p.id, name: p.name, price: p.price, size, color, quantity: 0 };
+    const line = lines.get(key) || {
+      product_id: p.id, name: p.name, category: p.category, subCategory: p.subCategory,
+      shippingWeightG: p.shippingWeightG, shippingLengthCm: p.shippingLengthCm,
+      shippingWidthCm: p.shippingWidthCm, shippingHeightCm: p.shippingHeightCm,
+      price: p.salePrice || p.price, size, color, quantity: 0,
+    };
     line.quantity += quantity;
     if (line.quantity > 99) throw new HttpError(400, 'Mỗi biến thể tối đa 99 sản phẩm');
     lines.set(key, line);
@@ -110,22 +155,30 @@ function quoteOrder(db, payload) {
       discount = Math.min(discount, subtotal);
     }
   }
-  return { items, subtotal, shippingFee, discount, total: subtotal - discount + shippingFee, voucherCode: voucher?.code || null, voucherId: voucher?.id || null };
+  const parcel = require('./shipping/parcels').estimateOrderParcel(items);
+  return { items, parcel, subtotal, shippingFee, discount, total: subtotal - discount + shippingFee, voucherCode: voucher?.code || null, voucherId: voucher?.id || null };
 }
 function createOrder(db, payload, userId = null) {
   const c = payload?.customer;
   if (!c) throw new HttpError(400, 'Thiếu thông tin khách hàng');
-  const name = text(c.name, 'Họ tên'); const address = text(c.address, 'Địa chỉ', 1000); const phone = text(c.phone, 'Số điện thoại', 11);
-  if (!/^0\d{9,10}$/.test(phone)) throw new HttpError(400, 'Số điện thoại không hợp lệ');
+  const name = text(c.name, 'Họ tên'); const address = text(c.address, 'Địa chỉ', 1000); const phone = normalizeVietnamPhone(text(c.phone, 'Số điện thoại', 20));
+  if (!isVietnamMobilePhone(phone)) throw new HttpError(400, 'Số nhận hàng cần là số di động Việt Nam 10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.');
   const email = text(c.email || '', 'Email', 254, false);
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpError(400, 'Email không hợp lệ');
+  const province = text(c.city || c.province || '', 'Tỉnh/thành', 200, false);
+  const ward = text(c.ward || '', 'Phường/xã', 200, false);
+  const district = text(c.district || '', 'Quận/huyện', 200, false);
+  const line1 = text(c.addressLine || '', 'Số nhà, đường', 500, false);
+  const hasShippingAddress = Boolean(province || ward || district || line1);
+  if (hasShippingAddress && (!province || !ward || !line1)) throw new HttpError(400, 'Địa chỉ giao hàng cần có tỉnh/thành, phường/xã và số nhà/tên đường.');
+  const shippingAddress = hasShippingAddress ? { province, ward, district, line1 } : null;
   if (payload.paymentMethod && payload.paymentMethod !== 'cod') throw new HttpError(400, 'Hiện chỉ hỗ trợ thanh toán COD');
   const quote = quoteOrder(db, payload);
   if (payload.expectedTotal !== undefined && payload.expectedTotal !== quote.total) {
     throw new HttpError(409, 'Giá hoặc ưu đãi đã thay đổi. Vui lòng kiểm tra lại tổng thanh toán.');
   }
   return transaction(db, () => {
-    const order = { id: db.data.nextOrderId++, customer_name: name, phone, email, address, user_id: userId, paymentMethod: 'cod', ...quote, status: 'new', created_at: new Date().toISOString() };
+    const order = { id: db.data.nextOrderId++, customer_name: name, phone, email, address, shippingAddress, user_id: userId, paymentMethod: 'cod', paymentStatus: 'unpaid', ...quote, status: 'new', created_at: new Date().toISOString() };
     for (const line of quote.items) db.data.products.find(p => p.id === line.product_id).stock -= line.quantity;
     if (quote.voucherId) db.data.vouchers.find(v => v.id === quote.voucherId).used++;
     db.data.orders.push(order);
@@ -141,6 +194,7 @@ function updateOrderStatus(db, id, status) {
   if (!order) throw new HttpError(404, 'Không tìm thấy đơn hàng');
   if (order.status === status) return clone(order);
   if (!TRANSITIONS[order.status]?.includes(status)) throw new HttpError(409, 'Không thể chuyển sang trạng thái này');
+  if (status === 'cancelled' && order.paymentStatus === 'paid') throw new HttpError(409, 'Đơn đã thu tiền cần xử lý hoàn tiền trước khi hủy');
   return transaction(db, () => {
     if (status === 'cancelled') {
       for (const item of order.items) {
@@ -154,4 +208,38 @@ function updateOrderStatus(db, id, status) {
     return order;
   });
 }
-module.exports = { saveProduct, deleteProduct, saveVoucher, deleteVoucher, available, quoteOrder, createOrder, updateOrderStatus, TRANSITIONS };
+function markOrderPaid(db, id) {
+  const order = db.data.orders.find(item => item.id === id);
+  if (!order) throw new HttpError(404, 'Không tìm thấy đơn hàng');
+  if (order.paymentMethod !== 'cod' || !['shipping', 'done'].includes(order.status)) throw new HttpError(409, 'Chỉ xác nhận COD đã thu khi đơn đang giao hoặc hoàn thành');
+  if (order.paymentStatus === 'paid') return clone(order);
+  return transaction(db, () => { order.paymentStatus = 'paid'; order.paidAt = new Date().toISOString(); return order; });
+}
+function updateOrderPhone(db, id, value) {
+  const order = db.data.orders.find(item => item.id === id);
+  if (!order) throw new HttpError(404, 'Không tìm thấy đơn hàng');
+  if (!['new', 'confirmed'].includes(order.status) || order.shipment?.trackingNumber) {
+    throw new HttpError(409, 'Chỉ sửa số nhận hàng trước khi tạo vận đơn.');
+  }
+  const phone = normalizeVietnamPhone(text(value, 'Số điện thoại', 20));
+  if (!isVietnamMobilePhone(phone)) {
+    throw new HttpError(400, 'Số nhận hàng cần là số di động Việt Nam 10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.');
+  }
+  return transaction(db, () => { order.phone = phone; return order; });
+}
+function saveShipment(db, id, input) {
+  const order = db.data.orders.find(item => item.id === id);
+  if (!order) throw new HttpError(404, 'Không tìm thấy đơn hàng');
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new HttpError(400, 'Thông tin vận chuyển không hợp lệ');
+  const carrier = text(input.carrier || '', 'Đơn vị vận chuyển', 100, false);
+  const trackingNumber = text(input.trackingNumber || '', 'Mã vận đơn', 120, false);
+  const trackingUrl = text(input.trackingUrl || '', 'Đường dẫn tra cứu', 1000, false);
+  if (trackingUrl && !/^https:\/\//i.test(trackingUrl)) throw new HttpError(400, 'Đường dẫn tra cứu phải dùng HTTPS');
+  if ((carrier || trackingNumber || trackingUrl) && (!carrier || !trackingNumber)) throw new HttpError(400, 'Nhập cả đơn vị vận chuyển và mã vận đơn');
+  if (order.status === 'cancelled') throw new HttpError(409, 'Không thể cập nhật vận chuyển cho đơn đã hủy');
+  return transaction(db, () => {
+    order.shipment = carrier ? { carrier, trackingNumber, trackingUrl, updatedAt: new Date().toISOString() } : null;
+    return order;
+  });
+}
+module.exports = { saveProduct, deleteProduct, saveVoucher, deleteVoucher, saveCategory, deleteCategory, available, quoteOrder, createOrder, updateOrderStatus, markOrderPaid, updateOrderPhone, saveShipment, TRANSITIONS };

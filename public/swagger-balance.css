@@ -1,0 +1,39 @@
+/* Final layout pass for the API reference and its responsive states. */
+body.api-page { line-height: 1.65; }
+.api-page > header { padding-inline: max(20px, calc((100vw - 1320px) / 2)); }
+.api-page .docs-hero { max-width: 760px; padding-block: clamp(34px, 5vw, 60px) clamp(28px, 4vw, 44px); }
+.api-page .docs-hero h1 { font-size: clamp(34px, 4vw, 48px); line-height: 1.12; text-wrap: balance; }
+.api-page .docs-hero p { max-width: 620px; font-size: 14px; line-height: 1.8; }
+.api-page .docs-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2.4vw, 32px); }
+.api-page .docs-guides { max-width: 1320px; gap: 18px; margin-block: 26px 34px; }
+.api-page .docs-guides details { min-width: 0; padding: clamp(16px, 2vw, 22px); line-height: 1.75; }
+.api-page .docs-guides p { margin-block: 10px 0; }
+.api-page #swagger-ui { max-width: 1360px; margin-inline: auto; }
+.api-page .swagger-ui .wrapper { max-width: 1320px; padding-inline: 22px; }
+.api-page .swagger-ui .info { margin-block: 28px; }
+.api-page .swagger-ui .opblock-tag { padding-block: 14px; }
+.api-page .swagger-ui .opblock-summary { min-height: 52px; }
+.api-page .swagger-ui .opblock .opblock-summary-path { overflow-wrap: anywhere; }
+.api-page .swagger-ui .parameters-container,
+.api-page .swagger-ui .responses-wrapper,
+.api-page .swagger-ui .request-body { padding-inline: clamp(12px, 2vw, 24px); }
+.api-page .swagger-ui table { width: 100%; }
+.api-page .swagger-ui td, .api-page .swagger-ui th { overflow-wrap: anywhere; }
+html[data-docs-theme="dark"] .api-page .docs-guides details { background: #202522; border-color: #39423d; color: #cbd5ce; }
+html[data-docs-theme="dark"] .api-page .docs-guides summary { color: #dce8df; }
+html[data-docs-theme="dark"] .api-page .docs-guides code { color: #b7d5be; }
+@media (max-width: 800px) {
+  .api-page > header { padding-inline: 18px; }
+  .api-page .docs-hero { padding-block: 34px 28px; }
+  .api-page .docs-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .api-page .docs-guides { grid-template-columns: minmax(0, 1fr); padding-inline: 14px; }
+  .api-page .swagger-ui .wrapper { padding-inline: 14px; }
+  .api-page .swagger-ui .opblock-summary { align-items: flex-start; }
+  .api-page .swagger-ui .opblock .opblock-summary-description { flex: 1 1 100%; }
+}
+@media (max-width: 420px) {
+  .api-page .docs-top { flex-direction: column; align-items: flex-start; }
+  .api-page .docs-top nav { flex-direction: row; flex-wrap: wrap; }
+  .api-page .docs-hero h1 { font-size: 32px; }
+  .api-page .docs-downloads a { flex: 1 1 100%; text-align: center; }
+}

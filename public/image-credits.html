@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Nguồn ảnh sản phẩm | Home Shopping</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#263e38;background:#f7f6f2;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.wrap{width:min(1120px,calc(100% - 36px));margin:0 auto;padding:34px 0 64px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 0 28px;border-bottom:1px solid #deded5}.brand{font-family:Georgia,serif;font-size:25px;font-weight:700;color:inherit;text-decoration:none}.back{color:inherit;text-decoration:none;font-weight:650}h1{font-family:Georgia,serif;font-size:clamp(32px,5vw,48px);margin:42px 0 10px}.intro{max-width:680px;color:#718079;line-height:1.7;margin:0 0 28px}.count{font-size:14px;color:#718079;margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:16px}.card{overflow:hidden;background:#fff;border:1px solid #e4e4dc;border-radius:15px;box-shadow:0 8px 28px #1c32220a}.card img{display:block;width:100%;height:190px;object-fit:cover;background:#efeee7}.body{padding:15px}.name{font-weight:700;font-size:16px;margin:0 0 10px}.meta{font-size:13px;line-height:1.55;color:#68766f;margin:4px 0;overflow-wrap:anywhere}.links{display:flex;gap:14px;margin-top:14px}.links a{font-size:13px;font-weight:650;color:#245b4e}.error{padding:30px;border-radius:12px;background:#fff;color:#725047}@media(prefers-color-scheme:dark){:root{color:#e7e8e2;background:#101210}.top{border-color:#343a35}.intro,.count,.meta{color:#a3ada6}.card{background:#1c201d;border-color:#343a35}.card img{background:#292d29}.links a{color:#a8c9b4}.error{background:#29211f;color:#ffd7c9}}
+  </style>
+</head>
+<body><main class="wrap">
+  <header class="top"><a class="brand" href="/">Home Shopping</a><a class="back" href="/">← Quay lại cửa hàng</a></header>
+  <h1>Nguồn ảnh sản phẩm</h1>
+  <p class="intro">Ảnh minh họa được lưu cùng website để tải ổn định. Ảnh trong danh sách được chọn theo nhóm sản phẩm và dẫn tới nguồn Pexels cùng thông tin giấy phép.</p>
+  <p class="count" id="count">Đang tải danh sách ảnh…</p>
+  <section class="grid" id="photos" aria-live="polite"></section>
+</main>
+<script>
+fetch('/images/catalog/credits.json').then(r=>{if(!r.ok)throw Error('Không tải được danh sách nguồn ảnh');return r.json()}).then(items=>{
+ const grid=document.getElementById('photos');document.getElementById('count').textContent=`${items.length} ảnh sản phẩm`;
+ for(const item of items){const card=document.createElement('article');card.className='card';const img=document.createElement('img');img.src=item.localPath;img.alt=item.productName||'';img.loading='lazy';const body=document.createElement('div');body.className='body';const title=document.createElement('h2');title.className='name';title.textContent=item.productName||`Sản phẩm #${item.productId}`;body.append(title);const lines=[item.title,item.creator,item.license].filter(Boolean);for(const value of lines){const p=document.createElement('p');p.className='meta';p.textContent=value;body.append(p)}const links=document.createElement('div');links.className='links';for(const [label,url] of [['Ảnh gốc trên Pexels',item.sourceUrl],['Giấy phép',item.licenseUrl]]){if(!url||!url.startsWith('https://'))continue;const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=label;links.append(a)}body.append(links);card.append(img,body);grid.append(card)}
+}).catch(error=>{document.getElementById('count').textContent='';const p=document.createElement('p');p.className='error';p.textContent=error.message;document.getElementById('photos').append(p)});
+</script></body></html>

@@ -1,0 +1,27 @@
+/* Keep the first viewport clean; reveal support after the shopper starts browsing. */
+.contact-float {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms linear;
+}
+
+.contact-float[data-visible] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+body:has(.modal.show) .contact-float,
+body:has(dialog[open]) .contact-float {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-float {
+    transition: none;
+  }
+}

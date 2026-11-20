@@ -10,7 +10,7 @@ test('Invalid request bodies and paths return client errors; stock reflects actu
   const db = openDb();
   const server = createApp({ db });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  t.after(() => { server.closeAllConnections(); server.close(); });
+  t.after(async () => { const closed = new Promise(resolve => server.close(resolve)); server.closeAllConnections(); server.closeIdleConnections(); await closed; });
   const base = `http://127.0.0.1:${server.address().port}`;
   for (const body of ['null', '[]', '42', '"text"']) {
     const res = await fetch(base + '/api/auth/login', { method: 'POST', body });

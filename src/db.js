@@ -1,6 +1,7 @@
 // Lớp dữ liệu: lưu trong bộ nhớ và ghi ra 1 file JSON (không cần cài thư viện, chạy được trên Node >= 18).
 const fs = require('fs');
 const path = require('path');
+const { normalizeVietnamPhone, isVietnamMobilePhone } = require('./phone');
 
 const MEN_CATEGORIES = [
   { id: 'ao-khoac', name: 'Áo khoác', parent: 'Nam' },
@@ -34,7 +35,14 @@ function normalizeProduct(product, index = 0) {
     gender: product?.gender || 'men',
     subCategory: product?.subCategory || 'phu-kien',
     price: Number(product?.price ?? 0),
+    salePrice: Number.isSafeInteger(Number(product?.salePrice)) && Number(product.salePrice) > 0 && Number(product.salePrice) < Number(product?.price) ? Number(product.salePrice) : null,
+    brand: String(product?.brand || '').trim(),
+    images: Array.isArray(product?.images) ? product.images.filter(image => typeof image === 'string' && image.trim()).map(image => image.trim()).slice(0, 8) : [],
     stock: Number(product?.stock ?? 0),
+    shippingWeightG: Number.isSafeInteger(Number(product?.shippingWeightG)) && Number(product.shippingWeightG) > 0 ? Number(product.shippingWeightG) : null,
+    shippingLengthCm: Number.isSafeInteger(Number(product?.shippingLengthCm)) && Number(product.shippingLengthCm) > 0 ? Number(product.shippingLengthCm) : null,
+    shippingWidthCm: Number.isSafeInteger(Number(product?.shippingWidthCm)) && Number(product.shippingWidthCm) > 0 ? Number(product.shippingWidthCm) : null,
+    shippingHeightCm: Number.isSafeInteger(Number(product?.shippingHeightCm)) && Number(product.shippingHeightCm) > 0 ? Number(product.shippingHeightCm) : null,
     emoji: product?.emoji || '🛍️',
     description,
     image: typeof product?.image === 'string' && product.image.trim() ? product.image.trim() : fallbackImage,
@@ -157,21 +165,29 @@ function openDb(file = ':memory:', { seed = true } = {}) {
   if (persistent && fs.existsSync(file)) {
     data = JSON.parse(fs.readFileSync(file, 'utf8'));
   } else {
-    data = seed ? seedData() : { nextProductId: 1, nextOrderId: 1, nextUserId: 1, products: [], orders: [], users: [] };
+    data = seed ? seedData() : { nextProductId: 1, nextOrderId: 1, nextUserId: 1, products: [], orders: [], users: [], staff: [] };
   }
 
   if (!Array.isArray(data.products)) data.products = [];
   if (!Array.isArray(data.vouchers)) data.vouchers = [];
   if (!Array.isArray(data.users)) data.users = [];
+  if (!Array.isArray(data.staff)) data.staff = [];
   if (!Array.isArray(data.orders)) data.orders = [];
   data.products = data.products.map((product, index) => normalizeProduct(product, index));
+  if (!Array.isArray(data.categories)) data.categories = [...new Set(data.products.map(product => product.category))];
   for (const [collection, counter] of [['products', 'nextProductId'], ['vouchers', 'nextVoucherId'], ['users', 'nextUserId'], ['orders', 'nextOrderId']]) {
     data[counter] = data[collection].reduce((next, item) => {
       const id = Number(item.id);
       return Number.isSafeInteger(id) && id > 0 ? Math.max(next, id + 1) : next;
     }, Number.isSafeInteger(data[counter]) && data[counter] > 0 ? data[counter] : 1);
   }
+  data.nextStaffId = data.staff.reduce((next, item) => Number.isSafeInteger(Number(item.id)) && Number(item.id) > 0 ? Math.max(next, Number(item.id) + 1) : next, Number.isSafeInteger(data.nextStaffId) && data.nextStaffId > 0 ? data.nextStaffId : 1);
 
+  if (seed) {
+    if (!persistent || !fs.existsSync(file)) require('./home-catalog').addHomeCatalog(data);
+    // Versioned, idempotent catalog migrations also apply to an existing shop.json.
+    require('./home-catalog-expansion').addHomeCatalogExpansion(data);
+  }
   const db = {
     file,
     data,
@@ -192,23 +208,25 @@ const clone = (x) => structuredClone(x);
 
 function listProducts(db, { q = '', category = '', gender = '' } = {}) {
   const search = require('../public/search');
+  const sold = new Map();
+  for (const order of db.data.orders) if (order.status !== 'cancelled') for (const item of order.items || []) sold.set(item.product_id, (sold.get(item.product_id) || 0) + Number(item.quantity || 0));
   return clone(
     db.data.products.filter((p) => {
       const matchesText = search.matches(p, q);
       const matchesCategory = !category || p.category === category || p.subCategory === category;
       const matchesGender = !gender || p.gender === gender;
       return matchesText && matchesCategory && matchesGender;
-    })
+    }).map(product => ({ ...product, regularPrice: product.price, price: product.salePrice || product.price, soldCount: sold.get(product.id) || 0 }))
   );
 }
 
 function listCategories(db) {
-  return [...new Set(db.data.products.map((p) => p.category))].sort((a, b) => a.localeCompare(b, 'vi'));
+  return [...new Set([...(db.data.categories || []), ...db.data.products.map((p) => p.category)])].sort((a, b) => a.localeCompare(b, 'vi'));
 }
 
 function getProduct(db, id) {
   const p = db.data.products.find((x) => x.id === id);
-  return p ? clone(p) : null;
+  return p ? clone({ ...p, regularPrice: p.price, price: p.salePrice || p.price }) : null;
 }
 
 function nowString() {
@@ -239,13 +257,14 @@ function verifyPassword(password, stored) {
   return derived === stored.hash;
 }
 
-function createUser(db, { name, username, email, password }) {
-  if (typeof name !== 'string' || typeof username !== 'string' || typeof password !== 'string' || (email !== undefined && typeof email !== 'string')) {
+function createUser(db, { name, username, email, phone, password }) {
+  if (typeof name !== 'string' || typeof username !== 'string' || typeof password !== 'string' || (email !== undefined && typeof email !== 'string') || (phone !== undefined && typeof phone !== 'string')) {
     throw new HttpError(400, 'Thông tin tài khoản không hợp lệ');
   }
   const cleanName = String(name || '').trim();
   const cleanUsername = String(username || '').trim();
   const cleanEmail = String(email || '').trim().toLowerCase();
+  const cleanPhone = phone === undefined ? '' : normalizeVietnamPhone(phone);
 
   if (cleanName.length > 200 || cleanUsername.length > 80 || cleanEmail.length > 254 || password.length > 256) {
     throw new HttpError(400, 'Thông tin tài khoản quá dài');
@@ -259,14 +278,23 @@ function createUser(db, { name, username, email, password }) {
     throw new HttpError(400, 'Email không hợp lệ');
   }
 
+  if (cleanPhone && !isVietnamMobilePhone(cleanPhone)) throw new HttpError(400, 'Số điện thoại cần là số di động Việt Nam hợp lệ');
+
   if (String(password).length < 6) {
     throw new HttpError(400, 'Mật khẩu phải có ít nhất 6 ký tự');
+  }
+
+  if (cleanPhone && db.data.users.some(user => user.phone && normalizeVietnamPhone(user.phone) === cleanPhone)) {
+    throw new HttpError(409, 'Số điện thoại đã được liên kết với tài khoản khác');
   }
 
   if (db.data.users.some((u) => u.username.toLowerCase() === cleanUsername.toLowerCase() ||
     (u.email && u.email.toLowerCase() === cleanUsername.toLowerCase()) ||
     (cleanEmail && (u.email === cleanEmail || u.username.toLowerCase() === cleanEmail)))) {
     throw new HttpError(409, 'Tên đăng nhập hoặc email đã tồn tại');
+  }
+  if ((db.data.staff || []).some(staff => staff.username.toLowerCase() === cleanUsername.toLowerCase() || (cleanEmail && staff.username.toLowerCase() === cleanEmail))) {
+    throw new HttpError(409, 'Tên đăng nhập đã tồn tại');
   }
 
   const { salt, hash } = hashPassword(String(password));
@@ -276,6 +304,7 @@ function createUser(db, { name, username, email, password }) {
     name: cleanName,
     username: cleanUsername,
     email: cleanEmail || '',
+    phone: cleanPhone,
     password: { salt, hash },
     created_at: nowString(),
   };

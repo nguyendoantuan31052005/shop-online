@@ -1,0 +1,29 @@
+/* Use an installed Vietnamese-capable UI font for text with tone marks. */
+:root {
+  --font-body: "Segoe UI", Arial, sans-serif;
+  --font-display: "Segoe UI", Arial, sans-serif;
+}
+
+.hero-copy h1,
+.small-banner h3,
+.main-shell .section-title,
+.home-category-section h2,
+.catalog-results .section-title,
+.account-hub-heading h2,
+.experience-heading h2,
+.modal-head h2,
+.footer-brand {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-weight: 700;
+  letter-spacing: 0 !important;
+  font-kerning: normal;
+}
+
+.hero-copy h1 {
+  line-height: 1.12;
+}
+
+.hero-copy h1 em {
+  font-style: normal;
+  font-weight: 600;
+}

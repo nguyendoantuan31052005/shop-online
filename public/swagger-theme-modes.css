@@ -1,0 +1,229 @@
+html[data-docs-theme="dark"] {
+  color-scheme: dark;
+  --docs-bg: #111312;
+  --docs-surface: #1b1e1c;
+  --docs-raised: #232825;
+  --docs-text: #e7ece8;
+  --docs-muted: #aab6ad;
+  --docs-line: #3c463f;
+  --docs-accent: #9fc5aa;
+}
+
+html[data-docs-theme="dark"] body.api-page {
+  background: var(--docs-bg);
+  color: var(--docs-text);
+}
+
+html[data-docs-theme="dark"] .api-page > header {
+  background: #191d1b;
+  color: var(--docs-text);
+  border-color: var(--docs-line);
+}
+
+html[data-docs-theme="dark"] .api-page .docs-top {
+  border-color: var(--docs-line);
+}
+
+html[data-docs-theme="dark"] .api-page .docs-brand,
+html[data-docs-theme="dark"] .api-page .docs-brand > span,
+html[data-docs-theme="dark"] .api-page .docs-hero h1 {
+  color: #e5eee8;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-brand small,
+html[data-docs-theme="dark"] .api-page .docs-eyebrow {
+  color: #d7bd87;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-hero p {
+  color: #bac6bd;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-top nav a,
+html[data-docs-theme="dark"] .api-page .docs-theme-toggle {
+  background: #272d29;
+  border: 1px solid #454f48;
+  color: #e3ebe5;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-top nav a:hover,
+html[data-docs-theme="dark"] .api-page .docs-theme-toggle:hover {
+  background: #343c36;
+  color: #fff;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-downloads a {
+  background: #345d46;
+  border-color: #50795e;
+  color: #f5f8f5;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-downloads a:last-child {
+  background: #242a26;
+  color: #e6d4ae;
+  border-color: #66583d;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-metrics,
+html[data-docs-theme="dark"] .api-page .docs-guides details {
+  background: var(--docs-surface);
+  border-color: var(--docs-line);
+  color: var(--docs-muted);
+}
+
+html[data-docs-theme="dark"] .api-page .docs-metrics > div {
+  border-color: var(--docs-line);
+}
+
+html[data-docs-theme="dark"] .api-page .docs-metrics strong,
+html[data-docs-theme="dark"] .api-page .docs-guides summary {
+  color: #d3e6d8;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-metrics span,
+html[data-docs-theme="dark"] .api-page .docs-guides p,
+html[data-docs-theme="dark"] .api-page .docs-guides li {
+  color: #afbbb2;
+}
+
+html[data-docs-theme="dark"] .api-page .docs-guides code {
+  background: #2a312c;
+  color: #c5e0cd;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui,
+html[data-docs-theme="dark"] .api-page .swagger-ui .wrapper,
+html[data-docs-theme="dark"] .api-page .swagger-ui .info,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-body,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-wrapper,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-inner,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model-box,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model-container,
+html[data-docs-theme="dark"] .api-page .swagger-ui .models {
+  background: var(--docs-bg);
+  color: var(--docs-text);
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .info .title,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-tag,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-tag small,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-summary-description,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-description-wrapper p,
+html[data-docs-theme="dark"] .api-page .swagger-ui .response-col_description,
+html[data-docs-theme="dark"] .api-page .swagger-ui .parameter__name,
+html[data-docs-theme="dark"] .api-page .swagger-ui .parameter__type,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model-title,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model,
+html[data-docs-theme="dark"] .api-page .swagger-ui label {
+  color: var(--docs-text);
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .info p,
+html[data-docs-theme="dark"] .api-page .swagger-ui .info li,
+html[data-docs-theme="dark"] .api-page .swagger-ui .response-col_status,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model-hint,
+html[data-docs-theme="dark"] .api-page .swagger-ui .prop-type {
+  color: var(--docs-muted);
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .scheme-container,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock-section-header,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-table thead tr,
+html[data-docs-theme="dark"] .api-page .swagger-ui .model-box-control,
+html[data-docs-theme="dark"] .api-page .swagger-ui .tab li {
+  background: var(--docs-raised);
+  color: var(--docs-text);
+  border-color: var(--docs-line);
+  box-shadow: none;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock,
+html[data-docs-theme="dark"] .api-page .swagger-ui section.models,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-table,
+html[data-docs-theme="dark"] .api-page .swagger-ui table thead tr th,
+html[data-docs-theme="dark"] .api-page .swagger-ui table tbody tr td {
+  border-color: var(--docs-line);
+  color: var(--docs-text);
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui table thead tr th,
+html[data-docs-theme="dark"] .api-page .swagger-ui table tbody tr td,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-table tbody tr,
+html[data-docs-theme="dark"] .api-page .swagger-ui .responses-table tbody tr td {
+  background: #1b1f1c;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock.opblock-get {
+  background: #1e302a;
+  border-color: #46725f;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock.opblock-post {
+  background: #302f22;
+  border-color: #807342;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock.opblock-put,
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock.opblock-patch {
+  background: #202b35;
+  border-color: #4c6a82;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .opblock.opblock-delete {
+  background: #382624;
+  border-color: #895047;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui input,
+html[data-docs-theme="dark"] .api-page .swagger-ui select,
+html[data-docs-theme="dark"] .api-page .swagger-ui textarea,
+html[data-docs-theme="dark"] .api-page .swagger-ui .operation-filter-input {
+  background: #121614;
+  color: var(--docs-text);
+  border: 1px solid #4a554d;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui input::placeholder,
+html[data-docs-theme="dark"] .api-page .swagger-ui textarea::placeholder {
+  color: #97a49b;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .highlight-code,
+html[data-docs-theme="dark"] .api-page .swagger-ui .microlight,
+html[data-docs-theme="dark"] .api-page .swagger-ui pre {
+  background: #111614 !important;
+  color: #e1e9e3 !important;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .btn {
+  background: #292f2b;
+  color: #e4ebe5;
+  border-color: #4b554e;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .btn.execute {
+  background: #315d46;
+  border-color: #527a60;
+  color: #fff;
+}
+
+html[data-docs-theme="dark"] .api-page .swagger-ui .btn.authorize {
+  background: #263b2d;
+  color: #d8eddd;
+  border-color: #65806b;
+}
+
+.docs-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .docs-theme-toggle { padding: 7px 9px; font-size: 11px; }
+}

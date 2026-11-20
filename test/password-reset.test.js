@@ -1,0 +1,60 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { openDb, createUser, verifyPassword } = require('../src/db');
+const { createPasswordReset } = require('../src/password-reset');
+test('Recovery HTTP routes revoke JWTs and do not expose reset secrets', async t => {
+  const db = openDb(':memory:'); const mail = [];
+  const server = require('../src/app').createApp({ db, jwtSecret: 'test-secret', passwordResetConfig: { origin: 'https://shop.example', sendEmail: async m => mail.push(m) } });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(async () => { const closed = new Promise(resolve => server.close(resolve)); server.closeAllConnections(); server.closeIdleConnections(); await closed; });
+  async function request(route, body, token) {
+    const res = await fetch('http://127.0.0.1:' + server.address().port + route, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    return { status: res.status, body: await res.json() };
+  }
+  const login = await request('/api/auth/register', { name: 'A', username: 'reset-user', email: 'reset@example.com', password: 'original-password' });
+  assert.equal((await request('/api/auth/forgot-password', { email: 'reset@example.com' })).status, 200);
+  const token = new URLSearchParams(new URL(mail[0].link).hash.slice(1)).get('reset');
+  const me = await request('/api/auth/me', undefined, login.body.token);
+  assert.ok(!JSON.stringify(me.body).includes('passwordReset'));
+  assert.equal((await request('/api/auth/reset-password', { token, newPassword: 'changed-password' })).status, 200);
+  assert.equal((await request('/api/auth/me', undefined, login.body.token)).status, 401);
+  assert.equal((await request('/api/auth/login', { username: 'reset-user', password: 'original-password' })).status, 401);
+  assert.equal((await request('/api/auth/login', { username: 'reset-user', password: 'changed-password' })).status, 200);
+});
+test('Recovery uses expiring single-use tokens, hides existence and revokes sessions', async () => {
+  const db = openDb(':memory:');
+  createUser(db, { name: 'Recovery', username: 'recovery', email: 'recovery@example.com', password: 'original-password' });
+  let time = Date.now(); const mail = [];
+  const service = createPasswordReset({ db, origin: 'https://shop.example', now: () => time, sendEmail: async m => mail.push(m) });
+  const known = await service.request({ email: 'RECOVERY@example.com' });
+  assert.deepEqual(await service.request({ email: 'missing@example.com' }), known);
+  const token = new URLSearchParams(new URL(mail[0].link).hash.slice(1)).get('reset');
+  assert.ok(!JSON.stringify(db.data).includes(token));
+  await service.request({ email: 'recovery@example.com' }); assert.equal(mail.length, 1);
+  assert.throws(() => service.reset({ token: 'b'.repeat(64), newPassword: 'changed-password' }));
+  assert.throws(() => service.reset({ token, newPassword: 'short' }));
+  service.reset({ token, newPassword: 'changed-password' });
+  assert.ok(verifyPassword('changed-password', db.data.users[0].password));
+  assert.equal(db.data.users[0].tokenVersion, 1);
+  assert.throws(() => service.reset({ token, newPassword: 'another-password' }));
+  time += 61000; await service.request({ email: 'recovery@example.com' });
+  const expired = new URLSearchParams(new URL(mail[1].link).hash.slice(1)).get('reset');
+  time += 16 * 60000;
+  assert.throws(() => service.reset({ token: expired, newPassword: 'another-password' }));
+  await assert.rejects(createPasswordReset({ db }).request({ email: 'missing@example.com' }), e => e.status === 503 || e.statusCode === 503);
+});
+test('Recovery invalidates earlier links, rejects changed or locked users and rolls back saves', async () => {
+  const db = openDb(':memory:'); createUser(db, { name: 'A', username: 'a', email: 'a@example.com', password: 'password123' });
+  let time = Date.now(); const tokens = [];
+  const service = createPasswordReset({ db, origin: 'https://shop.example', now: () => time, sendEmail: async m => tokens.push(new URLSearchParams(new URL(m.link).hash.slice(1)).get('reset')) });
+  await service.request({ email: 'a@example.com' }); time += 61000; await service.request({ email: 'a@example.com' });
+  assert.throws(() => service.reset({ token: tokens[0], newPassword: 'changed-password' }));
+  db.data.users[0].email = 'changed@example.com';
+  assert.throws(() => service.reset({ token: tokens[1], newPassword: 'changed-password' }));
+  db.data.users[0].email = 'a@example.com'; db.data.users[0].disabled = true;
+  assert.throws(() => service.reset({ token: tokens[1], newPassword: 'changed-password' }));
+  db.data.users[0].disabled = false;
+  const before = JSON.stringify(db.data); db.save = () => { throw Error('disk'); };
+  assert.throws(() => service.reset({ token: tokens[1], newPassword: 'changed-password' }));
+  assert.equal(JSON.stringify(db.data), before);
+});

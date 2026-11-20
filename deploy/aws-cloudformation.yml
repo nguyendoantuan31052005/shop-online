@@ -1,0 +1,358 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Shop Online single-instance deployment with persistent EBS data and HTTPS through CloudFront.
+
+Parameters:
+  AmiId:
+    Type: AWS::EC2::Image::Id
+  PublicSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  CloudFrontPrefixListId:
+    Type: String
+  EcrImageUri:
+    Type: String
+  AppSecretArn:
+    Type: String
+  BootstrapBucket:
+    Type: String
+  BootstrapObjectKey:
+    Type: String
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small]
+
+Resources:
+  ShopInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: ShopRuntimeReadOnly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: PullShopImage
+                Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+              - Sid: PullShopImageLayers
+                Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                Resource: !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/shop-online
+              - Sid: ReadShopRuntimeSecret
+                Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref AppSecretArn
+              - Sid: ReadBootstrapData
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${BootstrapBucket}/${BootstrapObjectKey}
+              - Sid: WriteEncryptedShopBackups
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub ${ShopBackupBucket.Arn}/daily/*
+              - Sid: UploadProductImages
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub ${ShopProductImageBucket.Arn}/product-images/*
+
+  ShopProductImageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Project
+          Value: shop-online
+        - Key: Purpose
+          Value: product-images
+
+  ShopBackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireDailyBackups
+            Status: Enabled
+            Prefix: daily/
+            ExpirationInDays: 30
+      Tags:
+        - Key: Project
+          Value: shop-online
+        - Key: Purpose
+          Value: encrypted-database-backups
+
+  ShopInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref ShopInstanceRole]
+
+  ShopSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow web traffic only from CloudFront origin-facing addresses.
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - Description: CloudFront origin traffic over HTTP.
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourcePrefixListId: !Ref CloudFrontPrefixListId
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: shop-online-origin
+
+  ShopInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ShopInstanceProfile
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds: [!Ref ShopSecurityGroup]
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required
+        HttpPutResponseHopLimit: 2
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 16
+            VolumeType: gp3
+            Encrypted: true
+            DeleteOnTermination: false
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euo pipefail
+          exec > >(tee -a /var/log/shop-bootstrap.log | logger -t shop-bootstrap -s 2>/dev/console) 2>&1
+          dnf install -y docker jq unzip awscli-2
+          systemctl enable --now docker
+          mkdir -p /opt/shop/data
+          aws s3 cp "s3://${BootstrapBucket}/${BootstrapObjectKey}" /tmp/shop-bootstrap.zip --region ${AWS::Region}
+          unzip -o /tmp/shop-bootstrap.zip -d /opt/shop
+          rm -f /tmp/shop-bootstrap.zip
+          chown -R 1000:1000 /opt/shop/data
+          APP_SECRET="$(aws secretsmanager get-secret-value --secret-id '${AppSecretArn}' --query SecretString --output text --region ${AWS::Region})"
+          ADMIN_TOKEN="$(printf '%s' "$APP_SECRET" | jq -r '.ADMIN_TOKEN')"
+          JWT_SECRET="$(printf '%s' "$APP_SECRET" | jq -r '.JWT_SECRET')"
+          PUBLIC_URL="$(printf '%s' "$APP_SECRET" | jq -r '.PUBLIC_URL // empty')"
+          RESEND_API_KEY="$(printf '%s' "$APP_SECRET" | jq -r '.RESEND_API_KEY // empty')"
+          MAIL_FROM="$(printf '%s' "$APP_SECRET" | jq -r '.MAIL_FROM // empty')"
+          unset APP_SECRET
+          aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
+          docker pull '${EcrImageUri}'
+          docker run -d --name shop-online --restart unless-stopped -p 80:3000 -v /opt/shop/data:/data -e PORT=3000 -e DB_PATH=/data/shop.json -e COOKIE_SECURE=true -e AWS_REGION='${AWS::Region}' -e PRODUCT_IMAGE_BUCKET='${ShopProductImageBucket}' -e PRODUCT_IMAGE_PREFIX=product-images -e PRODUCT_IMAGE_BASE_PATH=/product-images -e ADMIN_TOKEN="$ADMIN_TOKEN" -e JWT_SECRET="$JWT_SECRET" -e PUBLIC_URL="$PUBLIC_URL" -e RESEND_API_KEY="$RESEND_API_KEY" -e MAIL_FROM="$MAIL_FROM" '${EcrImageUri}'
+          unset ADMIN_TOKEN JWT_SECRET PUBLIC_URL RESEND_API_KEY MAIL_FROM
+          docker image prune -af
+      Tags:
+        - Key: Name
+          Value: shop-online
+        - Key: Project
+          Value: shop-online
+
+  ShopBackupAssociation:
+    Type: AWS::SSM::Association
+    DependsOn: ShopBackupBucket
+    Properties:
+      Name: AWS-RunShellScript
+      AssociationName: shop-online-daily-data-backup
+      ScheduleExpression: cron(15 2 * * ? *)
+      Targets:
+        - Key: InstanceIds
+          Values: [!Ref ShopInstance]
+      Parameters:
+        commands:
+          - !Sub |
+              set -euo pipefail
+              backup="/tmp/shop-data-$(date -u +%F-%H%M%S).tar.gz"
+              trap 'rm -f "$backup"' EXIT
+              tar -czf "$backup" -C /opt/shop data
+              aws s3 cp "$backup" "s3://${ShopBackupBucket}/daily/shop-$(date -u +%F-%H%M%S).tar.gz" --sse AES256 --region ${AWS::Region}
+
+  ShopElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref ShopInstance
+      Tags:
+        - Key: Name
+          Value: shop-online-origin
+
+  StaticAssetCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub ${AWS::StackName}-static-assets
+        Comment: Short edge cache for storefront assets; HTML and API stay uncached.
+        DefaultTTL: 300
+        MaxTTL: 3600
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          CookiesConfig:
+            CookieBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  ProductImagesOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${AWS::StackName}-product-images
+        Description: Private S3 access for product images through CloudFront.
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  ShopDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: ShopElasticIp
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: Shop Online storefront
+        PriceClass: PriceClass_100
+        HttpVersion: http2and3
+        Origins:
+          - Id: shop-online-origin
+            DomainName: !GetAtt ShopInstance.PublicDnsName
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+              OriginReadTimeout: 60
+              OriginKeepaliveTimeout: 30
+          - Id: shop-product-images
+            DomainName: !GetAtt ShopProductImageBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt ProductImagesOriginAccessControl.Id
+        CacheBehaviors:
+          - PathPattern: '/product-images/*'
+            TargetOriginId: shop-product-images
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !Ref StaticAssetCachePolicy
+          - PathPattern: '*.css'
+            TargetOriginId: shop-online-origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !Ref StaticAssetCachePolicy
+          - PathPattern: '*.js'
+            TargetOriginId: shop-online-origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !Ref StaticAssetCachePolicy
+          - PathPattern: '/images/*'
+            TargetOriginId: shop-online-origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !Ref StaticAssetCachePolicy
+          - PathPattern: '/data/*'
+            TargetOriginId: shop-online-origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !Ref StaticAssetCachePolicy
+        DefaultCacheBehavior:
+          TargetOriginId: shop-online-origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          CachedMethods: [GET, HEAD, OPTIONS]
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+            Headers:
+              - '*'
+          MinTTL: 0
+          DefaultTTL: 0
+          MaxTTL: 0
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+  ShopProductImageBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ShopProductImageBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontProductImageReads
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${ShopProductImageBucket.Arn}/product-images/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${ShopDistribution}
+
+Outputs:
+  ShopUrl:
+    Description: HTTPS storefront address.
+    Value: !Sub https://${ShopDistribution.DomainName}
+  InstanceId:
+    Description: EC2 instance managed by AWS Systems Manager.
+    Value: !Ref ShopInstance
+  BackupBucketName:
+    Description: Private S3 bucket holding encrypted daily shop data backups.
+    Value: !Ref ShopBackupBucket
+  ProductImageBucketName:
+    Description: Private S3 bucket for product images.
+    Value: !Ref ShopProductImageBucket
+  OriginPublicIp:
+    Description: Stable origin IP; security group accepts web traffic only from CloudFront.
+    Value: !Ref ShopElasticIp

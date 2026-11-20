@@ -10,7 +10,7 @@ test('Product uploads require admin, reject invalid files and survive server res
  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  const db=openDb(':memory:');let server;
  async function start(){server=createApp({db,uploadDir:dir,adminToken:'test-secret'});await new Promise(r=>server.listen(0,'127.0.0.1',r));return 'http://127.0.0.1:'+server.address().port;}
- async function stop(){server.closeAllConnections();await new Promise(r=>server.close(r));}
+ async function stop(){const closed=new Promise(r=>server.close(r));server.closeAllConnections();server.closeIdleConnections();await closed;}
  t.after(async()=>{if(server.listening)await stop();});
  let base=await start();
  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');

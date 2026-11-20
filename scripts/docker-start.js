@@ -16,6 +16,6 @@ function run(args) {
 run(['info', '--format', '{{.ServerVersion}}']);
 run(['compose', 'up', '-d', '--build', '--wait', '--wait-timeout', '90']);
 const base = 'http://localhost:' + (process.env.HOST_PORT || '8080');
-console.log('\nCửa hàng: ' + base + '\nQuản trị: ' + base + '/admin');
+console.log('\nCửa hàng: ' + base + '\nQuản trị: ' + base + '/admin\nSwagger API: ' + base + '/api-docs\nOpenAPI JSON: ' + base + '/api/openapi.json');
 console.log('Docker Desktop → Containers → shop-online. Mật khẩu quản trị: ADMIN_TOKEN trong .env.');
 console.log('Không cần tạo thêm container bằng nút Run trong Images.');

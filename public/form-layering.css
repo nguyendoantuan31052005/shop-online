@@ -1,0 +1,12 @@
+/* Keep dialogs above fixed navigation and floating contact controls. */
+.modal {
+  z-index: 2000;
+}
+
+#productDetailModal {
+  z-index: 2100;
+}
+
+#checkoutModal {
+  z-index: 2200;
+}

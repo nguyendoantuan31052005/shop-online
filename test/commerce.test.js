@@ -12,7 +12,7 @@ const voucher = (db, extra = {}) => c.saveVoucher(db, null, {code:'SALE10',type:
 async function fixture(t, options = {}) {
   const db = openDb(':memory:'); const server = createApp({db,adminToken:'private-admin-password',jwtSecret:'a'.repeat(48),...options});
   await new Promise(r => server.listen(0,'127.0.0.1',r));
-  t.after(async () => { server.closeAllConnections(); await new Promise(r=>server.close(r)); });
+  t.after(async () => { const closed = new Promise(r=>server.close(r)); server.closeAllConnections(); server.closeIdleConnections(); await closed; });
   const request = async (route, method = 'GET', body, headers = {}) => {
     const res = await fetch('http://127.0.0.1:'+server.address().port+route,{method,headers:{'Content-Type':'application/json',...headers},body:body===undefined?undefined:JSON.stringify(body)});
     return {status:res.status,body:await res.json(),cookie:res.headers.get('set-cookie')};

@@ -20,7 +20,7 @@ function renderWishlist() {
   const items = allProducts.filter((p) => wishlist.includes(p.id));
 
   if (!items.length) {
-    container.innerHTML = '<div class="mini-item"><span>Chưa có sản phẩm yêu thích</span></div>';
+    container.innerHTML = '<div class="service-empty"><span class="empty-symbol" aria-hidden="true">♡</span><strong>Những món đồ bạn yêu thích</strong><p>Nhấn vào trái tim trên sản phẩm để lưu lại và xem sau.</p><span class="empty-note">Chưa có sản phẩm yêu thích</span></div>';
     return;
   }
 

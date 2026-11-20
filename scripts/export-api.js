@@ -1,0 +1,11 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { createOpenApi } = require('../src/openapi');
+const { postmanCollection, apiMarkdown } = require('../src/api-export');
+const spec = createOpenApi('dev');
+const target = path.join(__dirname, '../docs');
+fs.mkdirSync(target, { recursive: true });
+fs.writeFileSync(path.join(target, 'openapi.json'), JSON.stringify(spec, null, 2) + '\n');
+fs.writeFileSync(path.join(target, 'postman.json'), JSON.stringify(postmanCollection(spec), null, 2) + '\n');
+fs.writeFileSync(path.join(target, 'API.md'), apiMarkdown(spec));
+console.log('Exported ' + Object.values(spec.paths).reduce((sum, value) => sum + Object.keys(value).length, 0) + ' API operations to docs.');

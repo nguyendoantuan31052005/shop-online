@@ -12,11 +12,11 @@ WORKDIR /app
 
 # Copy theo thứ tự ít thay đổi -> hay thay đổi để tận dụng cache của Docker layer
 COPY package.json ./
-COPY public ./public
-COPY src ./src
+COPY --chown=node:node public ./public
+COPY --chown=node:node src ./src
 
 # Thư mục dữ liệu (gắn volume) và phân quyền cho user không phải root
-RUN mkdir -p /data && chown -R node:node /data /app
+RUN mkdir -p /data && chown node:node /data /app
 USER node
 VOLUME ["/data"]
 

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="vi">
+<head><script>try{document.documentElement.dataset.docsTheme=localStorage.getItem('home-shopping-theme')==='dark'?'dark':'light'}catch{document.documentElement.dataset.docsTheme='light'}</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Shopping App — Swagger API</title>
+  <link rel="stylesheet" href="/vendor/swagger-ui/swagger-ui.css">
+  <link rel="stylesheet" href="/swagger-theme.css">
+  <link rel="stylesheet" href="/workspace-theme.css?v=1">
+<link rel="stylesheet" href="/swagger-theme-modes.css?v=1">
+  <link rel="stylesheet" href="/swagger-balance.css?v=whole-workspace-20261112-1">
+</head>
+<body class="api-page">
+  <header>
+    <div class="docs-top"><a class="docs-brand" href="/">⌂ <span>Home Shopping<small>DEVELOPER PORTAL</small></span></a><nav><a href="/">Cửa hàng ↗</a><a href="/admin">Quản trị ↗</a></nav></div>
+    <div class="docs-hero"><span class="docs-eyebrow">HOME SHOPPING · TÀI LIỆU TÍCH HỢP</span><h1>Kết nối cửa hàng.<br>Khám phá từng API.</h1><p>Tra cứu tài nguyên, xem dữ liệu mẫu và thử trực tiếp các API của Home Shopping App.</p><div class="docs-downloads"><a href="/api/openapi.json" download="home-shopping-openapi.json">↓ OpenAPI JSON</a><a href="/api/postman.json" download="home-shopping-postman.json">↓ Postman Collection</a></div></div>
+    <div class="docs-metrics"><div><strong id="apiOperationCount">—</strong><span>Thao tác API</span></div><div><strong>3</strong><span>Cách truy cập: công khai, JWT, quản trị</span></div><div><strong>VND</strong><span>Tiền tệ, số nguyên</span></div><div><strong>Offline UI</strong><span>Thư viện được lưu trong dự án</span></div></div>
+  </header>
+  <section class="docs-guides" aria-label="Hướng dẫn sử dụng API"><details open><summary>Bắt đầu trong 3 bước</summary><ol><li>Đọc <code>GET /api/products</code> để lấy ID, màu và quy cách thật.</li><li>Gọi đăng ký/đăng nhập khách. Swagger tự nhận token cho các yêu cầu tiếp theo.</li><li>Gọi báo giá rồi đặt đơn với <code>expectedTotal</code>. Chọn Try it out → Execute để gửi yêu cầu thật.</li></ol></details><details><summary>Khách hàng & quản trị</summary><p>CustomerBearer: nhập JWT từ API đăng nhập. Token hết hạn sau 24 giờ.</p><p>AdminToken: nhập ADMIN_TOKEN từ cấu hình riêng. Hoặc gọi API đăng nhập quản trị để dùng cookie HttpOnly, thời hạn 8 giờ. Swagger tự thêm X-Requested-With: shop-admin khi ghi qua API quản trị.</p><p>Token nhập trong trang không lưu sau khi tải lại. Cookie theo thời hạn phiên server.</p></details><details><summary>Đọc phản hồi & xử lý lỗi</summary><p>200: thành công · 201: đã tạo tài nguyên. Lỗi trả JSON có trường <code>error</code>.</p><p>400: dữ liệu không hợp lệ · 401/403: xác thực/quyền · 404: không tìm thấy · 409: xung đột giá/tồn kho/trạng thái · 413: body quá lớn · 429: quá số lần thử.</p><p>Ví dụ là dữ liệu minh họa. Thao tác ghi cập nhật dữ liệu thật; thanh toán hiện hỗ trợ COD.</p></details></section>
+  <div id="swagger-ui"></div>
+  <script src="/vendor/swagger-ui/swagger-ui-bundle.js" onerror="document.getElementById('swagger-ui').textContent='Không tải được Swagger UI. Hãy tải lại trang hoặc mở liên kết OpenAPI JSON phía trên.'"></script>
+  <script src="/swagger-init.js"></script>
+<script src="/swagger-theme-toggle.js?v=1"></script></body>
+</html>

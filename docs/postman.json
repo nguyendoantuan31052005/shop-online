@@ -1,0 +1,1695 @@
+{
+  "info": {
+    "name": "Home Shopping App Backend API",
+    "description": "Các request mẫu gọi API thật. Đặt baseUrl, adminToken; đăng nhập khách sẽ tự cập nhật customerToken. Không chứa secret của shop.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": "1"
+    },
+    {
+      "key": "ticketId",
+      "value": ""
+    },
+    {
+      "key": "reviewId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Hệ thống",
+      "item": [
+        {
+          "name": "Kiểm tra server",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thông tin phiên bản",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/info",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thông tin liên hệ công khai của shop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/contact",
+            "description": "Thông tin công khai của shop. Bỏ trống để ẩn kênh chưa dùng; Facebook/Messenger chỉ nhận HTTPS trên tên miền chính thức. PUT cập nhật các trường gửi lên và giữ các trường còn lại.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Available recovery methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/recovery-options",
+            "description": "Returns emailEnabled and authenticatorEnabled flags for the storefront.\n\nĐọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password with authenticator TOTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/reset-totp-password",
+            "description": "Requires a previously enrolled TOTP secret. Codes are time-based, single-use, and old customer sessions are revoked.\n\nThao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0901234567\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"Example-new-password-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Read current account TOTP status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/totp/status",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Create a temporary TOTP enrollment secret",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/totp/setup",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm and enable TOTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/totp/enable",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disable TOTP with a current code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/totp/disable",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tài khoản",
+      "item": [
+        {
+          "name": "Yêu cầu email khôi phục mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "description": "Phản hồi chung cho email có hoặc không có tài khoản. Liên kết dùng một lần, hết hạn sau 15 phút. Cần RESEND_API_KEY, MAIL_FROM và PUBLIC_URL; thiếu cấu hình trả 503. Không hỗ trợ tài khoản quản trị.\n\nThao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đặt mật khẩu mới từ liên kết khôi phục",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "description": "Token hợp lệ dùng một lần; mật khẩu mới từ 8–256 ký tự. Thu hồi tất cả phiên đăng nhập khách hàng. Token hết hạn, đã dùng hoặc bị vô hiệu hóa trả 400.\n\nThao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"newPassword\": \"Example-new-password-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sổ địa chỉ của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/addresses",
+            "description": "GET chỉ đọc sổ của tài khoản hiện tại. PUT thay thế toàn bộ sổ, tối đa 10 địa chỉ; ID không trùng và chỉ một địa chỉ mặc định. Danh sách rỗng xóa sổ. Nếu chưa có mặc định, server chọn địa chỉ đầu tiên.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Lưu tối đa 10 địa chỉ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/addresses",
+            "description": "GET chỉ đọc sổ của tài khoản hiện tại. PUT thay thế toàn bộ sổ, tối đa 10 địa chỉ; ID không trùng và chỉ một địa chỉ mặc định. Danh sách rỗng xóa sổ. Nếu chưa có mặc định, server chọn địa chỉ đầu tiên.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"id\": \"1\",\n      \"name\": \"Nguyễn Văn A\",\n      \"phone\": \"0901234567\",\n      \"city\": \"Hồ Chí Minh\",\n      \"ward\": \"Phường Bến Nghé\",\n      \"district\": \"\",\n      \"address\": \"12 Nguyễn Huệ\",\n      \"isDefault\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Hồ sơ chi tiết và thống kê mua sắm riêng tư",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/account/overview",
+            "description": "Chỉ trả thống kê của khách đăng nhập: đơn theo trạng thái, chi tiêu đơn hoàn thành, số địa chỉ/đánh giá/yêu cầu đang xử lý và địa chỉ mặc định. Không nhận userId từ client.\n\nĐọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng ký khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "description": "Tên, tên đăng nhập và mật khẩu bắt buộc; email tùy chọn. Mật khẩu tối thiểu 6 ký tự. Username/email được kiểm tra trùng không phân biệt hoa thường. Tên admin được dành riêng. Token hết hạn sau 24 giờ.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn A\",\n  \"username\": \"khachhang01\",\n  \"password\": \"MatKhau123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const payload = pm.response.json();",
+                  "  if (payload.token) pm.collectionVariables.set(\"customerToken\", payload.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đăng nhập lấy Bearer token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Nhập username hoặc email cùng password. Khách nhận JWT. Username admin dùng mật khẩu cấu hình server, nhận cookie HttpOnly và redirect /admin thay cho JWT. POST auth có giới hạn thử theo IP.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"khachhang01\",\n  \"password\": \"MatKhau123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const payload = pm.response.json();",
+                  "  if (payload.token) pm.collectionVariables.set(\"customerToken\", payload.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hồ sơ của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "GET đọc hồ sơ. PATCH nhận name, email, phone, address, birthday, gender, bio, avatarColor và ít nhất một trường. Ngày sinh/giới tính/giới thiệu là tùy chọn, có thể xóa bằng chuỗi rỗng. Email phải không trùng với tài khoản khác. Không thể đổi username hoặc vai trò qua API này.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật hồ sơ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "GET đọc hồ sơ. PATCH nhận name, email, phone, address, birthday, gender, bio, avatarColor và ít nhất một trường. Ngày sinh/giới tính/giới thiệu là tùy chọn, có thể xóa bằng chuỗi rỗng. Email phải không trùng với tài khoản khác. Không thể đổi username hoặc vai trò qua API này.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn A\",\n  \"phone\": \"0901234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đổi mật khẩu và thu hồi token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/password",
+            "description": "Cần mật khẩu hiện tại và mật khẩu mới 8–256 ký tự. Thành công thu hồi mọi JWT hiện có của tài khoản; đăng nhập lại để tiếp tục.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"MatKhau123!A\",\n  \"newPassword\": \"MatKhauMoi456!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng xuất, thu hồi mọi token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Thu hồi mọi JWT hiện có của tài khoản, gồm token đang dùng. Xóa token trong ứng dụng sau khi thành công.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sản phẩm",
+      "item": [
+        {
+          "name": "Đánh giá công khai từ người đã mua",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{id}}/reviews",
+            "description": "GET công khai chỉ gồm đánh giá không bị ẩn; average và count tính từ dữ liệu thật. POST yêu cầu tài khoản có đơn done chứa sản phẩm. Mỗi tài khoản chỉ một đánh giá/sản phẩm; không tạo đánh giá giả.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Đánh giá sản phẩm đã mua trong đơn hoàn thành",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products/{{id}}/reviews",
+            "description": "GET công khai chỉ gồm đánh giá không bị ẩn; average và count tính từ dữ liệu thật. POST yêu cầu tài khoản có đơn done chứa sản phẩm. Mỗi tài khoản chỉ một đánh giá/sản phẩm; không tạo đánh giá giả.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Sản phẩm đúng mô tả, đóng gói cẩn thận.\",\n  \"images\": [\n    \"Ví dụ\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tải ảnh đánh giá đã mua (tối đa 5 MB)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "image/png"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products/{{id}}/reviews/images",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.\n\nChọn file PNG trong tab Body → binary trước khi gửi.",
+            "body": {
+              "mode": "file",
+              "file": {}
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products?q=%C4%91%C3%A8n&category=Trang%20tr%C3%AD",
+            "description": "Trả toàn bộ sản phẩm khớp q và category; endpoint này không phân trang. Dùng /api/v1/vn/vi/products nếu cần phân trang. Bộ lọc giá trên trang cửa hàng hiện được xử lý ở client.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Chi tiết sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{id}}",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh mục",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/categories",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Đơn hàng",
+      "item": [
+        {
+          "name": "Thêm lại sản phẩm của đơn vào giỏ với giá và tồn kho hiện tại",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders/{{id}}/reorder",
+            "description": "Chỉ chủ đơn được mua lại. Thêm các dòng cũ vào giỏ hiện tại và kiểm tra theo catalog mới. Không tự tạo đơn, áp dụng lại voucher hay giữ giá cũ. Nếu có dòng không hợp lệ hoặc thiếu tồn kho, giỏ không thay đổi.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Các phiếu hỗ trợ của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/support",
+            "description": "Chỉ truy cập yêu cầu của chính tài khoản. Một đơn chỉ có một phiếu đang mở/xử lý. Loại return cần đơn done. Phiếu hỗ trợ không tự hoàn tiền, hoàn kho hoặc tạo vận đơn.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Gửi yêu cầu hỗ trợ/đổi trả",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/support",
+            "description": "Yêu cầu đổi trả cần đơn hoàn thành. Không tự hoàn tiền hoặc hoàn kho.\n\nChỉ truy cập yêu cầu của chính tài khoản. Một đơn chỉ có một phiếu đang mở/xử lý. Loại return cần đơn done. Phiếu hỗ trợ không tự hoàn tiền, hoàn kho hoặc tạo vận đơn.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"type\": \"question\",\n  \"message\": \"Tôi cần shop hỗ trợ kiểm tra đơn hàng.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đặt hàng COD (cần đăng nhập)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders",
+            "description": "Cần khách đăng nhập. Server kiểm tra dữ liệu và tính lại báo giá trước khi tạo đơn. Thành công trừ tồn kho, tăng lượt voucher và xóa giỏ server của khách. expectedTotal sai trả 409 và không tạo đơn. Chỉ có COD.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"name\": \"Nguyễn Văn A\",\n    \"phone\": \"0901234567\",\n    \"address\": \"12 Bạch Đằng, Đà Nẵng\"\n  },\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ],\n  \"paymentMethod\": \"cod\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lịch sử đơn của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders/mine",
+            "description": "Chỉ trả đơn của tài khoản hiện tại, mới nhất trước. Không nhận userId từ client để chọn khách khác.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tra đơn bằng mã và số điện thoại",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/orders/{{id}}?phone=0901234567",
+            "description": "Tra cứu bằng ID đơn và số điện thoại trùng với đơn. Sai số điện thoại hoặc không có đơn đều trả 404 để tránh lộ thông tin.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Hủy đơn mới của tôi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders/{{id}}/cancel",
+            "description": "Chỉ chủ đơn được hủy đơn new. Đơn đã cancelled trả kết quả cũ và không hoàn kho/lượt voucher lần hai. Đơn đã confirmed, shipping hoặc done không được khách tự hủy.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Quản trị",
+      "item": [
+        {
+          "name": "Các yêu cầu hỗ trợ khách hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/support",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Các đánh giá của khách",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/reviews",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Phản hồi phiếu hỗ trợ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/support/{{ticketId}}",
+            "description": "Cập nhật trạng thái xử lý và phản hồi hiển thị cho chủ phiếu. Thao tác này không tự chuyển tiền hoặc thay đổi tồn kho/đơn hàng.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"open\",\n  \"reply\": \"Shop đã tiếp nhận và đang kiểm tra.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ẩn/hiện đánh giá",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/reviews/{{reviewId}}",
+            "description": "Chỉ cập nhật hidden kiểu boolean. Đánh giá ẩn không xuất hiện trong danh sách công khai và không tính vào trung bình sao.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hidden\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đọc cấu hình liên hệ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/contact",
+            "description": "Thông tin công khai của shop. Bỏ trống để ẩn kênh chưa dùng; Facebook/Messenger chỉ nhận HTTPS trên tên miền chính thức. PUT cập nhật các trường gửi lên và giữ các trường còn lại.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Lưu cấu hình liên hệ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/contact",
+            "description": "Bỏ trống kênh không dùng. Facebook/Messenger phải là URL HTTPS trên tên miền chính thức.\n\nThông tin công khai của shop. Bỏ trống để ẩn kênh chưa dùng; Facebook/Messenger chỉ nhận HTTPS trên tên miền chính thức. PUT cập nhật các trường gửi lên và giữ các trường còn lại.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0901234567\",\n  \"zaloPhone\": \"\",\n  \"facebookName\": \"Tên Facebook shop\",\n  \"facebookUrl\": \"\",\n  \"messengerUrl\": \"\",\n  \"email\": \"khach@example.com\",\n  \"address\": \"12 Nguyễn Huệ\",\n  \"hours\": \"8:00–21:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng nhập chủ shop hoặc nhân viên bằng cookie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/login",
+            "description": "Chủ shop dùng username admin và ADMIN_TOKEN. Nhân viên dùng tài khoản được chủ shop tạo trong trang quản trị.\n\nMật khẩu quản trị lấy từ cấu hình ADMIN_TOKEN. Thành công tạo cookie shop_admin HttpOnly, SameSite=Strict, hết hạn sau 8 giờ. Không có secret thật trong tài liệu.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"khachhang01\",\n  \"password\": \"MatKhau123!A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng xuất quản trị",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/logout",
+            "description": "Thu hồi phiên cookie hiện tại và xóa cookie. Xóa AdminToken trong client nếu trước đó đã Authorize bằng header; API key trong cấu hình server không bị thu hồi bởi logout.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Kiểm tra phiên",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/session",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thống kê",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/stats",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách tài khoản",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Đơn của tài khoản",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{id}}/orders",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách đơn",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Trạng thái cấu hình dịch vụ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/integrations",
+            "description": "Chỉ trả trạng thái đã cấu hình, không trả token hay secret của nhà cung cấp.\n\nĐọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách nhân viên (chủ shop)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/staff",
+            "description": "Chỉ chủ shop được xem và quản lý tài khoản nhân viên.\n\nĐọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tạo tài khoản nhân viên (chủ shop)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/staff",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn A\",\n  \"username\": \"khachhang01\",\n  \"password\": \"MatKhau123!A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Khóa/mở khóa hoặc đặt lại mật khẩu nhân viên (chủ shop)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/staff/{{id}}",
+            "description": "Chỉ chủ shop được gọi. Đặt lại mật khẩu hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập đang hoạt động.\n\nThao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disabled\": false,\n  \"password\": \"MatKhau123!A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mô phỏng tạo vận đơn GHN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{id}}/shipment/ghn/simulate",
+            "description": "Chỉ trả về mã mô phỏng. Không gọi GHN, không ghi dữ liệu đơn hàng và không tạo vận đơn thật.\n\nThao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Khóa hoặc mở tài khoản",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{id}}",
+            "description": "Chỉ cho phép trường disabled kiểu boolean. Tài khoản khóa không sử dụng được các API khách hàng; không thay đổi đơn lịch sử.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật trạng thái, thanh toán COD hoặc vận đơn",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{id}}",
+            "description": "Luồng đơn: new → confirmed → shipping → done. COD chỉ được đánh dấu đã thu khi đơn đang giao hoặc hoàn thành. Lưu thông tin vận chuyển thủ công; link tra cứu phải dùng HTTPS.\n\nLuồng hợp lệ: new → confirmed → shipping → done. Có thể chuyển sang cancelled từ new, confirmed hoặc shipping. Đơn done/cancelled không mở lại. Chủ shop có thể cập nhật số di động nhận hàng cho đơn new/confirmed chưa có vận đơn; số phải theo dạng 03/05/07/08/09 và đủ 10 số. Hủy đơn hoàn kho và lượt voucher đúng một lần.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"new\",\n  \"paymentStatus\": \"paid\",\n  \"shipment\": {\n    \"carrier\": \"Ví dụ\",\n    \"trackingNumber\": \"Ví dụ\",\n    \"trackingUrl\": \"Ví dụ\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Danh mục sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thêm danh mục",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Đổi tên danh mục và cập nhật sản phẩm",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories/{{name}}",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa danh mục đang trống",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/categories/{{name}}",
+            "description": "Thao tác ghi được lưu vào database của shop. Khi ghi thất bại, thay đổi dữ liệu được hoàn tác.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/products",
+            "description": "POST yêu cầu name, category, price, stock; sizes/colors mặc định One Size/Mặc định nếu bỏ qua. PATCH ghép với dữ liệu hiện có rồi kiểm tra toàn bộ sản phẩm. Giá không âm, tồn kho 0–1.000.000. Xóa sản phẩm không xóa bản chụp trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thêm products",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/products",
+            "description": "POST yêu cầu name, category, price, stock; sizes/colors mặc định One Size/Mặc định nếu bỏ qua. PATCH ghép với dữ liệu hiện có rồi kiểm tra toàn bộ sản phẩm. Giá không âm, tồn kho 0–1.000.000. Xóa sản phẩm không xóa bản chụp trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Áo thun demo\",\n  \"category\": \"Áo\",\n  \"price\": 199000,\n  \"stock\": 20,\n  \"sizes\": [\n    \"M\",\n    \"L\"\n  ],\n  \"colors\": [\n    \"Đen\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa products",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/products/{{id}}",
+            "description": "POST yêu cầu name, category, price, stock; sizes/colors mặc định One Size/Mặc định nếu bỏ qua. PATCH ghép với dữ liệu hiện có rồi kiểm tra toàn bộ sản phẩm. Giá không âm, tồn kho 0–1.000.000. Xóa sản phẩm không xóa bản chụp trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Áo thun demo\",\n  \"category\": \"Áo\",\n  \"price\": 199000,\n  \"stock\": 20,\n  \"sizes\": [\n    \"M\",\n    \"L\"\n  ],\n  \"colors\": [\n    \"Đen\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa products",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/products/{{id}}",
+            "description": "POST yêu cầu name, category, price, stock; sizes/colors mặc định One Size/Mặc định nếu bỏ qua. PATCH ghép với dữ liệu hiện có rồi kiểm tra toàn bộ sản phẩm. Giá không âm, tồn kho 0–1.000.000. Xóa sản phẩm không xóa bản chụp trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách vouchers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/vouchers",
+            "description": "Loại percent: value 1–100; fixed: value từ 1 VND; shipping: value được đặt về 0. Mã chỉ gồm chữ/số/gạch ngang/gạch dưới và không được trùng. startsAt phải trước expiresAt. PATCH ghép dữ liệu hiện có. Xóa voucher không xóa thông tin trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Thêm vouchers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/vouchers",
+            "description": "Loại percent: value 1–100; fixed: value từ 1 VND; shipping: value được đặt về 0. Mã chỉ gồm chữ/số/gạch ngang/gạch dưới và không được trùng. startsAt phải trước expiresAt. PATCH ghép dữ liệu hiện có. Xóa voucher không xóa thông tin trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DEMO10\",\n  \"type\": \"percent\",\n  \"value\": 10,\n  \"minOrder\": 0,\n  \"maxDiscount\": 50000,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa vouchers",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/vouchers/{{id}}",
+            "description": "Loại percent: value 1–100; fixed: value từ 1 VND; shipping: value được đặt về 0. Mã chỉ gồm chữ/số/gạch ngang/gạch dưới và không được trùng. startsAt phải trước expiresAt. PATCH ghép dữ liệu hiện có. Xóa voucher không xóa thông tin trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DEMO10\",\n  \"type\": \"percent\",\n  \"value\": 10,\n  \"minOrder\": 0,\n  \"maxDiscount\": 50000,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa vouchers",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/vouchers/{{id}}",
+            "description": "Loại percent: value 1–100; fixed: value từ 1 VND; shipping: value được đặt về 0. Mã chỉ gồm chữ/số/gạch ngang/gạch dưới và không được trùng. startsAt phải trước expiresAt. PATCH ghép dữ liệu hiện có. Xóa voucher không xóa thông tin trong đơn cũ.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tải ảnh (PNG/JPG/WebP, tối đa 5 MB)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "X-Requested-With",
+                "value": "shop-admin"
+              },
+              {
+                "key": "Content-Type",
+                "value": "image/png"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/images",
+            "description": "Gửi trực tiếp byte ảnh, không gửi multipart/form-data hoặc JSON base64. Server kiểm tra chữ ký PNG/JPEG/WebP, tối đa 5 MB. Kết quả là đường dẫn /uploads/... dùng ở trường image của sản phẩm.\n\nQuản trị: x-admin-token hoặc cookie phiên. Với cookie và thao tác ghi, gửi X-Requested-With: shop-admin.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.\n\nChọn file PNG trong tab Body → binary trước khi gửi.",
+            "body": {
+              "mode": "file",
+              "file": {}
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Giỏ hàng",
+      "item": [
+        {
+          "name": "Đọc giỏ hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart",
+            "description": "Giỏ riêng theo tài khoản. PUT thay thế toàn bộ giỏ; items rỗng làm trống giỏ. Server kiểm tra sản phẩm, quy cách, màu và tồn kho. DELETE làm trống giỏ. Giá trả về lấy từ catalog hiện tại.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Lưu giỏ hàng",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart",
+            "description": "Giỏ riêng theo tài khoản. PUT thay thế toàn bộ giỏ; items rỗng làm trống giỏ. Server kiểm tra sản phẩm, quy cách, màu và tồn kho. DELETE làm trống giỏ. Giá trả về lấy từ catalog hiện tại.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart",
+            "description": "Giỏ riêng theo tài khoản. PUT thay thế toàn bộ giỏ; items rỗng làm trống giỏ. Server kiểm tra sản phẩm, quy cách, màu và tồn kho. DELETE làm trống giỏ. Giá trả về lấy từ catalog hiện tại.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách yêu thích",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wishlist",
+            "description": "Danh sách riêng theo tài khoản. PUT thay toàn bộ danh sách bằng productIds, tối đa 200 ID và loại bỏ ID trùng.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Lưu danh sách yêu thích",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wishlist",
+            "description": "Danh sách riêng theo tài khoản. PUT thay toàn bộ danh sách bằng productIds, tối đa 200 ID và loại bỏ ID trùng.\n\nKhách hàng: Authorization: Bearer <token>.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productIds\": [\n    1,\n    2\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Thanh toán",
+      "item": [
+        {
+          "name": "Voucher còn hiệu lực",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vouchers",
+            "description": "Đọc dữ liệu hiện tại; không thay đổi dữ liệu shop.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tính giá và phí vận chuyển",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout/quote",
+            "description": "Không tạo đơn hoặc giữ hàng. Server tính lại giá, gộp dòng cùng biến thể, kiểm tra tồn kho chung và voucher. parcel là kích thước, khối lượng ước tính theo các sản phẩm trong đơn; có thể nhập thông số đóng gói thực theo từng sản phẩm trong admin. Giỏ phải có 1–100 dòng, mỗi dòng 1–99 sản phẩm. Phí cơ bản 30.000 VND; voucher shipping có thể giảm phí về 0. Sử dụng total làm expectedTotal khi đặt hàng.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog mở rộng",
+      "item": [
+        {
+          "name": "Danh mục nam",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/categories",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Bộ sưu tập nam",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/products/section/men",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Lọc, sắp xếp và phân trang",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/products?q=%C4%91%C3%A8n&category=Trang%20tr%C3%AD&gender=all&page=1&limit=24&sort=rank",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tìm kiếm và gợi ý",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/products/search?query=%C4%91%C3%A8n&gender=all",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Bộ lọc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/products/filters",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Tồn kho và biến thể",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/vn/vi/products/{{id}}/stock",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}."
+          },
+          "response": []
+        },
+        {
+          "name": "Gợi ý size demo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/vn/vi/size-recommendation",
+            "description": "Catalog tương thích/demo được giữ cho API cũ. Quy tắc demo không phải dữ liệu hãng vận chuyển hoặc dịch vụ tư vấn thực tế.\n\nAPI công khai, không yêu cầu token.\n\nMẫu bên dưới chỉ minh họa. Lấy ID/quy cách/màu từ API đọc trước khi thử thao tác ghi. Tiền tệ: VND, số nguyên. Lỗi trả JSON {error}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"height\": 170,\n  \"weight\": 65,\n  \"fit\": \"regular\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -31,7 +31,7 @@ document.querySelector('.search-wrap input').addEventListener('input', (event) =
     suggestions.innerHTML = `
       <div class="empty-state" style="grid-column:1/-1;">
         <h4>Không tìm thấy kết quả</h4>
-        <div>Gợi ý: áo thun, quần jeans, tai nghe, balo, mũ.</div>
+        <div>Gợi ý: đèn bàn, bình hoa, kệ lưu trữ, hộp bảo quản.</div>
       </div>
     `;
     renderProductsPanel();
@@ -40,7 +40,7 @@ document.querySelector('.search-wrap input').addEventListener('input', (event) =
 
   suggestions.innerHTML = matches.slice(0, 4).map((p, index) => `
     <div class="suggestion-item" data-suggestion="${p.id}">
-      <img src="${esc(getProductImage(p, index))}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80';" />
+      <img src="${esc(getProductImage(p, index))}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
       <div style="font-weight:700; margin-top:8px;">${esc(p.name)}</div>
       <div style="color:var(--sub); font-size:12px; margin-top:4px;">${Number(p.price).toLocaleString('vi-VN')}đ</div>
     </div>
@@ -89,6 +89,7 @@ document.getElementById('registerForm').addEventListener('submit', async (event)
         name: form.querySelector('[name="name"]').value,
         username: form.querySelector('[name="username"]').value,
         email: form.querySelector('[name="email"]').value,
+        phone: form.querySelector('[name="phone"]').value,
         password: form.querySelector('[name="password"]').value,
       }),
     });
@@ -123,7 +124,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
         password: form.querySelector('[name="password"]').value,
       }),
     });
-    if (data.role === 'admin') {
+    if (data.role === 'admin' || data.role === 'staff') {
       localStorage.removeItem('shop_token');
       localStorage.removeItem('shop_user');
       form.reset();

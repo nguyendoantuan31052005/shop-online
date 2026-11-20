@@ -4,7 +4,7 @@
   }
   function matches(product, query) {
     const words = normalize(query).split(/\s+/).filter(Boolean);
-    const haystack = normalize([product.name, product.description, product.category, product.subCategory, ...(product.colors || []), ...(product.sizes || [])].join(' '));
+    const haystack = normalize([product.name, product.brand, product.description, product.category, product.subCategory, ...(product.colors || []), ...(product.sizes || [])].join(' '));
     return words.every(word => haystack.includes(word));
   }
   const search = { normalize, matches };

@@ -4,7 +4,7 @@ if(localStorage.getItem('shop_token')==='admin-demo-token'){localStorage.removeI
 loadProducts();
 hydrateUserSession();
 loadOrderHistory();
-document.getElementById('heroShopBtn').onclick = scrollToProducts;
+document.getElementById('heroShopBtn').onclick = () => chooseHomeCategory(homeSlides[homeSlideIndex].category);
 document.getElementById('heroExploreBtn').onclick = () => document.getElementById('catalogControls').scrollIntoView({ behavior: 'smooth' });
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;

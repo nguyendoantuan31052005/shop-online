@@ -1,18 +1,17 @@
 // Storefront: cart. Loaded in index.html order; shared state is in state.js.
 function addToCart(id, selectedVariant = {}) {
-  if (!requireShoppingLogin()) return false;
   const product = allProducts.find((item) => item.id === id);
-  if (!product) return;
+  if (!product) return false;
+  if (typeof requireShoppingLogin === 'function' && !requireShoppingLogin()) return false;
   if (product.stock <= 0) {
     showToast('Sản phẩm hiện đã hết hàng.', 'error');
     return;
   }
 
-  if(!selectedVariant.color||!selectedVariant.size){openDetail(id);return false;}
+  const color = selectedVariant.color || product.colors?.[0] || 'Trắng';
+  const size = selectedVariant.size || product.sizes?.[0] || 'M';
   const inCart=cart.filter(i=>i.id===id).reduce((n,i)=>n+i.qty,0);
   if(inCart>=product.stock){showToast('Đã đạt số lượng tồn kho.','error');return false;}
-  const color = selectedVariant.color;
-  const size = selectedVariant.size || product.sizes?.[0] || 'M';
   const existing = cart.find((item) => item.id === id && item.size === size && item.color === color);
 
   if (existing) {
@@ -36,7 +35,6 @@ function addToCart(id, selectedVariant = {}) {
 }
 
 function updateCartQty(id, delta, size = null, color = null) {
-  if (delta > 0 && !requireShoppingLogin()) return;
   const product=allProducts.find(p=>p.id===id);
   const total=cart.filter(i=>i.id===id).reduce((n,i)=>n+i.qty,0);
   if(delta>0&&(!product||total>=product.stock)){showToast('Không đủ tồn kho.','error');return;}
@@ -83,21 +81,21 @@ function renderCart() {
   totalEl.textContent = `${total.toLocaleString('vi-VN')}đ`;
 
   itemsEl.innerHTML = cart.map((item) => `
-    <div class="cart-item">
-      <div class="mini-emoji">${esc(item.emoji || '🛍️')}</div>
-      <div>
-        <div style="font-weight:700; font-size:14px;">${esc(item.name)}</div>
-        <div style="color:var(--text); font-weight:700;">${Number(item.price).toLocaleString('vi-VN')}đ</div>
-        <div style="font-size:12px; color:var(--sub); margin-top:4px;">${esc(item.color || 'Trắng')} / ${esc(item.size || 'M')}</div>
-        <div class="qty">
-          <button data-dec="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}">-</button>
-          <span>${item.qty}</span>
-          <button data-inc="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}">+</button>
-          <button data-remove="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}" aria-label="Xóa ${esc(item.name)} khỏi giỏ">Xóa</button>
+    <article class="cart-item">
+      <img class="cart-item-image" src="${esc(getProductImage(item, Number(item.id) || 0))}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+      <div class="cart-item-info">
+        <div class="cart-item-name">${esc(item.name)}</div>
+        <div class="cart-item-unit-price">${Number(item.price).toLocaleString('vi-VN')}\u0111</div>
+        <div class="cart-item-variant">${esc(item.color || 'Tr\u1eafng')} / ${esc(item.size || 'M')}</div>
+        <div class="qty cart-item-qty">
+          <button type="button" data-dec="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}" aria-label="Gi\u1ea3m s\u1ed1 l\u01b0\u1ee3ng">\u2212</button>
+          <span aria-label="S\u1ed1 l\u01b0\u1ee3ng">${item.qty}</span>
+          <button type="button" data-inc="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}" aria-label="T\u0103ng s\u1ed1 l\u01b0\u1ee3ng">+</button>
+          <button type="button" class="remove-cart-item" data-remove="${item.id}" data-size="${esc(item.size || '')}" data-color="${esc(item.color || '')}" aria-label="X\u00f3a ${esc(item.name)} kh\u1ecfi gi\u1ecf">X\u00f3a</button>
         </div>
       </div>
-      <div style="font-weight:700;">${(Number(item.price) * item.qty).toLocaleString('vi-VN')}đ</div>
-    </div>
+      <div class="cart-item-total">${(Number(item.price) * item.qty).toLocaleString('vi-VN')}\u0111</div>
+    </article>
   `).join('');
 
   itemsEl.querySelectorAll('[data-inc]').forEach((btn) => {
@@ -129,15 +127,32 @@ function persistCustomerCart() {
   localStorage.setItem('shop_cart', JSON.stringify(cart));
   const token = localStorage.getItem('shop_token');
   const items = cart.map(i=>({productId:i.id,quantity:i.qty,size:i.size,color:i.color}));
-  if (!token) return;
+  if (!token) {
+    localStorage.setItem('shop_guest_cart', JSON.stringify(cart));
+    return;
+  }
   cartSaveQueue = cartSaveQueue.catch(()=>{}).then(()=>api('/api/cart',{method:'PUT',headers:{Authorization:'Bearer '+token},body:JSON.stringify({items})})).catch(error=>showToast('Không lưu được giỏ hàng: '+error.message,'error'));
 }
 async function loadCustomerShopping() {
   try {
     await cartSaveQueue;
+    const guestCart = readArray('shop_guest_cart');
     const result = await api('/api/cart');
-    cart = result.items.filter(i=>i.product).map(i=>({...i.product,qty:i.quantity,size:i.size,color:i.color}));
+    const merged = new Map(result.items.filter(i=>i.product).map(i=>{
+      const item={...i.product,qty:i.quantity,size:i.size,color:i.color};
+      return [`${item.id}|${item.color}|${item.size}`,item];
+    }));
+    for (const guest of guestCart) {
+      const product=allProducts.find(item=>item.id===guest.id);
+      if(!product||product.stock<=0)continue;
+      const color=guest.color||product.colors?.[0]||'Trắng', size=guest.size||product.sizes?.[0]||'M';
+      const key=`${product.id}|${color}|${size}`, existing=merged.get(key);
+      const quantity=Math.min(product.stock,99,(existing?.qty||0)+guest.qty);
+      if(quantity>0)merged.set(key,{...product,qty:quantity,color,size});
+    }
+    cart=[...merged.values()];
     localStorage.setItem('shop_cart',JSON.stringify(cart));renderCart();
+    if(guestCart.length){localStorage.removeItem('shop_guest_cart');persistCustomerCart();await cartSaveQueue;}
     const favorites = await api('/api/wishlist');
     wishlist = favorites.products.map(p=>p.id);
     localStorage.setItem('shop_wishlist',JSON.stringify(wishlist));renderWishlist();renderProductsPanel();

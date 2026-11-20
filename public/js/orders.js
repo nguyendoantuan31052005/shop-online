@@ -6,6 +6,7 @@ async function loadOrderHistory() {
     catch (e) { document.getElementById('orderHistoryList').textContent = e.message; return; }
   }
   renderOrderHistory(); renderAccountSummary();
+  refreshCustomerOverview();
 }
 const ADMIN_STATUS_LABELS = {
   new: 'Mới',
@@ -22,27 +23,22 @@ function renderAccountSummary() {
   const user = getStoredUser();
 
   if (!token || !user) {
-    container.innerHTML = '<div class="mini-item"><span>Chưa đăng nhập</span><button class="small-btn detail-btn" onclick="document.getElementById(\'authModal\').classList.add(\'show\')">Đăng nhập</button></div>';
+    container.innerHTML = '<div class="service-empty"><span class="empty-symbol" aria-hidden="true">◎</span><strong>Chào mừng bạn đến Home Shopping</strong><p>Đăng nhập để xem hồ sơ và theo dõi đơn mua của bạn.</p><button type="button" class="small-btn detail-btn" onclick="toggleAuth(\'login\')">Đăng nhập tài khoản <span aria-hidden="true">→</span></button></div>';
     return;
   }
 
 
-  const totalSpent = orderHistory.filter(order => order.status === 'done').reduce((sum, order) => sum + Number(order.total || 0), 0);
-  container.innerHTML = `
-    <div class="mini-item"><span>Khách hàng</span><strong>${esc(user.name)}</strong></div>
-    <div class="mini-item"><span>Đã mua (đơn hoàn thành)</span><strong>${totalSpent.toLocaleString('vi-VN')}đ</strong></div>
-    <div class="mini-item"><span>Email</span><strong>${esc(user.email || 'Chưa cung cấp')}</strong></div>
-  `;
+  renderProfileCard(container, user);
 }
 
 function renderOrderHistory() {
   const container = document.getElementById('orderHistoryList');
   if (!orderHistory.length) {
-    container.innerHTML = '<div class="mini-item"><span>Chưa có đơn hàng nào</span></div>';
+    container.innerHTML = '<div class="service-empty order-empty"><span class="empty-symbol" aria-hidden="true">▤</span><div><strong>Chưa có đơn hàng nào</strong><p>Đơn mua của bạn sẽ xuất hiện tại đây sau khi đặt hàng.</p></div></div>';
     return;
   }
 
-  container.innerHTML = orderHistory.slice(0, 5).map((order) => `
+  container.innerHTML = orderHistory.filter(matchesOrderHub).map((order) => `
     <div class="mini-item">
       <div>
         <strong>#${order.id}</strong>
@@ -51,6 +47,7 @@ function renderOrderHistory() {
       <div style="text-align:right;">
         <strong>${Number(order.total).toLocaleString('vi-VN')}đ</strong>
         <div style="color:var(--green); font-size:12px;">${esc(ADMIN_STATUS_LABELS[order.status] || order.status)}</div>
+        <button type="button" class="small-btn" data-view-customer-order="${order.id}">Xem chi tiết →</button>
       </div>
     </div>
   `).join('');

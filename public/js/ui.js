@@ -8,7 +8,10 @@ function showToast(message, type = 'success') {
     document.body.appendChild(container);
   }
   const toast = document.createElement('div');
+  container.querySelectorAll('.toast').forEach(item => { if (item.textContent === message) item.remove(); });
+  while (container.children.length >= 2) container.firstElementChild.remove();
   toast.className = `toast ${type}`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
   toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 2200);

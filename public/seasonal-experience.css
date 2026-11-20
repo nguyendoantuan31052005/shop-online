@@ -1,0 +1,341 @@
+/* A restrained seasonal skin: the holiday mood never obstructs shopping. */
+:root { --season-accent: #294d42; --season-metal: #a78b58; }
+
+/* Real weather colors the page canvas and adds a quiet, non-interactive sky layer. */
+html[data-weather] {
+  background: transparent !important;
+  background-image: none !important;
+}
+.weather-scene {
+  display: none !important;
+}
+.weather-scene::before,
+.weather-scene::after {
+  position: absolute;
+  inset: -8%;
+  content: '';
+  pointer-events: none;
+}
+
+html[data-weather="sunny"] {
+  --weather-panel: #f7f0df;
+  background-color: #f4f3eb;
+  background-image: radial-gradient(ellipse 34rem 24rem at 96% 2%, #ffdda051, transparent 72%), linear-gradient(160deg, #fbf5e8 0%, #f3f5ef 54%, #e8f0eb 100%);
+}
+html[data-weather="cloudy"] {
+  --weather-panel: #edf1f0;
+  background-color: #edf1f1;
+  background-image: radial-gradient(ellipse 45rem 22rem at 85% 0%, #ffffffad, transparent 70%), linear-gradient(165deg, #f2f5f4, #edf0ee 56%, #e7eeed);
+}
+html[data-weather="cloudy"] .weather-scene::before,
+html[data-weather="fog"] .weather-scene::before {
+  background: radial-gradient(ellipse at 18% 23%, #ffffff70, transparent 42%), radial-gradient(ellipse at 78% 12%, #ffffff88, transparent 48%);
+  filter: blur(32px);
+  animation: weather-cloud-drift 34s ease-in-out infinite alternate;
+}
+html[data-weather="rain"] {
+  --weather-panel: #e4edf1;
+  background-color: #e6edf0;
+  background-image: radial-gradient(ellipse 42rem 23rem at 80% 0%, #ffffff88, transparent 70%), linear-gradient(165deg, #e9f0f3, #e6ecee 52%, #dce7ea);
+}
+html[data-weather="rain"] .weather-scene::before,
+html[data-weather="storm"] .weather-scene::before {
+  background: linear-gradient(155deg, #506d7a10, #54728618 52%, #293f5014);
+}
+html[data-weather="storm"] {
+  --weather-panel: #e1e7ec;
+  background-color: #e3e8ed;
+  background-image: radial-gradient(ellipse 42rem 20rem at 75% 0%, #ffffff90, transparent 70%), linear-gradient(160deg, #e8edf1, #dfe6ec 55%, #d7e0e7);
+}
+html[data-weather="snow"] {
+  --weather-panel: #eaf2f4;
+  background-color: #f0f5f6;
+  background-image: radial-gradient(ellipse 38rem 22rem at 82% 0%, #ffffffd6, transparent 68%), linear-gradient(165deg, #f5f8f8, #edf3f4 58%, #e4edef);
+}
+html[data-weather="fog"] {
+  --weather-panel: #e9eeeb;
+  background-color: #eef1ef;
+  background-image: radial-gradient(ellipse at 30% 0%, #ffffffd1, transparent 70%), linear-gradient(160deg, #f2f3ef, #e9eeec 72%, #e6edeb);
+}
+html[data-weather="clear-night"] {
+  --weather-panel: #e7eaf1;
+  background-color: #e8eaf0;
+  background-image: radial-gradient(ellipse 35rem 22rem at 95% 0%, #c7d1eb80, transparent 68%), linear-gradient(165deg, #eaedf3, #e9e9ee 55%, #e5e8eb);
+}
+
+.weather-particle {
+  position: absolute;
+  display: block;
+  left: var(--weather-x);
+  top: var(--weather-top);
+  will-change: transform;
+}
+.weather-particle--rain,
+.weather-particle--storm {
+  width: 1px;
+  height: 42px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, #7896a6a0 35%, #7896a680 72%, transparent);
+  opacity: .44;
+  animation: weather-rain-fall var(--weather-duration) linear var(--weather-delay) infinite;
+}
+.weather-particle--storm { background: linear-gradient(180deg, transparent, #536e8095 35%, #536e8068 72%, transparent); opacity: .55; }
+.weather-particle--snow {
+  width: var(--weather-size);
+  height: var(--weather-size);
+  border-radius: 50%;
+  background: #ffffffc9;
+  box-shadow: 0 0 8px #ffffff9c;
+  opacity: .7;
+  animation: weather-snow-fall var(--weather-duration) linear var(--weather-delay) infinite;
+}
+.weather-cloud {
+  position: absolute;
+  top: 4%;
+  left: -18%;
+  width: 56vw;
+  height: 18vh;
+  border-radius: 50%;
+  background: #ffffff3b;
+  filter: blur(42px);
+  animation: weather-cloud-drift 40s ease-in-out infinite alternate;
+}
+.weather-cloud--2 { top: 14%; left: 42%; width: 48vw; opacity: .58; animation-duration: 52s; animation-direction: alternate-reverse; }
+.weather-cloud--3 { top: 38%; left: 4%; width: 42vw; height: 24vh; opacity: .42; animation-duration: 64s; }
+html[data-weather="storm"] .weather-cloud { background: #7485942c; filter: blur(56px); }
+html[data-weather="clear-night"] .weather-scene::before {
+  background-image: radial-gradient(circle at 12% 22%, #ffffff9c 0 1px, transparent 2px), radial-gradient(circle at 70% 13%, #ffffffa0 0 1px, transparent 2px), radial-gradient(circle at 85% 33%, #ffffff8a 0 1px, transparent 2px);
+  background-size: 170px 140px, 210px 180px, 130px 170px;
+  opacity: .5;
+}
+
+html[data-theme="dark"][data-weather="sunny"] { background-color: #171915; background-image: radial-gradient(ellipse 38rem 24rem at 94% 0%, #d7a54922, transparent 70%), linear-gradient(160deg, #171916, #1c211e 55%, #17221f); }
+html[data-theme="dark"][data-weather="cloudy"] { background-color: #14191c; background-image: radial-gradient(ellipse at 82% 0%, #bac8d013, transparent 66%), linear-gradient(160deg, #151a1d, #1a2023 62%, #182124); }
+html[data-theme="dark"][data-weather="rain"] { background-color: #111a20; background-image: radial-gradient(ellipse at 80% 0%, #91b1c018, transparent 64%), linear-gradient(160deg, #121a20, #142127 60%, #101d24); }
+html[data-theme="dark"][data-weather="storm"] { background-color: #11151c; background-image: radial-gradient(ellipse at 72% 0%, #9babc21b, transparent 65%), linear-gradient(160deg, #12161d, #181d26 60%, #131922); }
+html[data-theme="dark"][data-weather="snow"] { background-color: #171e22; background-image: radial-gradient(ellipse at 80% 0%, #d3e7ef1d, transparent 68%), linear-gradient(160deg, #182025, #202a30 60%, #1a252b); }
+html[data-theme="dark"][data-weather="fog"] { background-color: #171c1d; background-image: radial-gradient(ellipse at 28% 0%, #d4dedc18, transparent 70%), linear-gradient(160deg, #181c1d, #202725 70%, #1b2423); }
+html[data-theme="dark"][data-weather="clear-night"] { background-color: #101522; background-image: radial-gradient(ellipse at 90% 0%, #899ecb21, transparent 68%), linear-gradient(160deg, #101522, #151b2b 64%, #111923); }
+html[data-theme="dark"][data-weather="sunny"] { --weather-panel: #24231d; }
+html[data-theme="dark"][data-weather="cloudy"] { --weather-panel: #202528; }
+html[data-theme="dark"][data-weather="rain"] { --weather-panel: #1d292f; }
+html[data-theme="dark"][data-weather="storm"] { --weather-panel: #20252d; }
+html[data-theme="dark"][data-weather="snow"] { --weather-panel: #222d33; }
+html[data-theme="dark"][data-weather="fog"] { --weather-panel: #252b29; }
+html[data-theme="dark"][data-weather="clear-night"] { --weather-panel: #1c2231; }
+html[data-theme="dark"] .weather-particle--rain,
+html[data-theme="dark"] .weather-particle--storm { opacity: .3; }
+
+.announcement-bar { position: relative; transition: background 500ms ease, color 500ms ease; }
+.hero-main.has-seasonal-experience { isolation: isolate; }
+.seasonal-atmosphere {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+.seasonal-badge {
+  position: absolute;
+  z-index: 5;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 33px;
+  max-width: calc(100% - 32px);
+  padding: 6px 12px;
+  border: 1px solid #ffffff85;
+  border-radius: 999px;
+  background: #fffdf2d9;
+  box-shadow: 0 6px 20px #23352914, inset 0 1px #ffffffa8;
+  color: #33463a;
+  font: 650 10px/1.2 system-ui, sans-serif;
+  letter-spacing: .045em;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.seasonal-badge-symbol { color: var(--season-metal); font-size: 15px; }
+.seasonal-badge .seasonal-title { color: var(--season-accent); white-space: nowrap; }
+.seasonal-badge [hidden] { display: none !important; }
+.weather-summary {
+  order: 3;
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  gap: 5px;
+  max-width: 310px;
+  color: #4c5c52;
+  font: 600 10px/1.35 system-ui, sans-serif;
+}
+.weather-glyph { flex: 0 0 auto; color: var(--season-accent); font-size: 15px; }
+.weather-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.weather-updated { flex: 0 0 auto; color: #838274; font: 500 8px/1.2 system-ui, sans-serif; white-space: nowrap; }
+.weather-attribution {
+  order: 4;
+  color: #6f735f;
+  font: 500 8px/1.2 system-ui, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.weather-action,
+.weather-disable {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  padding: 3px 9px;
+  border: 1px solid #ded5be;
+  border-radius: 999px;
+  background: #fffefa;
+  color: #4a5146;
+  font: 600 9px/1.2 system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.weather-action:hover, .weather-disable:hover { border-color: var(--season-metal); background: #fff9e8; }
+.weather-action:disabled { opacity: .65; cursor: wait; }
+.weather-disable { width: 24px; min-height: 24px; padding: 0; font-size: 15px; }
+
+.seasonal-garland {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 3%;
+  display: flex;
+  justify-content: space-around;
+  width: 69%;
+  height: 42px;
+  pointer-events: none;
+}
+.seasonal-garland::before {
+  position: absolute;
+  top: -11px;
+  right: 1%;
+  left: 1%;
+  height: 32px;
+  border-top: 1px solid #b89b60b8;
+  border-radius: 50%;
+  content: '';
+}
+.seasonal-garland i {
+  position: relative;
+  z-index: 1;
+  width: 6px;
+  height: 8px;
+  margin-top: 13px;
+  border-radius: 45% 45% 55% 55%;
+  background: #d8b767;
+  box-shadow: 0 0 11px 2px #f1d78a80;
+  animation: festive-glow 3.2s ease-in-out infinite alternate;
+}
+.seasonal-garland i:nth-child(3n) { background: #a6473e; box-shadow: 0 0 10px 2px #bd6a5b78; animation-delay: -.8s; }
+.seasonal-garland i:nth-child(3n + 1) { background: #60856d; box-shadow: 0 0 10px 2px #98bd9a6e; animation-delay: -1.5s; }
+
+html[data-season="christmas"] { --season-accent: #255343; --season-metal: #a7884c; }
+html[data-season="christmas"] .announcement-bar {
+  background: linear-gradient(105deg, #173a31 0%, #285746 48%, #183d33 100%);
+  color: #f7f0dc;
+}
+html[data-season="christmas"] .hero-main { box-shadow: inset 0 0 0 1px #b69a6070; }
+html[data-season="christmas"] .hero-copy .primary-btn,
+html[data-season="christmas"] .product-actions .primary,
+html[data-season="christmas"] .search-btn { background: #255343; border-color: #255343; }
+html[data-season="christmas"] .seasonal-badge { border-color: #c6b37a9c; }
+html[data-season="christmas"] .seasonal-atmosphere {
+  opacity: .25;
+  background: radial-gradient(circle at 14% 25%, #ffffffc0 0 2px, transparent 3px), radial-gradient(circle at 72% 18%, #ffffffb0 0 2px, transparent 3px), radial-gradient(circle at 46% 66%, #ffffffad 0 2px, transparent 3px), radial-gradient(ellipse at 80% 0, #e4d5a12b, transparent 42%);
+  background-size: 120px 130px, 170px 190px, 140px 150px, auto;
+  animation: holiday-snow 15s linear infinite;
+}
+
+html[data-season="tet"] { --season-accent: #8c332d; --season-metal: #bb8c48; }
+html[data-season="tet"] .announcement-bar { background: linear-gradient(100deg, #7f2927, #a34a35 55%, #742c2a); color: #fff5df; }
+html[data-season="tet"] .hero-copy .primary-btn,
+html[data-season="tet"] .product-actions .primary,
+html[data-season="tet"] .search-btn { background: #8c332d; border-color: #8c332d; }
+html[data-season="tet"] .seasonal-atmosphere { opacity: .26; background: radial-gradient(ellipse at 100% 0, #d9964a48, transparent 48%), radial-gradient(circle at 84% 24%, #a5333038 0 7px, transparent 8px); }
+html[data-season="tet"] .seasonal-garland i { width: 8px; height: 8px; border-radius: 2px 7px 2px 7px; background: #b53b32; box-shadow: 0 0 9px #d59a50a0; }
+html[data-season="tet"] .seasonal-garland i:nth-child(2n) { background: #d8b767; }
+
+html[data-season="new-year"] { --season-accent: #30486e; --season-metal: #b2904c; }
+html[data-season="new-year"] .announcement-bar { background: linear-gradient(100deg, #172b46, #30486e 55%, #192c47); color: #fff7e5; }
+html[data-season="new-year"] .hero-copy .primary-btn,
+html[data-season="new-year"] .product-actions .primary,
+html[data-season="new-year"] .search-btn { background: #30486e; border-color: #30486e; }
+html[data-season="new-year"] .seasonal-atmosphere { opacity: .26; background: radial-gradient(ellipse at 86% 3%, #f6df9f58, transparent 34%), radial-gradient(circle at 75% 25%, #fff7d5a0 0 2px, transparent 3px); background-size: auto, 70px 80px; }
+
+html[data-season="mid-autumn"] { --season-accent: #6e523c; --season-metal: #bd8b47; }
+html[data-season="mid-autumn"] .announcement-bar { background: linear-gradient(100deg, #57412f, #806247 55%, #57412f); color: #fff5e2; }
+html[data-season="mid-autumn"] .hero-copy .primary-btn,
+html[data-season="mid-autumn"] .product-actions .primary,
+html[data-season="mid-autumn"] .search-btn { background: #735537; border-color: #735537; }
+html[data-season="mid-autumn"] .seasonal-atmosphere { opacity: .3; background: radial-gradient(circle at 87% 14%, #f4d38955 0 58px, transparent 59px), radial-gradient(ellipse at 80% 0, #b07a3633, transparent 45%); }
+
+html[data-season="valentine"] { --season-accent: #8a4e57; --season-metal: #b47b72; }
+html[data-season="valentine"] .announcement-bar { background: linear-gradient(100deg, #74434b, #9d5e65 55%, #74434b); color: #fff5f3; }
+html[data-season="valentine"] .hero-copy .primary-btn,
+html[data-season="valentine"] .product-actions .primary,
+html[data-season="valentine"] .search-btn { background: #8a4e57; border-color: #8a4e57; }
+html[data-season="valentine"] .seasonal-atmosphere { opacity: .22; background: radial-gradient(circle at 86% 22%, #d898a04d 0 36px, transparent 37px), radial-gradient(ellipse at 80% 0, #e5b7b331, transparent 48%); }
+
+html[data-season="women"] { --season-accent: #76546f; --season-metal: #a7839d; }
+html[data-season="women"] .announcement-bar { background: linear-gradient(100deg, #58415b, #80647e 55%, #58415b); color: #fff7fb; }
+html[data-season="women"] .hero-copy .primary-btn,
+html[data-season="women"] .product-actions .primary,
+html[data-season="women"] .search-btn { background: #76546f; border-color: #76546f; }
+
+html[data-season="halloween"] { --season-accent: #684e37; --season-metal: #be7a35; }
+html[data-season="halloween"] .announcement-bar { background: linear-gradient(100deg, #342d2b, #594238 55%, #302b29); color: #fff3e2; }
+html[data-season="halloween"] .hero-copy .primary-btn,
+html[data-season="halloween"] .product-actions .primary,
+html[data-season="halloween"] .search-btn { background: #684e37; border-color: #684e37; }
+
+html[data-season="spring"] { --season-accent: #3c705a; --season-metal: #a28354; }
+html[data-season="summer"] { --season-accent: #3d6571; --season-metal: #a17c4e; }
+html[data-season="autumn"] { --season-accent: #755a3d; --season-metal: #a27b4b; }
+
+html[data-weather] .seasonal-atmosphere { opacity: 0 !important; }
+
+html[data-theme="dark"] .seasonal-badge {
+  border-color: #ffffff40;
+  background: #181a18d9;
+  color: #f2eee3;
+  box-shadow: 0 8px 22px #00000035, inset 0 1px #ffffff14;
+}
+html[data-theme="dark"] .seasonal-badge-symbol { color: #d3bb82; }
+html[data-theme="dark"] .weather-summary { color: #e0ddcf; }
+html[data-theme="dark"] .weather-glyph { color: #e0c47d; }
+html[data-theme="dark"] .weather-updated { color: #b5b19e; }
+html[data-theme="dark"] .weather-attribution { color: #d2c390; }
+html[data-theme="dark"] .weather-action,
+html[data-theme="dark"] .weather-disable { border-color: #535347; background: #252621; color: #eee9d9; }
+html[data-theme="dark"] .weather-action:hover,
+html[data-theme="dark"] .weather-disable:hover { background: #333127; }
+html[data-theme="dark"][data-season="christmas"] .announcement-bar { background: linear-gradient(105deg, #0c211b, #173c2d 52%, #102b22); }
+html[data-theme="dark"][data-season="tet"] .announcement-bar { background: linear-gradient(100deg, #4e1b1b, #702f25 55%, #4e1b1b); }
+
+@keyframes festive-glow { from { opacity: .52; filter: brightness(.88); } to { opacity: 1; filter: brightness(1.24); } }
+@keyframes holiday-snow { to { background-position: 80px 130px, -45px 190px, 50px 150px, center; } }
+@keyframes weather-rain-fall { to { transform: translate3d(22px, 115vh, 0); } }
+@keyframes weather-snow-fall { to { transform: translate3d(28px, 110vh, 0) rotate(240deg); } }
+@keyframes weather-cloud-drift { from { transform: translate3d(-4vw, 0, 0); } to { transform: translate3d(12vw, 4vh, 0); } }
+
+@media (max-width: 760px) {
+  .seasonal-badge { top: 10px; right: 10px; min-height: 29px; gap: 5px; padding: 5px 9px; font-size: 9px; }
+  .seasonal-badge-symbol { font-size: 13px; }
+  .weather-summary { max-width: 290px; font-size: 9px; }
+  .weather-updated { font-size: 7px; }
+  .weather-action, .weather-disable { min-height: 24px; padding-inline: 7px; font-size: 8px; }
+  .seasonal-garland { left: 2%; width: 56%; height: 35px; }
+  .seasonal-garland i { width: 5px; height: 7px; margin-top: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-garland i, .seasonal-atmosphere, .weather-particle, .weather-cloud, .weather-scene::before, .weather-scene::after { animation: none !important; transition: none !important; }
+}

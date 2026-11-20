@@ -29,6 +29,14 @@ function matchesSelectedCategory(product, categoryName) {
   return category === normalized || subCategory === normalized || aliases.includes(subCategory) || aliases.includes(category);
 }
 
+function priceFilterValue(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  // Short values are entered in thousands of VND (100 means 100,000đ).
+  // Existing quick budget buttons and full values remain in VND.
+  return amount < 10000 ? amount * 1000 : amount;
+}
+
 function getFilteredProducts() {
   const q = (document.querySelector('.search-wrap input')?.value || '').trim().toLowerCase();
   let items = allProducts.filter((p) => {
@@ -38,12 +46,21 @@ function getFilteredProducts() {
     const normalize = (value) => String(value).normalize('NFC').trim().toLowerCase();
     const sizeOk = !shoppingFilters.size || (p.sizes || []).some(size => normalize(size) === normalize(shoppingFilters.size));
     const colorOk = !shoppingFilters.color || (p.colors || []).some(color => normalize(color) === normalize(shoppingFilters.color));
-    return categoryOk && searchOk && genderOk && sizeOk && colorOk;
+    const minRaw = document.getElementById('minPrice')?.value || '';
+    const maxRaw = document.getElementById('maxPrice')?.value || '';
+    const min = priceFilterValue(minRaw);
+    const max = priceFilterValue(maxRaw);
+    const priceOk = (!minRaw || p.price >= min) && (!maxRaw || p.price <= max);
+    const stockOk = !document.getElementById('inStockOnly')?.checked || p.stock > 0;
+    const brandOk = !document.getElementById('brandFilter')?.value || p.brand === document.getElementById('brandFilter').value;
+    return categoryOk && searchOk && genderOk && sizeOk && colorOk && priceOk && stockOk && brandOk;
   });
 
   if (sortMode === 'price_asc') items = [...items].sort((a, b) => a.price - b.price);
   if (sortMode === 'price_desc') items = [...items].sort((a, b) => b.price - a.price);
   if (sortMode === 'newest') items = [...items].sort((a, b) => Number(b.id) - Number(a.id));
+  if (sortMode === 'bestselling') items = [...items].sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0));
+  if (sortMode === 'featured') items.sort((a, b) => Number(b.subCategory === 'home') - Number(a.subCategory === 'home'));
   return items;
 }
 
@@ -63,9 +80,28 @@ function renderFilterChips() {
   });
 }
 
+function renderMerchSections() {
+  const homeCategories = new Set(['Nhà bếp', 'Phòng khách', 'Phòng ngủ', 'Phòng tắm', 'Trang trí', 'Lưu trữ', 'Gia dụng']);
+  const availableHomeProducts = allProducts.filter(p => p.stock > 0 && homeCategories.has(p.category));
+  const best = [...availableHomeProducts].sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0) || a.price - b.price).slice(0, 4);
+  const fresh = [...availableHomeProducts].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 4);
+  renderProducts(best, 'bestSellerProducts');
+  renderProducts(fresh, 'newProducts');
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+  const select = document.getElementById('brandFilter');
+  const selected = select.value;
+  select.innerHTML = '<option value="">Tất cả thương hiệu</option>' + brands.map(brand => `<option value="${esc(brand)}">${esc(brand)}</option>`).join('');
+  select.value = selected;
+}
+document.getElementById('brandFilter').addEventListener('change', renderProductsPanel);
+
 function applyQuickNavFilter(label) {
   const input = document.querySelector('.search-wrap input');
   const quickMap = {
+    'Trang chủ': { category: 'Tất cả', query: '' },
+    'Nhà bếp': { category: 'Nhà bếp', query: '' },
+    'Phòng khách': { category: 'Phòng khách', query: '' },
+    'Trang trí': { category: 'Trang trí', query: '' },
     Nam: { category: 'Thời trang', gender: 'men', query: '' },
     Nữ: { category: 'Thời trang', gender: 'women', query: '' },
     'Trẻ em': { category: 'Mẹ & Bé', query: '' },
@@ -81,13 +117,21 @@ function applyQuickNavFilter(label) {
   sortMode = config.sort || 'featured';
   sortSelect.value = sortMode;
   if (input) input.value = config.query || '';
+  shoppingFilters.size = '';
+  shoppingFilters.color = '';
+  document.getElementById('minPrice').value = '';
+  document.getElementById('maxPrice').value = '';
+  document.getElementById('maxPrice').setCustomValidity('');
+  document.getElementById('inStockOnly').checked = false;
+  document.getElementById('brandFilter').value = '';
+  renderShoppingFilters();
 
   document.querySelectorAll('.nav-item').forEach((btn) => btn.classList.toggle('active', btn.dataset.nav === label));
   document.querySelectorAll('.panel-link').forEach((btn) => btn.classList.toggle('active', btn.dataset.nav === label));
 
   renderFilterChips();
   renderProductsPanel();
-  if (label === 'Khuyến mãi') couponGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (label === 'Trang chủ') window.scrollTo({ top: 0, behavior: 'smooth' });
   else scrollToProducts();
 }
 
@@ -105,13 +149,17 @@ function renderShoppingFilters() {
       });
     });
   };
-  renderOptions(sizePills, ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], 'size', 'size-pill');
-  renderOptions(colorPills, ['Trắng', 'Đen', 'Xanh navy', 'Xanh', 'Nâu', 'Be'], 'color', 'color-pill');
+  renderOptions(sizePills, [...new Set(allProducts.flatMap(p => p.sizes || []))], 'size', 'size-pill');
+  renderOptions(colorPills, [...new Set(allProducts.flatMap(p => p.colors || []))], 'color', 'color-pill');
   const clearButton = document.getElementById('clearShoppingFilters');
-  clearButton.disabled = !shoppingFilters.size && !shoppingFilters.color;
+  clearButton.disabled = !shoppingFilters.size && !shoppingFilters.color && !document.getElementById('minPrice')?.value && !document.getElementById('maxPrice')?.value && !document.getElementById('inStockOnly')?.checked && !document.getElementById('brandFilter')?.value;
   clearButton.onclick = () => {
     shoppingFilters.size = '';
     shoppingFilters.color = '';
+    for (const id of ['minPrice', 'maxPrice']) { const input = document.getElementById(id); if (input) input.value = ''; }
+    document.getElementById('maxPrice')?.setCustomValidity('');
+    if (document.getElementById('inStockOnly')) document.getElementById('inStockOnly').checked = false;
+    if (document.getElementById('brandFilter')) document.getElementById('brandFilter').value = '';
     renderShoppingFilters();
     renderProductsPanel();
   };
@@ -154,7 +202,7 @@ function renderFeaturedCollections() {
     const productMarkup = items.length
       ? items.map((item, index) => `
           <div class="mini-item" data-detail="${item.id}" style="cursor:pointer; padding:8px 10px;">
-            <img src="${esc(getProductImage(item, collectionIndex + index + Number(item.id)))}" alt="${esc(item.name)}" style="width:56px; height:56px; object-fit:cover; border-radius:12px;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80';" />
+            <img src="${esc(getProductImage(item, collectionIndex + index + Number(item.id)))}" alt="${esc(item.name)}" loading="lazy" decoding="async" style="width:56px; height:56px; object-fit:cover; border-radius:12px;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
             <div style="flex:1; min-width:0;">
               <strong style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(item.name)}</strong>
               <div style="color:var(--sub); font-size:12px;">${Number(item.price).toLocaleString('vi-VN')}đ</div>
@@ -187,13 +235,15 @@ function scrollToProducts() {
     const header = document.querySelector('.header-main');
     const offset = header && ['sticky', 'fixed'].includes(getComputedStyle(header).position) ? header.getBoundingClientRect().height : 0;
     const results = document.getElementById('recommendedProducts');
-    window.scrollTo({ top: Math.max(0, window.scrollY + results.getBoundingClientRect().top - offset - 20), behavior: 'smooth' });
+    const breathingRoom = window.innerWidth <= 760 ? 16 : 20;
+    window.scrollTo({ top: Math.max(0, window.scrollY + results.getBoundingClientRect().top - offset - breathingRoom), behavior: 'smooth' });
   });
 }
 
 function renderProductsPanel() {
+  if (typeof syncMarketplaceControls === 'function') syncMarketplaceControls();
   const items = getFilteredProducts();
-  const key = JSON.stringify([document.querySelector('.search-wrap input').value.trim(), selectedCategory, selectedGender, shoppingFilters, sortMode]);
+  const key = JSON.stringify([document.querySelector('.search-wrap input').value.trim(), selectedCategory, selectedGender, shoppingFilters, sortMode, document.getElementById('minPrice')?.value, document.getElementById('maxPrice')?.value, document.getElementById('inStockOnly')?.checked, document.getElementById('brandFilter')?.value]);
   if (key !== productFilterKey) { productPage = 1; productFilterKey = key; }
   const pages = Math.max(1, Math.ceil(items.length / productsPerPage));
   productPage = Math.min(productPage, pages);
@@ -228,6 +278,12 @@ function renderProducts(items, nodeId, showSale = false) {
         selectedGender = '';
         shoppingFilters.size = '';
         shoppingFilters.color = '';
+        sortMode = 'featured';
+        sortSelect.value = 'featured';
+        for (const id of ['minPrice', 'maxPrice']) document.getElementById(id).value = '';
+        document.getElementById('maxPrice').setCustomValidity('');
+        document.getElementById('inStockOnly').checked = false;
+        document.getElementById('brandFilter').value = '';
         renderShoppingFilters();
         document.querySelector('.search-wrap input').value = '';
         renderFilterChips();
@@ -239,9 +295,10 @@ function renderProducts(items, nodeId, showSale = false) {
 
   node.innerHTML = items.map((p, index) => {
     const price = Number(p.price || 0);
+    const regularPrice = Number(p.regularPrice || p.price || 0);
     const productImage = getProductImage(p, index);
     const imageHtml = p.image || p.emoji
-      ? `<img class="thumb-image" src="${esc(productImage)}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80';" />`
+      ? `<img class="thumb-image" src="${esc(productImage)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />`
       : `<div class="thumb-emoji">${esc(p.emoji || ['👕', '🎧', '👟', '🎒', '☕', '🖱️'][index % 6])}</div>`;
 
     return `
@@ -249,6 +306,7 @@ function renderProducts(items, nodeId, showSale = false) {
         <button type="button" class="thumb product-image-button" data-detail="${p.id}" aria-label="Xem chi tiết ${esc(p.name)}">
           <span class="thumb-badge">${p.stock > 0 ? esc(p.category) : 'Hết hàng'}</span>
           ${imageHtml}
+          ${p.image?.startsWith('/images/products/') ? '<span class="photo-reference-tag">Ảnh tham khảo</span>' : ''}
         </button>
         <div class="product-info">
           <div class="product-name">${esc(p.name)}</div>
@@ -259,13 +317,14 @@ function renderProducts(items, nodeId, showSale = false) {
             <span class="stock-label">${p.stock > 0 ? '● Có sẵn · ' + p.stock + ' sản phẩm' : 'Tạm hết hàng'}</span>
           </div>
           <div class="price-wrap">
-            <span class="price">${price.toLocaleString('vi-VN')}đ</span>
+            <span class="price">${price.toLocaleString('vi-VN')}đ</span>${regularPrice > price ? `<del class="regular-price">${regularPrice.toLocaleString('vi-VN')}đ</del><span class="sale-badge">-${Math.round((1 - price / regularPrice) * 100)}%</span>` : ''}
           </div>
           <div class="product-actions">
             <button class="small-btn soft" data-wishlist="${p.id}" aria-label="Yêu thích ${esc(p.name)}" aria-pressed="${wishlist.includes(p.id)}">${wishlist.includes(p.id) ? '♥' : '♡'}</button>
             <button class="small-btn detail-btn" data-detail="${p.id}">Chi tiết</button>
-            <button class="small-btn primary" data-add="${p.id}" ${p.stock <= 0 ? 'disabled' : ''}>${p.stock > 0 ? 'Chọn mua' : 'Hết hàng'}</button>
+            <button type="button" class="small-btn primary" data-add="${p.id}" ${p.stock <= 0 ? 'disabled' : ''}>${p.stock > 0 ? 'Thêm giỏ' : 'Hết hàng'}</button>
           </div>
+          <button type="button" class="compare-toggle" data-compare="${p.id}" aria-pressed="${comparisonIds.includes(p.id)}">${comparisonIds.includes(p.id) ? '✓ Đã thêm so sánh' : '+ So sánh sản phẩm'}</button>
         </div>
       </article>
     `;
@@ -297,18 +356,21 @@ async function loadProducts() {
     renderFeaturedCollections();
     renderProductsPanel();
     renderWishlist();
+    renderRecentProducts();
+    renderHomeCategories();
+    renderMerchSections();
     renderAccountSummary();
     renderOrderHistory();
     renderCart();
-    await loadOrderHistory();
+    // Order history loads independently during app startup; avoid requesting it twice.
 
     try {
-      const menSection = await api('/api/v1/vn/vi/products/section/men');
+      const menSection = { products: allProducts };
       if (menSection && Array.isArray(menSection.products) && menSection.products.length) {
         const suggestions = document.getElementById('searchSuggestions');
         suggestions.innerHTML = menSection.products.slice(0, 4).map((p, index) => `
           <div class="suggestion-item" data-suggestion="${p.id}">
-            <img src="${esc(getProductImage(p, index))}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80';" />
+            <img src="${esc(getProductImage(p, index))}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
             <div style="font-weight:700; margin-top:8px;">${esc(p.name)}</div>
             <div style="color:var(--sub); font-size:12px; margin-top:4px;">${Number(p.price).toLocaleString('vi-VN')}đ</div>
           </div>

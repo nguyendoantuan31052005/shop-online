@@ -1,0 +1,21 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { openDb, createUser } = require('../src/db');
+const backend = require('../src/customer');
+test('Extended customer profile validates optional fields, exposes safe data and computes isolated totals', () => {
+  const db = openDb(':memory:');
+  const a = createUser(db, { name: 'Profile A', username: 'profile-a', password: 'Password123' });
+  const b = createUser(db, { name: 'Profile B', username: 'profile-b', password: 'Password123' });
+  for (const body of [{ birthday: '2025-02-31' }, { birthday: '2999-01-01' }, { birthday: '1800-01-01' }, { gender: 'admin' }, { avatarColor: 'url(x)' }, { bio: 'a'.repeat(301) }]) assert.throws(() => backend.account(db, a.id, '/api/auth/me', body));
+  const result = backend.account(db, a.id, '/api/auth/me', { birthday: '1995-05-20', gender: 'undisclosed', bio: '<b>About me</b>', avatarColor: 'teal' });
+  assert.equal(result.user.birthday, '1995-05-20'); assert.equal(result.user.bio, '<b>About me</b>'); assert.equal(result.user.password, undefined);
+  db.data.orders.push({ user_id: a.id, status: 'done', total: 150000 }, { user_id: a.id, status: 'cancelled', total: 500000 }, { user_id: b.id, status: 'done', total: 900000 });
+  const overview = backend.overview(db, a.id);
+  assert.equal(overview.stats.orders, 2); assert.equal(overview.stats.totalSpent, 150000); assert.equal(overview.stats.completed, 1); assert.equal(overview.stats.cancelled, 1);
+  assert.equal(overview.defaultAddress, null); assert.equal(overview.user.username, 'profile-a');
+  backend.account(db, a.id, '/api/auth/me', { birthday: '', gender: '', bio: '' });
+  assert.equal(backend.overview(db, a.id).user.birthday, '');
+  const snapshot = structuredClone(db.data); db.save = () => { throw new Error('disk failure'); };
+  assert.throws(() => backend.account(db, a.id, '/api/auth/me', { avatarColor: 'rose' }), /disk failure/);
+  assert.deepEqual(db.data, snapshot);
+});

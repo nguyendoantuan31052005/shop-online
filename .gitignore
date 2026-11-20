@@ -10,3 +10,4 @@ deploy_key
 deploy_key.pub
 *.pem
 .browser-test/
+deploy/aws-deploy-state.json
