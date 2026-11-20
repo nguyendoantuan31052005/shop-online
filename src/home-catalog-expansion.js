@@ -1,8 +1,9 @@
 'use strict';
 
 const PRODUCTS = require('./home-catalog-expansion.json');
+const PRODUCT_PHOTOS = require('./home-product-photos.json');
 const BATCH = 'home-luxury-1000-v1';
-const VERSION = 3;
+const VERSION = 4;
 
 function addHomeCatalogExpansion(data) {
   let added = 0;
@@ -38,6 +39,24 @@ function addHomeCatalogExpansion(data) {
       }
     }
     data.homeCatalogExpansionVersion = 3;
+    version = 3;
+  }
+  if (version < 4) {
+    const usage = new Map();
+    for (const product of data.products) {
+      if (product.catalogBatch !== BATCH || !/^\/images\/generated-products\//i.test(product.image || '')) continue;
+      const photos = PRODUCT_PHOTOS[product.imageType] || [];
+      if (!photos.length) continue;
+      const used = usage.get(product.imageType) || 0;
+      const image = photos[used % photos.length];
+      usage.set(product.imageType, used + 1);
+      product.image = image;
+      const customGallery = Array.isArray(product.images)
+        ? product.images.filter(item => typeof item === 'string' && !/^\/images\/generated-products\//i.test(item))
+        : [];
+      product.images = [image, ...customGallery.filter(item => item !== image)].slice(0, 8);
+    }
+    data.homeCatalogExpansionVersion = 4;
   }
   return added;
 }

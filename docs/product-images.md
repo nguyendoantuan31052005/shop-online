@@ -9,6 +9,10 @@
 
 Có thể dùng ảnh đã có trong `public/images/products/` bằng cách nhập đường dẫn tương đối như `/images/products/lamp.jpg` vào URL ảnh chính.
 
+## Ảnh thật cho catalog gia dụng
+
+Danh mục mở rộng 1.000 sản phẩm trước đây dùng ảnh SVG minh họa. Migration `homeCatalogExpansionVersion=4` thay các ảnh đó bằng ảnh chụp tham khảo lưu cục bộ, luân phiên theo loại sản phẩm. Ảnh được lấy từ nguồn có giấy phép cho phép sử dụng thương mại; nguồn và giấy phép được ghi ở `/image-credits.html`. Đây là ảnh tham khảo theo nhóm, không xác nhận đúng mẫu/màu/kích thước hàng thực tế. Với sản phẩm bán thật, hãy thay bằng ảnh do nhà cung cấp hoặc chủ shop chụp.
+
 ## Lưu trữ trên AWS
 
 `src/product-images.js` tải ảnh qua IAM role của EC2 lên bucket riêng khi runtime có `PRODUCT_IMAGE_BUCKET`; bucket dùng mã hóa mặc định ở S3 và không mở public. Khách xem ảnh qua CloudFront `/product-images/...`. Nếu chưa cấu hình bucket, ứng dụng lưu ảnh trong thư mục `uploads` cạnh DB.

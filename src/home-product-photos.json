@@ -1,0 +1,185 @@
+{
+  "tray": [
+    "/images/home-products/tray-01.jpg",
+    "/images/home-products/tray-02.jpg",
+    "/images/home-products/tray-03.jpg",
+    "/images/home-products/tray-04.jpg",
+    "/images/products/tray.jpg"
+  ],
+  "board": [
+    "/images/home-products/board-01.jpg",
+    "/images/home-products/board-02.jpg",
+    "/images/products/woodenTools.jpg"
+  ],
+  "bottle": [
+    "/images/home-products/bottle-01.jpg",
+    "/images/home-products/bottle-02.jpg",
+    "/images/catalog/pexels-4282738.jpg"
+  ],
+  "jar": [
+    "/images/home-products/jar-01.jpg",
+    "/images/catalog/pexels-1516421.jpg"
+  ],
+  "bowl": [
+    "/images/home-products/bowl-01.jpg",
+    "/images/products/woodenTools.jpg"
+  ],
+  "cup": [
+    "/images/home-products/cup-01.jpg",
+    "/images/home-products/cup-02.jpg",
+    "/images/catalog/pexels-1516421.jpg"
+  ],
+  "shelf": [
+    "/images/home-products/shelf-01.jpg",
+    "/images/home-products/shelf-02.jpg",
+    "/images/home-products/shelf-03.jpg",
+    "/images/home-products/shelf-04.jpg",
+    "/images/products/shelf.jpg"
+  ],
+  "crock": [
+    "/images/products/utensils.jpg"
+  ],
+  "textile": [
+    "/images/home-products/textile-01.jpg",
+    "/images/home-products/textile-02.jpg",
+    "/images/home-products/textile-03.jpg",
+    "/images/products/towels.jpg"
+  ],
+  "carafe": [
+    "/images/home-products/carafe-01.jpg",
+    "/images/home-products/carafe-02.jpg",
+    "/images/catalog/pexels-4282738.jpg"
+  ],
+  "plate": [
+    "/images/home-products/plate-01.jpg",
+    "/images/home-products/plate-02.jpg",
+    "/images/products/woodenTools.jpg"
+  ],
+  "kettle": [
+    "/images/catalog/coffee.jpg"
+  ],
+  "utensils": [
+    "/images/home-products/utensils-01.jpg",
+    "/images/products/utensils.jpg"
+  ],
+  "cushion": [
+    "/images/home-products/cushion-01.jpg",
+    "/images/home-products/cushion-02.jpg",
+    "/images/products/pillow.jpg"
+  ],
+  "throw": [
+    "/images/home-products/throw-01.jpg",
+    "/images/products/blanket.jpg"
+  ],
+  "vase": [
+    "/images/home-products/vase-01.jpg",
+    "/images/home-products/vase-02.jpg",
+    "/images/products/vase.jpg"
+  ],
+  "lamp": [
+    "/images/home-products/lamp-01.jpg",
+    "/images/products/lamp.jpg"
+  ],
+  "diffuser": [
+    "/images/home-products/diffuser-01.jpg",
+    "/images/home-products/diffuser-02.jpg",
+    "/images/catalog/pexels-4282738.jpg"
+  ],
+  "stool": [
+    "/images/home-products/stool-01.jpg",
+    "/images/products/shelf.jpg"
+  ],
+  "rug": [
+    "/images/home-products/rug-01.jpg",
+    "/images/home-products/rug-02.jpg",
+    "/images/catalog/pexels-12273900.jpg"
+  ],
+  "candle": [
+    "/images/home-products/candle-01.jpg",
+    "/images/products/vaseRound.jpg"
+  ],
+  "sculpture": [
+    "/images/home-products/sculpture-01.jpg",
+    "/images/products/vaseRound.jpg"
+  ],
+  "table": [
+    "/images/home-products/table-01.jpg",
+    "/images/home-products/table-02.jpg",
+    "/images/products/shelf.jpg"
+  ],
+  "frame": [
+    "/images/catalog/pexels-8251757.jpg"
+  ],
+  "bedding": [
+    "/images/products/blanket.jpg"
+  ],
+  "box": [
+    "/images/home-products/box-01.jpg",
+    "/images/products/storage.jpg"
+  ],
+  "mirror": [
+    "/images/catalog/pexels-8251757.jpg"
+  ],
+  "sachet": [
+    "/images/home-products/sachet-01.jpg",
+    "/images/home-products/sachet-02.jpg",
+    "/images/products/towels.jpg"
+  ],
+  "dispenser": [
+    "/images/home-products/dispenser-01.jpg",
+    "/images/home-products/dispenser-02.jpg",
+    "/images/products/storage.jpg"
+  ],
+  "basket": [
+    "/images/home-products/basket-01.jpg",
+    "/images/home-products/basket-02.jpg",
+    "/images/catalog/pexels-31390649.jpg"
+  ],
+  "hook": [
+    "/images/products/shelf.jpg"
+  ],
+  "planter": [
+    "/images/home-products/planter-01.jpg",
+    "/images/products/planter.jpg"
+  ],
+  "clock": [
+    "/images/catalog/pexels-6207335.jpg"
+  ],
+  "floral": [
+    "/images/home-products/floral-01.jpg",
+    "/images/products/lamp.jpg"
+  ],
+  "blender": [
+    "/images/home-products/blender-01.webp",
+    "/images/catalog/blender.jpg"
+  ],
+  "fan": [
+    "/images/home-products/fan-01.jpg",
+    "/images/products/lamp.jpg"
+  ],
+  "scale": [
+    "/images/home-products/scale-01.jpg",
+    "/images/home-products/scale-02.jpg",
+    "/images/catalog/pexels-7558122.jpg"
+  ],
+  "coffee": [
+    "/images/home-products/coffee-01.jpg",
+    "/images/home-products/coffee-02.jpg",
+    "/images/catalog/coffee.jpg"
+  ],
+  "humidifier": [
+    "/images/home-products/humidifier-01.jpg",
+    "/images/catalog/pexels-4282738.jpg"
+  ],
+  "vacuum": [
+    "/images/catalog/blender.jpg"
+  ],
+  "toaster": [
+    "/images/products/utensils.jpg"
+  ],
+  "lunchbox": [
+    "/images/home-products/lunchbox-01.jpg",
+    "/images/home-products/lunchbox-02.jpg",
+    "/images/products/tray.jpg"
+  ]
+}

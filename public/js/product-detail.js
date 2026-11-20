@@ -23,7 +23,7 @@ function openDetail(id, preserveSelection = false) {
         <span class="variant-tag">Còn ${product.stock}</span>
         <span class="variant-tag">Thanh toán COD</span>
       </div>
-      ${product.image?.startsWith('/images/products/') ? '<p class="photo-reference-note">Ảnh tham khảo cách bài trí. Màu sắc, kích thước và phụ kiện đi kèm được ghi trong thông tin sản phẩm.</p>' : ''}
+      ${(/^\/images\/(?:products|home-products)\//.test(product.image || '') || /^\/images\/catalog\/pexels-/.test(product.image || '')) ? '<p class="photo-reference-note">Ảnh chụp tham khảo theo nhóm sản phẩm, không xác nhận đúng mẫu hàng. Màu sắc, kích thước và phụ kiện thực tế được ghi trong thông tin sản phẩm.</p>' : ''}
     </div>
     <div>
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">

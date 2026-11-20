@@ -131,6 +131,7 @@ function serveStaticFile(res, requestPath) {
       '.png': 'image/png',
       '.jpg': 'image/jpeg',
       '.jpeg': 'image/jpeg',
+      '.webp': 'image/webp',
     }[ext] || 'application/octet-stream';
 
     const isHtml = ext === '.html';
