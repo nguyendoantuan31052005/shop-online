@@ -5,16 +5,21 @@ const path = require('node:path');
 const vm = require('node:vm');
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/vietnam-addresses.json'), 'utf8'));
 const script = fs.readFileSync(path.join(__dirname, '../public/js/address-search.js'), 'utf8');
-const context = vm.createContext({});
+const context = vm.createContext({
+  AbortController,
+  fetch: async () => ({ ok: true, json: async () => data }),
+  setTimeout,
+  clearTimeout,
+});
 vm.runInContext(script.slice(0, script.indexOf('(() => {')), context);
 
-test('Address suggestions find Vietnamese names without accents and include the parent province', () => {
-  const results = context.findAddresses(data, 'ba dinh ha noi');
+test('Address suggestions find Vietnamese names without accents and include the parent province', async () => {
+  const results = await context.findAddresses('ba dinh ha noi');
   assert.ok(results.length > 0);
   assert.ok(results.some(item => item.ward === 'Phường Ba Đình' && item.city === 'Thành phố Hà Nội'));
-  assert.equal(context.findAddresses(data, '  ').length, 0);
-  assert.equal(context.findAddresses(data, 'zzzzzzzz').length, 0);
-  assert.ok(context.findAddresses(data, 'ha').length <= 20);
+  assert.equal((await context.findAddresses('  ')).length, 0);
+  assert.equal((await context.findAddresses('zzzzzzzz')).length, 0);
+  assert.ok((await context.findAddresses('ha')).length <= 20);
 });
 
 test('Bundled address data has unique provinces and ward codes', () => {

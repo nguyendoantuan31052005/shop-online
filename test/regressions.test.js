@@ -61,7 +61,7 @@ test('Legacy data recovers all counters from existing ids and initializes missin
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const file = path.join(dir, 'shop.json');
   fs.writeFileSync(file, JSON.stringify({ products: [{ id: 100 }], users: [{ id: 80 }], orders: [{ id: 90 }], vouchers: [{ id: 70 }], nextUserId: 1 }));
-  const db = openDb(file);
+  const db = openDb(file, { seed: false });
   assert.equal(db.data.nextProductId, 101);
   assert.equal(db.data.nextUserId, 81);
   assert.equal(db.data.nextOrderId, 91);
