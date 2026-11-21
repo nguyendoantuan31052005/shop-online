@@ -363,9 +363,47 @@ function createApp({ db, passwordResetConfig = require('./password-reset').email
           });
           return;
         }
-        const publicUser = user => ({ id:user.id, name:user.name, username:user.username, email:user.email || '', createdAt:user.created_at, disabled:!!user.disabled, orderCount:db.data.orders.filter(o => o.user_id === user.id).length });
+        const publicUser = (user, orderCounts = new Map()) => ({ id:user.id, name:user.name, username:user.username, email:user.email || '', createdAt:user.created_at, disabled:!!user.disabled, synthetic:user.synthetic === true, orderCount:orderCounts.get(user.id) || 0 });
+        if (pathname === '/api/admin/users/seed-synthetic' && req.method === 'POST') {
+          if (!isOwner(req)) throw new HttpError(403, 'Chỉ chủ shop được tạo tài khoản thử nghiệm');
+          const body = await readRequestJson();
+          const target = body.count === undefined ? 20_000 : body.count;
+          if (!Number.isSafeInteger(target) || target < 1 || target > 20_000 || Object.keys(body).some(key => key !== 'count')) throw new HttpError(400, 'Số lượng phải từ 1 đến 20.000');
+          const syntheticUsers = db.data.users.filter(user => user.synthetic === true);
+          const existingCount = syntheticUsers.length;
+          const desired = Math.max(target, existingCount);
+          if (existingCount >= target) { sendJson(res, 200, { created:0, total:existingCount, disabled:true }); return; }
+          const created = desired - existingCount;
+          const originalUserCount = db.data.users.length;
+          const originalNextUserId = db.data.nextUserId;
+          const usernames = new Set(db.data.users.map(user => String(user.username || '').toLowerCase()));
+          const dummyHash = '0'.repeat(128);
+          const createdAt = Date.now();
+          let serial = 1;
+          while (syntheticUsers.length < desired) {
+            const tag = String(serial++).padStart(6, '0');
+            const username = 'test_user_' + tag;
+            if (usernames.has(username)) continue;
+            usernames.add(username);
+            db.data.users.push({ id:db.data.nextUserId++, name:'TEST User ' + tag, username, email:'test-user-' + tag + '@example.invalid', phone:'', password:{ salt:crypto.randomBytes(16).toString('hex'), hash:dummyHash }, created_at:new Date(createdAt + serial).toISOString(), disabled:true, synthetic:true });
+            syntheticUsers.push(null);
+          }
+          try { db.save(); } catch (error) { db.data.users.length = originalUserCount; db.data.nextUserId = originalNextUserId; throw error; }
+          sendJson(res, 201, { created, total:db.data.users.filter(user => user.synthetic === true).length, disabled:true }); return;
+        }
+        if (pathname === '/api/admin/users/synthetic' && req.method === 'DELETE') {
+          if (!isOwner(req)) throw new HttpError(403, 'Chỉ chủ shop được xóa tài khoản thử nghiệm');
+          const originalUsers = db.data.users;
+          const before = db.data.users.length;
+          db.data.users = db.data.users.filter(user => user.synthetic !== true);
+          const deleted = before - db.data.users.length;
+          if (deleted) { try { db.save(); } catch (error) { db.data.users = originalUsers; throw error; } }
+          sendJson(res, 200, { deleted, total:db.data.users.length }); return;
+        }
         if (pathname === '/api/admin/users' && req.method === 'GET') {
-          sendJson(res, 200, db.data.users.map(publicUser)); return;
+          const orderCounts = new Map();
+          for (const order of db.data.orders) if (order.user_id != null) orderCounts.set(order.user_id, (orderCounts.get(order.user_id) || 0) + 1);
+          sendJson(res, 200, db.data.users.map(user => publicUser(user, orderCounts))); return;
         }
         const userMatch = pathname.match(/^\/api\/admin\/users\/(\d+)(\/orders|\/password)?$/);
         if (userMatch) {
@@ -375,6 +413,7 @@ function createApp({ db, passwordResetConfig = require('./password-reset').email
             sendJson(res, 200, db.data.orders.filter(o => o.user_id === user.id).slice().reverse()); return;
           }
           if (userMatch[2] === '/password' && req.method === 'PATCH') {
+            if (user.synthetic === true) throw new HttpError(409, 'Tài khoản TEST luôn bị khóa và không thể dùng như tài khoản khách hàng');
             if (!isOwner(req)) throw new HttpError(403, 'Chỉ chủ shop được đặt lại mật khẩu khách hàng');
             const body = await readRequestJson();
             if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1 || typeof body.password !== 'string') throw new HttpError(400, 'Thông tin mật khẩu không hợp lệ');
@@ -384,6 +423,7 @@ function createApp({ db, passwordResetConfig = require('./password-reset').email
             if (!isOwner(req)) throw new HttpError(403, 'Chỉ chủ shop được khóa tài khoản khách');
             const body = await readRequestJson();
             if (typeof body.disabled !== 'boolean' || Object.keys(body).some(key => key !== 'disabled')) throw new HttpError(400, 'Trạng thái tài khoản không hợp lệ');
+            if (user.synthetic === true && body.disabled !== true) throw new HttpError(409, 'Tài khoản TEST phải luôn bị khóa');
             const original = user.disabled;
             user.disabled = body.disabled;
             try { db.save(); } catch (error) { if (original === undefined) delete user.disabled; else user.disabled = original; throw error; }

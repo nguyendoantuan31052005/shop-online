@@ -1,5 +1,9 @@
 'use strict';
 const adminPages = {};
+const userTools = document.createElement('div');
+userTools.className = 'admin-user-tools';
+userTools.innerHTML = '<button type="button" data-seed-synthetic-users data-owner-only>+ Tạo 20.000 user TEST</button><button type="button" class="danger" data-delete-synthetic-users data-owner-only>Xóa user TEST</button>';
+$('#users > .heading').append(userTools);
 const adminSearchText = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
 const navigation = $('#dashboard > nav');
 navigation.insertAdjacentHTML('afterbegin', '<button data-tab="overviewPanel">Tổng quan</button>');

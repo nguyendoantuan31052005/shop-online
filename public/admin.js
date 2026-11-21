@@ -273,8 +273,14 @@ $('#productDialog').addEventListener('cancel', e => { if (imageUploading) e.prev
 function renderUsers() {
   const query = $('#userSearch').value.trim().toLocaleLowerCase('vi');
   const items = adminPaged(users.filter(matchesAccountFilter).filter(u => adminSearchText(`${u.name} ${u.username} ${u.email}`).includes(adminSearchText(query))), 'users', renderUsers);
-  $('#userCount').textContent = `${users.length} tài khoản`;
-  $('#userRows').innerHTML = items.map(u => `<tr><td><strong>${esc(u.name)}</strong><div class="muted">@${esc(u.username)} · #${u.id}</div></td><td>${esc(u.email || 'Chưa cung cấp')}</td><td>${esc(new Date(u.createdAt).toLocaleDateString('vi-VN'))}</td><td>${u.orderCount}</td><td><span class="badge ${u.disabled ? 'account-locked' : ''}">${u.disabled ? 'Đã khóa' : 'Hoạt động'}</span></td><td><button data-user-orders="${u.id}">Xem đơn</button>${adminRole === 'owner' ? `<button data-user-password="${u.id}">Đặt mật khẩu</button><button data-user-toggle="${u.id}" class="${u.disabled ? '' : 'danger'}">${u.disabled ? 'Mở khóa' : 'Khóa'}</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Không tìm thấy tài khoản</td></tr>';
+  const syntheticCount = users.filter(user => user.synthetic).length;
+  $('#userCount').textContent = syntheticCount ? `${users.length} tài khoản · ${syntheticCount.toLocaleString('vi-VN')} TEST` : `${users.length} tài khoản`;
+  $('#userRows').innerHTML = items.map(u => {
+    const isTest = u.synthetic === true;
+    const status = isTest ? 'TEST · Đã khóa' : u.disabled ? 'Đã khóa' : 'Hoạt động';
+    const actions = isTest ? '<span class="muted">Dữ liệu thử nghiệm</span>' : `<button data-user-orders="${u.id}">Xem đơn</button>${adminRole === 'owner' ? `<button data-user-password="${u.id}">Đặt mật khẩu</button><button data-user-toggle="${u.id}" class="${u.disabled ? '' : 'danger'}">${u.disabled ? 'Mở khóa' : 'Khóa'}</button>` : ''}`;
+    return `<tr class="${isTest ? 'synthetic-user-row' : ''}"><td><strong>${esc(u.name)}${isTest ? ' <span class="badge synthetic-badge">TEST</span>' : ''}</strong><div class="muted">@${esc(u.username)} · #${u.id}</div></td><td>${esc(u.email || 'Chưa cung cấp')}</td><td>${esc(new Date(u.createdAt).toLocaleDateString('vi-VN'))}</td><td>${u.orderCount}</td><td><span class="badge ${u.disabled ? 'account-locked' : ''}">${status}</span></td><td>${actions}</td></tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty">Không tìm thấy tài khoản</td></tr>';
 }
 async function refreshUsers() {
   if (usersRefreshInFlight || $('#dashboard').hidden) return;
@@ -307,6 +313,24 @@ $('#staffPasswordForm').addEventListener('submit', async event => {
   finally { button.disabled = false; }
 });
 $('#userSearch').oninput = renderUsers;
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-seed-synthetic-users], [data-delete-synthetic-users]');
+  if (!button) return;
+  if (button.hasAttribute('data-seed-synthetic-users')) {
+    if (!window.confirm('Tạo đủ 20.000 tài khoản TEST bị khóa trong danh sách quản trị? Các tài khoản này không phải khách hàng thật.')) return;
+    button.disabled = true;
+    try { const result = await api('users/seed-synthetic', {method:'POST', body:JSON.stringify({count:20000})}); await refreshUsers(); message(`Đã thêm ${result.created.toLocaleString('vi-VN')} tài khoản TEST; tổng ${result.total.toLocaleString('vi-VN')} tài khoản TEST, tất cả đã khóa.`); }
+    catch (error) { message(error.message, true); }
+    finally { button.disabled = false; }
+  }
+  if (button.hasAttribute('data-delete-synthetic-users')) {
+    if (!window.confirm('Xóa vĩnh viễn tất cả tài khoản TEST? Tài khoản khách hàng thật sẽ được giữ nguyên.')) return;
+    button.disabled = true;
+    try { const result = await api('users/synthetic', {method:'DELETE'}); await refreshUsers(); message(`Đã xóa ${result.deleted.toLocaleString('vi-VN')} tài khoản TEST.`); }
+    catch (error) { message(error.message, true); }
+    finally { button.disabled = false; }
+  }
+});
 document.addEventListener('click', async e => {
   const button = e.target.closest('button'); if (!button) return;
   if (button.dataset.userToggle) {
