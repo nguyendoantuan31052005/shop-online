@@ -306,7 +306,7 @@ function renderProducts(items, nodeId, showSale = false) {
         <button type="button" class="thumb product-image-button" data-detail="${p.id}" aria-label="Xem chi tiết ${esc(p.name)}">
           <span class="thumb-badge">${p.stock > 0 ? esc(p.category) : 'Hết hàng'}</span>
           ${imageHtml}
-          ${(/^\/images\/(?:products|home-products)\//.test(p.image || '') || /^\/images\/catalog\/pexels-/.test(p.image || '')) ? '<span class="photo-reference-tag">Ảnh tham khảo</span>' : ''}
+          ${(/^\/images\/(?:products|home-products)\//.test(p.image || '') || /^\/images\/catalog\/pexels-/.test(p.image || '') || /Shopee Top Value/.test(p.description || '')) ? '<span class="photo-reference-tag">Ảnh tham khảo</span>' : ''}
         </button>
         <div class="product-info">
           <div class="product-name">${esc(p.name)}</div>
